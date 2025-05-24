@@ -10,11 +10,11 @@ export default function LinkedListPage() {
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6 text-center">Linked List Data Structure</h1>
           <div className="mb-8 max-w-3xl mx-auto">
-            <p className="text-gray-700 mb-4">
+            <p className="text-white-700 mb-4">
               A linked list is a linear data structure where elements are not stored at contiguous memory locations. 
               Each element (node) contains a data field and a reference (link) to the next node.
             </p>
-            <div className="bg-blue-50 p-4 rounded-md">
+            <div className="bg-black-50 p-4 rounded-md">
               <h3 className="font-semibold mb-2">Common Linked List Operations:</h3>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Access: O(n) - Need to traverse from head</li>

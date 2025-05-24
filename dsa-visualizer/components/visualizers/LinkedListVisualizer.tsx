@@ -147,7 +147,7 @@ export default function LinkedListVisualizer() {
         </div>
       </div>
       
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-black-100 p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-4">Add Node</h3>
