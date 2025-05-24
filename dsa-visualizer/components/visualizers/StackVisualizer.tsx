@@ -1,8 +1,7 @@
 'use client';
-
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, Eye, RotateCcw, ArrowRight } from 'lucide-react';
+import { Plus, Minus, Eye, RotateCcw, ArrowDown, ArrowUp } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 import { cn, delay } from '../../lib/utils';
 
@@ -29,7 +28,7 @@ const STACK_OPERATIONS = {
 }`,
   
   pop: `function pop(stack) {
-  // Check if queue is empty
+  // Check if stack is empty
   if (stack.size === 0) {
     throw new Error('Stack underflow');
   }
@@ -37,7 +36,7 @@ const STACK_OPERATIONS = {
   // Get top element
   const topElement = stack[stack.top];
   
-  // Move top pointer forward
+  // Move top pointer backward
   stack.top--;
   
   // Decrement stack size
@@ -68,13 +67,13 @@ const CODE_STEPS = {
   pop: [
     { line: 2, description: "Check if the stack is empty (underflow condition)" },
     { line: 7, description: "Get reference to the top element" },
-    { line: 10, description: "Move the top pointer to the next position" },
+    { line: 10, description: "Move the top pointer to the previous position" },
     { line: 13, description: "Decrement the stack size counter" },
     { line: 15, description: "Return the removed element" }
   ],
   
   peek: [
-    { line: 2, description: "Check if the queue is empty" },
+    { line: 2, description: "Check if the stack is empty" },
     { line: 7, description: "Return the top element without removing it" }
   ]
 };
@@ -119,16 +118,17 @@ export default function StackVisualizer() {
     for (let step = 0; step < CODE_STEPS.push.length; step++) {
       setCurrentStep(step);
       await delay(800);
-
+      
       if (step === 0) {
-        // Create new element and add to queue
+        // Create new element and add to top of stack
         const newElement: StackElement = {
           value,
           id: generateId(),
           isPushing: true
         };
         
-        setStack(prev => [...prev, newElement]);
+        // Add to beginning of array (top of stack)
+        setStack(prev => [newElement, ...prev]);
         
         setTimeout(() => {
           setStack(prev => prev.map(item => ({ ...item, isPushing: false })));
@@ -149,16 +149,15 @@ export default function StackVisualizer() {
 
     setIsAnimating(true);
     setCurrentOperation('pop');
-
     const topElement = stack[0];
 
     // Step-by-step animation
     for (let step = 0; step < CODE_STEPS.pop.length; step++) {
       setCurrentStep(step);
       await delay(800);
-
+      
       if (step === 1) {
-        // Highlight the front element
+        // Highlight the top element
         setStack(prev => prev.map((item, idx) => ({
           ...item,
           isHighlighted: idx === 0
@@ -173,7 +172,7 @@ export default function StackVisualizer() {
         
         await delay(600);
         
-        // Remove the element
+        // Remove the top element
         setStack(prev => prev.slice(1));
       }
     }
@@ -191,16 +190,15 @@ export default function StackVisualizer() {
 
     setIsAnimating(true);
     setCurrentOperation('peek');
-
     const topElement = stack[0];
 
     // Step-by-step animation
     for (let step = 0; step < CODE_STEPS.peek.length; step++) {
       setCurrentStep(step);
       await delay(800);
-
+      
       if (step === 1) {
-        // Highlight the front element
+        // Highlight the top element
         setStack(prev => prev.map((item, idx) => ({
           ...item,
           isHighlighted: idx === 0
@@ -217,7 +215,6 @@ export default function StackVisualizer() {
     showMessage(`Top element is ${topElement.value}`, 'success');   
     setIsAnimating(false);
   }, [stack]);
-
 
   const clearStack = () => {
     setStack([]);
@@ -261,12 +258,12 @@ export default function StackVisualizer() {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
-            {/* Queue Display */}
+            {/* Stack Display */}
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
-                  <ArrowRight size={20} />
-                    Stack Contents
+                  <ArrowUp size={20} />
+                  Stack Contents
                 </h2>
                 <button
                   onClick={clearStack}
@@ -278,93 +275,100 @@ export default function StackVisualizer() {
                 </button>
               </div>
 
-              {/* Stack Container */}
-              <div className="relative">
-                {/* Top and Bottom Labels */}
-                <div className="flex justify-between mb-2 text-xs text-slate-400">
-                <span>TOP (Pop)</span>
-                  <span>BOTTOM (Push)</span>
+              {/* Stack Container - Vertical Layout */}
+              <div className="relative flex flex-col items-center">
+                {/* Top Label */}
+                <div className="mb-4 text-xs text-slate-400 flex items-center gap-2">
+                  <ArrowUp size={14} />
+                  <span>TOP (Push/Pop)</span>
                 </div>
                 
-                {/* Stack Elements */}
-                <div className="flex gap-2 min-h-[120px] items-center justify-center p-4 bg-slate-700 rounded-xl border-2 border-dashed border-slate-600">
+                {/* Stack Elements - Vertical Stack */}
+                <div className="relative min-w-[200px]">
                   <AnimatePresence mode="popLayout">
                     {stack.length === 0 ? (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-slate-400 text-center py-8"
+                        className="w-full h-32 flex items-center justify-center bg-slate-700 rounded-xl border-2 border-dashed border-slate-600 text-slate-400 text-center"
                       >
-                        Stack is empty. Push some elements!
+                        Stack is empty.<br />Push some elements!
                       </motion.div>
                     ) : (
-                      stack.map((item, index) => (
-                        <motion.div
-                          key={item.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8, x: 50 }}
-                          animate={{ 
-                            opacity: 1, 
-                            scale: 1, 
-                            x: 0,
-                            backgroundColor: item.isHighlighted 
-                              ? 'rgb(56, 189, 248)' 
-                              : item.isPushing
-                              ? 'rgb(34, 197, 94)'
-                              : item.isPopping
-                              ? 'rgb(239, 68, 68)'
-                              : 'rgb(51, 65, 85)'
-                          }}
-                          exit={{ 
-                            opacity: 0, 
-                            scale: 0.8, 
-                            x: -50,
-                            transition: { duration: 0.3 }
-                          }}
-                          transition={{ duration: 0.4 }}
-                          className="relative"
-                        >
-                          <div className="w-16 h-16 flex items-center justify-center rounded-2xl border-2 border-slate-600 text-slate-100 font-bold text-lg shadow-lg">
-                            {item.value}
-                          </div>
-                          
-                          {/* Position indicators */}
-                          {index === 0 && (
-                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs bg-yellow-500 text-slate-900 px-2 py-1 rounded font-medium">
-                              TOP
+                      <div className="flex flex-col-reverse gap-1">
+                        {stack.map((item, index) => (
+                          <motion.div
+                            key={item.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8, y: -30 }}
+                            animate={{ 
+                              opacity: 1, 
+                              scale: 1, 
+                              y: 0,
+                              backgroundColor: item.isHighlighted 
+                                ? 'rgb(56, 189, 248)' 
+                                : item.isPushing
+                                ? 'rgb(34, 197, 94)'
+                                : item.isPopping
+                                ? 'rgb(239, 68, 68)'
+                                : 'rgb(51, 65, 85)'
+                            }}
+                            exit={{ 
+                              opacity: 0, 
+                              scale: 0.8, 
+                              y: -30,
+                              transition: { duration: 0.3 }
+                            }}
+                            transition={{ duration: 0.4 }}
+                            className="relative"
+                          >
+                            {/* Stack Element */}
+                            <div className="w-full h-16 flex items-center justify-center rounded-xl border-2 border-slate-600 text-slate-100 font-bold text-lg shadow-lg relative">
+                              {item.value}
+                              
+                              {/* TOP indicator for the first element */}
+                              {index === 0 && (
+                                <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 text-xs bg-yellow-500 text-slate-900 px-2 py-1 rounded font-medium whitespace-nowrap">
+                                  TOP
+                                </div>
+                              )}
+                              
+                              {/* BOTTOM indicator for the last element when there are multiple */}
+                              {index === stack.length - 1 && stack.length > 1 && (
+                                <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 text-xs bg-green-500 text-white px-2 py-1 rounded font-medium whitespace-nowrap">
+                                  BOTTOM
+                                </div>
+                              )}
                             </div>
-                          )}
-                          
-                          {index === stack.length - 1 && stack.length > 1 && (
-                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs bg-green-500 text-white px-2 py-1 rounded font-medium">
-                              BOTTOM
-                            </div>
-                          )}
-                          
-                          {/* Arrow between elements */}
-                          {index < stack.length - 1 && (
-                            <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 text-slate-400">
-                              →
-                            </div>
-                          )}
-                        </motion.div>
-                      ))
+                          </motion.div>
+                        ))}
+                      </div>
                     )}
                   </AnimatePresence>
                 </div>
 
-                {/* Direction Indicator */}
-                <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-400">
-                  <span>Dequeue ←</span>
-                  <div className="flex-1 h-px bg-slate-600"></div>
-                  <span>Flow Direction</span>
-                  <div className="flex-1 h-px bg-slate-600"></div>
-                  <span>→ Enqueue</span>
+                {/* Bottom Label */}
+                <div className="mt-4 text-xs text-slate-400 flex items-center gap-2">
+                  <span>BOTTOM (Base)</span>
+                  <ArrowDown size={14} />
                 </div>
+
+                {/* Stack Pointer Visualization */}
+                {stack.length > 0 && (
+                  <div className="absolute -left-8 top-16 flex flex-col items-center">
+                    <div className="text-xs text-yellow-400 mb-1">Stack Pointer</div>
+                    <ArrowUp className="text-yellow-400" size={16} />
+                  </div>
+                )}
               </div>
 
-              <div className="mt-4 text-sm text-slate-400 text-center">
-                Stack Size: {stack.length}
+              <div className="mt-6 text-sm text-slate-400 text-center">
+                Stack Size: {stack.length} | 
+                {peekedValue !== null && (
+                  <span className="text-yellow-400 ml-2">
+                    Peeked Value: {peekedValue}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -373,7 +377,7 @@ export default function StackVisualizer() {
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Stack Operations</h3>
               
               <div className="space-y-4">
-                {/* Enqueue Section */}
+                {/* Push Section */}
                 <div className="p-4 bg-slate-700 rounded-xl">
                   <h4 className="font-medium text-slate-200 mb-3">Push (Add to Top)</h4>
                   <div className="flex gap-3">
@@ -405,7 +409,7 @@ export default function StackVisualizer() {
                   </div>
                 </div>
 
-                {/* Dequeue and Peek Section */}
+                {/* Pop and Peek Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     onClick={popElement}
@@ -473,7 +477,7 @@ export default function StackVisualizer() {
                   <span className="text-slate-200">Last In, First Out</span>
                 </div>
                 <div className="flex justify-between">
-                <span className="text-slate-400">Push Time Complexity:</span>
+                  <span className="text-slate-400">Push Time Complexity:</span>
                   <span className="text-green-400">O(1)</span>
                 </div>
                 <div className="flex justify-between">
@@ -497,19 +501,19 @@ export default function StackVisualizer() {
               <ul className="space-y-2 text-sm text-slate-300">
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Task scheduling in operating systems
+                  Function call management (call stack)
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Expression evaluation and parsing
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Undo operations in applications
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
                   Depth-First Search (DFS) algorithm
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Expression evaluation
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Function call management
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
@@ -522,4 +526,4 @@ export default function StackVisualizer() {
       </div>
     </div>
   );
-} 
+}
