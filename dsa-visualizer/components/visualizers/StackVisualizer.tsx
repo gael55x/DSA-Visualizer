@@ -2,8 +2,8 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus, Eye, RotateCcw, ArrowDown, ArrowUp } from 'lucide-react';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import CodeHighlighter from '../ui/CodeHighlighter';
+import { cn, delay } from '../../lib/utils';
 
 interface StackElement {
   value: number;
@@ -88,7 +88,7 @@ export default function StackVisualizer() {
   const [inputValue, setInputValue] = useState('');
   const [message, setMessage] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
-  const [currentOperation, setCurrentOperation] = useState<'push' | 'pop' | 'peek'>('push');
+  const [currentOperation, setCurrentOperation] = useState<string>('push');
   const [currentStep, setCurrentStep] = useState(0);
   const [peekedValue, setPeekedValue] = useState<number | null>(null);
 
@@ -104,6 +104,7 @@ export default function StackVisualizer() {
       showMessage('Please enter a value', 'error');
       return;
     }
+
     const value = parseInt(inputValue);
     if (isNaN(value)) {
       showMessage('Please enter a valid number', 'error');
@@ -221,149 +222,158 @@ export default function StackVisualizer() {
     showMessage('Stack cleared', 'info');
   };
 
-  // Reverse the stack for proper visualization (top element at top)
-  const visualStack = [...stack].reverse();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
-      <div className="container mx-auto px-6 py-8">
+    <div className="min-h-screen bg-slate-900 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-400 to-blue-400 bg-clip-text text-transparent mb-3">
-            Stack Visualizer
-          </h1>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl font-bold text-slate-100 mb-2">Stack Visualizer</h1>
           <p className="text-slate-400 text-lg">
             LIFO (Last In, First Out) data structure with animated operations
           </p>
-        </div>
+        </motion.div>
 
         {/* Message Display */}
-        <div className="mb-6">
+        <AnimatePresence>
           {message && (
-            <div className="bg-sky-500/20 border border-sky-400/30 rounded-lg px-4 py-3 text-sky-200 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6 p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100 text-center"
+            >
               {message}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Visualization Panel */}
-          <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-6"
+          >
             {/* Stack Display */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <ArrowUp className="w-5 h-5 text-sky-400" />
-                  <h3 className="text-xl font-semibold text-slate-200">Stack Contents</h3>
-                </div>
+                <h2 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
+                  <ArrowUp size={20} />
+                  Stack Contents
+                </h2>
                 <button
                   onClick={clearStack}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2"
+                  disabled={isAnimating}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw size={16} />
                   Clear
                 </button>
               </div>
 
-              {/* Stack Container - Proper vertical layout */}
-              <div className="flex flex-col items-center space-y-4">
+              {/* Stack Container - Vertical Layout */}
+              <div className="relative flex flex-col items-center">
                 {/* Top Label */}
-                <div className="text-sm text-slate-400 font-medium flex items-center gap-2">
-                  <ArrowUp className="w-4 h-4" />
-                  TOP (Push/Pop)
+                <div className="mb-4 text-xs text-slate-400 flex items-center gap-2">
+                  <ArrowUp size={14} />
+                  <span>TOP (Push/Pop)</span>
                 </div>
-
-                {/* Stack Elements - Proper LIFO visualization */}
-                <div className="relative w-full max-w-xs">
-                  <AnimatePresence mode="popLayout">
+                
+                {/* Stack Elements - Vertical Stack */}
+                <div className="relative min-w-[200px]">
+                <AnimatePresence mode="popLayout">
                     {stack.length === 0 ? (
-                      <div className="text-center py-12 text-slate-400">
-                        <div className="text-lg font-medium mb-2">Stack is empty.</div>
-                        <div className="text-sm">Push some elements!</div>
-                      </div>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full h-32 flex items-center justify-center bg-slate-700 rounded-xl border-2 border-dashed border-slate-600 text-slate-400 text-center"
+                    >
+                        Stack is empty.<br />Push some elements!
+                    </motion.div>
                     ) : (
-                      <div className="space-y-2">
-                        {visualStack.map((item, visualIndex) => {
-                          // Get the actual index in the original array
-                          const actualIndex = stack.length - 1 - visualIndex;
-                          const isTop = actualIndex === stack.length - 1;
-                          const isBottom = actualIndex === 0;
-                          
-                          return (
+                    <div className="flex flex-col gap-1">
+                        {/* Reverse the stack array to show newest (top) elements first */}
+                        {[...stack].reverse().map((item, visualIndex) => {
+                        // Calculate the actual index in the original array
+                        const actualIndex = stack.length - 1 - visualIndex;
+                        const isTop = actualIndex === stack.length - 1;
+                        const isBottom = actualIndex === 0;
+                        
+                        return (
                             <motion.div
-                              key={item.id}
-                              initial={item.isPushing ? { y: -50, opacity: 0, scale: 0.8 } : false}
-                              animate={{ 
-                                y: 0, 
+                            key={item.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8, y: -30 }}
+                            animate={{ 
                                 opacity: 1, 
-                                scale: item.isHighlighted ? 1.05 : 1,
-                                backgroundColor: item.isHighlighted ? 'rgb(56 189 248)' : 'rgb(71 85 105)'
-                              }}
-                              exit={item.isPopping ? { 
-                                y: -50, 
+                                scale: 1, 
+                                y: 0,
+                                backgroundColor: item.isHighlighted 
+                                ? 'rgb(56, 189, 248)' 
+                                : item.isPushing
+                                ? 'rgb(34, 197, 94)'
+                                : item.isPopping
+                                ? 'rgb(239, 68, 68)'
+                                : 'rgb(51, 65, 85)'
+                            }}
+                            exit={{ 
                                 opacity: 0, 
-                                scale: 0.8 
-                              } : { opacity: 0 }}
-                              transition={{ 
-                                type: "spring", 
-                                stiffness: 300, 
-                                damping: 30 
-                              }}
-                              className="relative"
+                                scale: 0.8, 
+                                y: -30,
+                                transition: { duration: 0.3 }
+                            }}
+                            transition={{ duration: 0.4 }}
+                            className="relative"
                             >
-                              {/* Stack Element */}
-                              <div className={`
-                                relative px-6 py-4 rounded-xl border-2 text-center font-bold text-lg
-                                ${item.isHighlighted 
-                                  ? 'bg-sky-400 border-sky-300 text-slate-900' 
-                                  : 'bg-slate-600 border-slate-500 text-slate-100'
-                                }
-                                transition-all duration-300
-                              `}>
+                            {/* Stack Element */}
+                            <div className="w-full h-16 flex items-center justify-center rounded-xl border-2 border-slate-600 text-slate-100 font-bold text-lg shadow-lg relative">
                                 {item.value}
                                 
-                                {/* TOP indicator for the top element */}
+                                {/* TOP indicator for the top element (now correctly at the top visually) */}
                                 {isTop && (
-                                  <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+                                <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 text-xs bg-yellow-500 text-slate-900 px-2 py-1 rounded font-medium whitespace-nowrap">
                                     TOP
-                                  </div>
+                                </div>
                                 )}
                                 
                                 {/* BOTTOM indicator for the bottom element when there are multiple */}
                                 {isBottom && stack.length > 1 && (
-                                  <div className="absolute -bottom-2 -right-2 bg-green-500 text-green-900 px-2 py-1 rounded-full text-xs font-bold">
+                                <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 text-xs bg-green-500 text-white px-2 py-1 rounded font-medium whitespace-nowrap">
                                     BOTTOM
-                                  </div>
+                                </div>
                                 )}
-                              </div>
+                            </div>
                             </motion.div>
-                          );
+                        );
                         })}
-                      </div>
+                    </div>
                     )}
-                  </AnimatePresence>
+                </AnimatePresence>
                 </div>
 
                 {/* Bottom Label */}
-                <div className="text-sm text-slate-400 font-medium flex items-center gap-2">
-                  BOTTOM (Base)
-                  <ArrowDown className="w-4 h-4" />
+                <div className="mt-4 text-xs text-slate-400 flex items-center gap-2">
+                  <span>BOTTOM (Base)</span>
+                  <ArrowDown size={14} />
                 </div>
 
                 {/* Stack Pointer Visualization */}
                 {stack.length > 0 && (
-                  <div className="text-xs text-slate-500 flex items-center gap-2">
-                    <ArrowUp className="w-3 h-3" />
-                    <span className="font-mono">Stack Pointer</span>
-                    <ArrowUp className="w-3 h-3" />
+                  <div className="absolute -left-8 top-16 flex flex-col items-center">
+                    <div className="text-xs text-yellow-400 mb-1">Stack Pointer</div>
+                    <ArrowUp className="text-yellow-400" size={16} />
                   </div>
                 )}
               </div>
 
-              <div className="mt-6 text-center text-sm text-slate-400">
+              <div className="mt-6 text-sm text-slate-400 text-center">
                 Stack Size: {stack.length} | 
                 {peekedValue !== null && (
-                  <span className="text-sky-400 font-medium">
+                  <span className="text-yellow-400 ml-2">
                     Peeked Value: {peekedValue}
                   </span>
                 )}
@@ -371,13 +381,13 @@ export default function StackVisualizer() {
             </div>
 
             {/* Controls */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
-              <h3 className="text-xl font-semibold text-slate-200 mb-4">Stack Operations</h3>
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Stack Operations</h3>
               
               <div className="space-y-4">
                 {/* Push Section */}
-                <div className="space-y-3">
-                  <h4 className="text-lg font-medium text-slate-300">Push (Add to Top)</h4>
+                <div className="p-4 bg-slate-700 rounded-xl">
+                  <h4 className="font-medium text-slate-200 mb-3">Push (Add to Top)</h4>
                   <div className="flex gap-3">
                     <input
                       type="number"
@@ -390,13 +400,17 @@ export default function StackVisualizer() {
                     />
                     <button
                       onClick={pushElement}
-                      disabled={isAnimating}
-                      className="px-6 py-3 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-600/50 rounded-xl font-medium transition-colors flex items-center gap-2"
+                      disabled={isAnimating || !inputValue}
+                      className="flex items-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
                     >
                       {isAnimating && currentOperation === 'push' ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        />
                       ) : (
-                        <Plus className="w-4 h-4" />
+                        <Plus size={16} />
                       )}
                       Push
                     </button>
@@ -404,16 +418,20 @@ export default function StackVisualizer() {
                 </div>
 
                 {/* Pop and Peek Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     onClick={popElement}
                     disabled={isAnimating || stack.length === 0}
-                    className="px-4 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-600/50 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-2 p-4 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
                   >
                     {isAnimating && currentOperation === 'pop' ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
                     ) : (
-                      <Minus className="w-4 h-4" />
+                      <Minus size={16} />
                     )}
                     Pop (Remove Top)
                   </button>
@@ -421,102 +439,97 @@ export default function StackVisualizer() {
                   <button
                     onClick={peekElement}
                     disabled={isAnimating || stack.length === 0}
-                    className="px-4 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-600/50 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-2 p-4 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
                   >
                     {isAnimating && currentOperation === 'peek' ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full"
+                      />
                     ) : (
-                      <Eye className="w-4 h-4" />
+                      <Eye size={16} />
                     )}
                     Peek (View Top)
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Information Panel */}
-          <div className="space-y-6">
+          {/* Code Panel */}
+          <motion.div
+            initial={{ opacity: 0, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-6"
+          >
+            <CodeHighlighter
+              code={STACK_OPERATIONS[currentOperation as keyof typeof STACK_OPERATIONS]}
+              language="javascript"
+              title={`Stack ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
+              steps={CODE_STEPS[currentOperation as keyof typeof CODE_STEPS]}
+              currentStep={currentStep}
+              showControls={false}
+            />
+
             {/* Stack Properties */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
-              <h3 className="text-xl font-semibold text-slate-200 mb-4">Stack Properties</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Stack Properties</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Data Structure:</span>
-                  <span className="text-slate-200 font-medium">Linear (LIFO)</span>
+                  <span className="text-slate-200">Linear (LIFO)</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Access Pattern:</span>
-                  <span className="text-slate-200 font-medium">Last In, First Out</span>
+                  <span className="text-slate-200">Last In, First Out</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Push Time Complexity:</span>
-                  <span className="text-green-400 font-mono">O(1)</span>
+                  <span className="text-green-400">O(1)</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Pop Time Complexity:</span>
-                  <span className="text-green-400 font-mono">O(1)</span>
+                  <span className="text-green-400">O(1)</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Peek Time Complexity:</span>
-                  <span className="text-green-400 font-mono">O(1)</span>
+                  <span className="text-green-400">O(1)</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Space Complexity:</span>
-                  <span className="text-blue-400 font-mono">O(n)</span>
+                  <span className="text-yellow-400">O(n)</span>
                 </div>
               </div>
             </div>
 
             {/* Use Cases */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
-              <h3 className="text-xl font-semibold text-slate-200 mb-4">Common Use Cases</h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-slate-300">Function call management (call stack)</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-slate-300">Expression evaluation and parsing</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-slate-300">Undo operations in applications</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-slate-300">Depth-First Search (DFS) algorithm</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-slate-300">Backtracking algorithms</span>
-                </div>
-              </div>
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Common Use Cases</h3>
+              <ul className="space-y-2 text-sm text-slate-300">
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Function call management (call stack)
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Expression evaluation and parsing
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Undo operations in applications
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Depth-First Search (DFS) algorithm
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
+                  Backtracking algorithms
+                </li>
+              </ul>
             </div>
-
-            {/* Current Operation Code */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
-              <h3 className="text-xl font-semibold text-slate-200 mb-4">
-                Stack {currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation
-              </h3>
-              <div className="bg-slate-900 rounded-lg p-4 font-mono text-sm">
-                <pre className="text-slate-300 whitespace-pre-wrap">
-                  {STACK_OPERATIONS[currentOperation]}
-                </pre>
-              </div>
-              
-              {isAnimating && (
-                <div className="mt-4 p-3 bg-sky-500/20 border border-sky-400/30 rounded-lg">
-                  <div className="text-sm text-sky-200">
-                    <strong>Step {currentStep + 1} of {CODE_STEPS[currentOperation].length}:</strong>
-                    <br />
-                    {CODE_STEPS[currentOperation][currentStep]?.description}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
