@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Trash2, Shuffle, RotateCcw, Play, Pause } from 'lucide-react';
+import { Plus, Search, Trash2, Shuffle, RotateCcw } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 import ThemeToggle from '../ui/ThemeToggle';
 import { cn, delay, generateRandomArray } from '../../lib/utils';
@@ -117,12 +117,12 @@ export default function ArrayVisualizer() {
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showMessage = useCallback((text: string, type: 'success' | 'error' | 'info' = 'info') => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3000);
-  };
+  }, []);
 
-  const addToHistory = (operation: string, description: string, newArray: ArrayElement[], highlightIndex?: number) => {
+  const addToHistory = useCallback((operation: string, description: string, newArray: ArrayElement[], highlightIndex?: number) => {
     const step: OperationStep = {
       operation,
       description,
@@ -131,7 +131,7 @@ export default function ArrayVisualizer() {
       codeStep: currentStep
     };
     setOperationHistory(prev => [...prev.slice(-9), step]);
-  };
+  }, [currentStep]);
 
   const insertElement = useCallback(async () => {
     if (!inputValue.trim()) {
@@ -145,37 +145,42 @@ export default function ArrayVisualizer() {
       return;
     }
 
-    const index = inputIndex.trim() ? parseInt(inputIndex) : array.length;
-    if (isNaN(index) || index < 0 || index > array.length) {
-      showMessage(`Index must be between 0 and ${array.length}`, 'error');
+    setIsAnimating(true);
+    setCurrentOperation('insert');
+    
+    // Get current array state
+    const currentArray = array;
+    const index = inputIndex.trim() ? parseInt(inputIndex) : currentArray.length;
+    
+    if (isNaN(index) || index < 0 || index > currentArray.length) {
+      showMessage(`Index must be between 0 and ${currentArray.length}`, 'error');
+      setIsAnimating(false);
       return;
     }
 
-    setIsAnimating(true);
-    setCurrentOperation('insert');
-
-    // Step-by-step animation with enhanced code highlighting
+    // Step-by-step animation with code highlighting
     for (let step = 0; step < CODE_STEPS.insert.length; step++) {
       setCurrentStep(step);
-      await delay(800);
+      await delay(600);
 
       if (step === 1) {
         // Highlight elements that will be shifted
-        const newArray = array.map((item, idx) => ({
+        setArray(prev => prev.map((item, idx) => ({
           ...item,
           isHighlighted: idx >= index
-        }));
-        setArray(newArray);
+        })));
       } else if (step === 2) {
         // Animate the shifting
-        const newArray = [...array];
-        for (let i = newArray.length - 1; i >= index; i--) {
-          if (newArray[i]) {
-            newArray[i].isHighlighted = true;
+        setArray(prev => {
+          const newArray = [...prev];
+          for (let i = newArray.length - 1; i >= index; i--) {
+            if (newArray[i]) {
+              newArray[i].isHighlighted = true;
+            }
           }
-        }
-        setArray(newArray);
-        await delay(600);
+          return newArray;
+        });
+        await delay(400);
       } else if (step === 3) {
         // Insert the new element
         const newElement: ArrayElement = {
@@ -184,22 +189,21 @@ export default function ArrayVisualizer() {
           isInserting: true
         };
         
-        const newArray = [...array];
-        newArray.splice(index, 0, newElement);
-        
-        // Reset highlighting
-        const finalArray = newArray.map(item => ({
-          ...item,
-          isHighlighted: false,
-          isInserting: item.id === newElement.id
-        }));
-        
-        setArray(finalArray);
-        addToHistory('INSERT', `Inserted ${value} at index ${index}`, finalArray, index);
+        setArray(prev => {
+          const newArray = [...prev];
+          newArray.splice(index, 0, newElement);
+          
+          // Reset highlighting
+          return newArray.map(item => ({
+            ...item,
+            isHighlighted: false,
+            isInserting: item.id === newElement.id
+          }));
+        });
         
         setTimeout(() => {
           setArray(prev => prev.map(item => ({ ...item, isInserting: false })));
-        }, 600);
+        }, 400);
       }
     }
 
@@ -207,7 +211,7 @@ export default function ArrayVisualizer() {
     setInputIndex('');
     showMessage(`Successfully inserted ${value} at index ${index}`, 'success');
     setIsAnimating(false);
-  }, [inputValue, inputIndex, array, currentStep]);
+  }, [inputValue, inputIndex, showMessage]);
 
   const searchElement = useCallback(async () => {
     if (!searchValue.trim()) {
@@ -227,7 +231,9 @@ export default function ArrayVisualizer() {
     // Reset all highlights
     setArray(prev => prev.map(item => ({ ...item, isHighlighted: false, isSearching: false })));
 
-    for (let i = 0; i < array.length; i++) {
+    const currentArray = array;
+    
+    for (let i = 0; i < currentArray.length; i++) {
       setCurrentStep(1);
       
       // Highlight current element being checked
@@ -237,9 +243,9 @@ export default function ArrayVisualizer() {
         isHighlighted: false
       })));
 
-      await delay(800);
+      await delay(600);
 
-      if (array[i].value === target) {
+      if (currentArray[i].value === target) {
         setCurrentStep(2);
         setArray(prev => prev.map((item, idx) => ({
           ...item,
@@ -248,7 +254,7 @@ export default function ArrayVisualizer() {
         })));
         
         showMessage(`Found ${target} at index ${i}!`, 'success');
-        addToHistory('SEARCH', `Found ${target} at index ${i}`, array, i);
+        addToHistory('SEARCH', `Found ${target} at index ${i}`, currentArray, i);
         setIsAnimating(false);
         return;
       }
@@ -257,12 +263,14 @@ export default function ArrayVisualizer() {
     setCurrentStep(3);
     setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
     showMessage(`${target} not found in the array`, 'error');
-    addToHistory('SEARCH', `${target} not found`, array);
+    addToHistory('SEARCH', `${target} not found`, currentArray);
     setIsAnimating(false);
-  }, [searchValue, array]);
+  }, [searchValue, showMessage, addToHistory]);
 
   const deleteElement = useCallback(async (index: number) => {
-    if (index < 0 || index >= array.length) {
+    const currentArray = array;
+    
+    if (index < 0 || index >= currentArray.length) {
       showMessage('Invalid index', 'error');
       return;
     }
@@ -270,12 +278,12 @@ export default function ArrayVisualizer() {
     setIsAnimating(true);
     setCurrentOperation('delete');
 
-    const valueToDelete = array[index].value;
+    const valueToDelete = currentArray[index].value;
 
-    // Step-by-step deletion with enhanced code highlighting
+    // Step-by-step deletion with code highlighting
     for (let step = 0; step < CODE_STEPS.delete.length; step++) {
       setCurrentStep(step);
-      await delay(800);
+      await delay(600);
 
       if (step === 0) {
         // Highlight element to be deleted
@@ -292,23 +300,24 @@ export default function ArrayVisualizer() {
         })));
       } else if (step === 2) {
         // Animate the shifting and remove element
-        const newArray = array.filter((_, idx) => idx !== index);
-        const finalArray = newArray.map(item => ({
-          ...item,
-          isHighlighted: false,
-          isRemoving: false
-        }));
+        setArray(prev => {
+          const newArray = prev.filter((_, idx) => idx !== index);
+          return newArray.map(item => ({
+            ...item,
+            isHighlighted: false,
+            isRemoving: false
+          }));
+        });
         
-        setArray(finalArray);
-        addToHistory('DELETE', `Deleted ${valueToDelete} from index ${index}`, finalArray);
+        addToHistory('DELETE', `Deleted ${valueToDelete} from index ${index}`, []);
       }
     }
 
     showMessage(`Successfully deleted ${valueToDelete}`, 'success');
     setIsAnimating(false);
-  }, [array]);
+  }, [showMessage, addToHistory]);
 
-  const generateNewArray = () => {
+  const generateNewArray = useCallback(() => {
     const newArray = generateRandomArray(6, 1, 99).map(value => ({
       value,
       id: generateId(),
@@ -316,13 +325,17 @@ export default function ArrayVisualizer() {
     }));
     setArray(newArray);
     showMessage('Generated new random array', 'success');
-  };
+  }, [showMessage]);
 
-  const clearArray = () => {
+  const clearArray = useCallback(() => {
     setArray([]);
     setOperationHistory([]);
     showMessage('Array cleared', 'info');
-  };
+  }, [showMessage]);
+
+  // Memoize the current code and steps to prevent unnecessary re-renders
+  const currentCode = useMemo(() => ARRAY_OPERATIONS[currentOperation as keyof typeof ARRAY_OPERATIONS], [currentOperation]);
+  const currentCodeSteps = useMemo(() => CODE_STEPS[currentOperation as keyof typeof CODE_STEPS], [currentOperation]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 p-6 transition-colors duration-300">
@@ -535,10 +548,10 @@ export default function ArrayVisualizer() {
             className="space-y-6"
           >
             <CodeHighlighter
-              code={ARRAY_OPERATIONS[currentOperation as keyof typeof ARRAY_OPERATIONS]}
+              code={currentCode}
               language="javascript"
               title={`${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Algorithm`}
-              steps={CODE_STEPS[currentOperation as keyof typeof CODE_STEPS]}
+              steps={currentCodeSteps}
               currentStep={currentStep}
               showControls={false}
             />
