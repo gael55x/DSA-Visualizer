@@ -113,29 +113,37 @@ body {
 
 @keyframes pulse-highlight {
   0% { 
-    background-color: transparent;
-    border-color: transparent;
-    box-shadow: none;
-  }
-  25% { 
     background-color: rgba(56, 189, 248, 0.15);
-    border-color: rgba(56, 189, 248, 0.5);
-    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1);
   }
   50% { 
-    background-color: rgba(56, 189, 248, 0.2);
+    background-color: rgba(56, 189, 248, 0.3);
     border-color: rgb(56, 189, 248);
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
-  }
-  75% { 
-    background-color: rgba(56, 189, 248, 0.15);
-    border-color: rgba(56, 189, 248, 0.5);
-    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4), inset 0 0 0 1px rgba(56, 189, 248, 0.3);
   }
   100% { 
-    background-color: rgba(56, 189, 248, 0.08);
-    border-color: rgba(56, 189, 248, 0.3);
-    box-shadow: none;
+    background-color: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1);
+  }
+}
+
+@keyframes pulse-highlight-dark {
+  0% { 
+    background-color: rgba(56, 189, 248, 0.25);
+    border-color: rgba(56, 189, 248, 0.5);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2);
+  }
+  50% { 
+    background-color: rgba(56, 189, 248, 0.4);
+    border-color: rgb(56, 189, 248);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5), inset 0 0 0 1px rgba(56, 189, 248, 0.4);
+  }
+  100% { 
+    background-color: rgba(56, 189, 248, 0.25);
+    border-color: rgba(56, 189, 248, 0.5);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2);
   }
 }
 

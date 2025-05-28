@@ -43,7 +43,6 @@ export default function CodeHighlighter({
   const [step, setStep] = useState(currentStep);
   const { theme } = useTheme();
 
-  const codeLines = code.split('\n');
   const currentStepLine = steps[step]?.line;
 
   useEffect(() => {
@@ -61,46 +60,6 @@ export default function CodeHighlighter({
   };
 
   const syntaxTheme = theme === 'dark' ? vscDarkPlus : vs;
-
-  // Custom renderer for line highlighting
-  const LineWrapper = ({ children, ...props }: any) => {
-    const lineNumber = props['data-line-number'];
-    const isCurrentLine = currentStepLine === lineNumber;
-    
-    return (
-      <motion.div
-        {...props}
-        animate={{
-          backgroundColor: isCurrentLine 
-            ? theme === 'dark' 
-              ? 'rgba(56, 189, 248, 0.15)' 
-              : 'rgba(56, 189, 248, 0.1)'
-            : 'transparent',
-          borderLeft: isCurrentLine 
-            ? '4px solid rgb(56, 189, 248)' 
-            : '4px solid transparent',
-        }}
-        transition={{ 
-          duration: 0.6, 
-          ease: "easeInOut",
-          backgroundColor: { duration: 0.8 },
-          borderLeft: { duration: 0.4 }
-        }}
-        className={cn(
-          "block px-4 py-1 transition-all duration-500",
-          isCurrentLine && "animate-pulse-highlight"
-        )}
-        style={{
-          paddingLeft: '1rem',
-          paddingRight: '1rem',
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-        }}
-      >
-        {children}
-      </motion.div>
-    );
-  };
 
   return (
     <motion.div
@@ -171,20 +130,30 @@ export default function CodeHighlighter({
                   display: 'block',
                   backgroundColor: isCurrentLine 
                     ? theme === 'dark' 
-                      ? 'rgba(56, 189, 248, 0.15)' 
-                      : 'rgba(56, 189, 248, 0.08)'
+                      ? 'rgba(56, 189, 248, 0.25)' 
+                      : 'rgba(56, 189, 248, 0.15)'
                     : 'transparent',
                   borderLeft: isCurrentLine 
                     ? '4px solid rgb(56, 189, 248)' 
                     : '4px solid transparent',
                   paddingLeft: '12px',
                   paddingRight: '12px',
-                  paddingTop: '2px',
-                  paddingBottom: '2px',
-                  marginLeft: '-16px',
-                  marginRight: '-16px',
-                  transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animation: isCurrentLine ? 'pulse-highlight 2s ease-in-out' : 'none'
+                  paddingTop: '4px',
+                  paddingBottom: '4px',
+                  marginLeft: '-20px',
+                  marginRight: '-20px',
+                  transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                  animation: isCurrentLine 
+                    ? theme === 'dark' 
+                      ? 'pulse-highlight-dark 2.5s ease-in-out infinite' 
+                      : 'pulse-highlight 2.5s ease-in-out infinite'
+                    : 'none',
+                  boxShadow: isCurrentLine 
+                    ? theme === 'dark'
+                      ? '0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2)'
+                      : '0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1)'
+                    : 'none',
+                  borderRadius: isCurrentLine ? '6px' : '0px'
                 }
               };
             }}
