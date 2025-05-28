@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Trash2, Shuffle, RotateCcw, Play, Pause } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import ThemeToggle from '../ui/ThemeToggle';
 import { cn, delay, generateRandomArray } from '../../lib/utils';
 
 interface ArrayElement {
@@ -153,7 +154,7 @@ export default function ArrayVisualizer() {
     setIsAnimating(true);
     setCurrentOperation('insert');
 
-    // Step-by-step animation
+    // Step-by-step animation with enhanced code highlighting
     for (let step = 0; step < CODE_STEPS.insert.length; step++) {
       setCurrentStep(step);
       await delay(800);
@@ -271,7 +272,7 @@ export default function ArrayVisualizer() {
 
     const valueToDelete = array[index].value;
 
-    // Step-by-step deletion
+    // Step-by-step deletion with enhanced code highlighting
     for (let step = 0; step < CODE_STEPS.delete.length; step++) {
       setCurrentStep(step);
       await delay(800);
@@ -324,18 +325,21 @@ export default function ArrayVisualizer() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 p-6">
+    <div className="min-h-screen bg-white dark:bg-slate-900 p-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header with Theme Toggle */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="flex items-center justify-between mb-8"
         >
-          <h1 className="text-4xl font-bold text-slate-100 mb-2">Array Visualizer</h1>
-          <p className="text-slate-400 text-lg">
-            Interactive visualization of array operations with step-by-step code execution
-          </p>
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-slate-100 mb-2">Array Visualizer</h1>
+            <p className="text-gray-600 dark:text-slate-400 text-lg">
+              Interactive visualization of array operations with step-by-step code execution
+            </p>
+          </div>
+          <ThemeToggle />
         </motion.div>
 
         {/* Message Display */}
@@ -345,7 +349,7 @@ export default function ArrayVisualizer() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100 text-center"
+              className="mb-6 p-4 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-2xl text-gray-900 dark:text-slate-100 text-center"
             >
               {message}
             </motion.div>
@@ -360,14 +364,14 @@ export default function ArrayVisualizer() {
             className="space-y-6"
           >
             {/* Array Display */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+            <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-slate-100">Array Contents</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Array Contents</h2>
                 <div className="flex gap-2">
                   <button
                     onClick={generateNewArray}
                     disabled={isAnimating}
-                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
                   >
                     <Shuffle size={16} />
                     Random
@@ -375,7 +379,7 @@ export default function ArrayVisualizer() {
                   <button
                     onClick={clearArray}
                     disabled={isAnimating}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
                   >
                     <RotateCcw size={16} />
                     Clear
@@ -390,7 +394,7 @@ export default function ArrayVisualizer() {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-slate-400 text-center py-8"
+                      className="text-gray-500 dark:text-slate-400 text-center py-8"
                     >
                       Array is empty. Add some elements to get started!
                     </motion.div>
@@ -423,7 +427,7 @@ export default function ArrayVisualizer() {
                         </div>
                         
                         {/* Index Label */}
-                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-slate-400">
+                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 dark:text-slate-400">
                           [{index}]
                         </div>
                         
@@ -441,19 +445,19 @@ export default function ArrayVisualizer() {
                 </AnimatePresence>
               </div>
 
-              <div className="text-sm text-slate-400 text-center">
+              <div className="text-sm text-gray-600 dark:text-slate-400 text-center">
                 Array Length: {array.length} | Max Capacity: ∞
               </div>
             </div>
 
             {/* Controls */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Operations</h3>
+            <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Operations</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Insert Section */}
                 <div className="space-y-4">
-                  <h4 className="font-medium text-slate-200">Insert Element</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-slate-200">Insert Element</h4>
                   <div className="space-y-3">
                     <input
                       type="number"
@@ -461,7 +465,7 @@ export default function ArrayVisualizer() {
                       onChange={(e) => setInputValue(e.target.value)}
                       placeholder="Enter value"
                       disabled={isAnimating}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
                     />
                     <input
                       type="number"
@@ -469,12 +473,12 @@ export default function ArrayVisualizer() {
                       onChange={(e) => setInputIndex(e.target.value)}
                       placeholder={`Index (0-${array.length})`}
                       disabled={isAnimating}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
                     />
                     <button
                       onClick={insertElement}
                       disabled={isAnimating || !inputValue}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-sky-500 hover:bg-sky-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
                     >
                       {isAnimating && currentOperation === 'insert' ? (
                         <motion.div
@@ -492,7 +496,7 @@ export default function ArrayVisualizer() {
 
                 {/* Search Section */}
                 <div className="space-y-4">
-                  <h4 className="font-medium text-slate-200">Search Element</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-slate-200">Search Element</h4>
                   <div className="space-y-3">
                     <input
                       type="number"
@@ -500,12 +504,12 @@ export default function ArrayVisualizer() {
                       onChange={(e) => setSearchValue(e.target.value)}
                       placeholder="Search value"
                       disabled={isAnimating}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
                     />
                     <button
                       onClick={searchElement}
                       disabled={isAnimating || !searchValue || array.length === 0}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
                     >
                       {isAnimating && currentOperation === 'search' ? (
                         <motion.div
@@ -541,17 +545,17 @@ export default function ArrayVisualizer() {
 
             {/* Operation History */}
             {operationHistory.length > 0 && (
-              <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-slate-100 mb-4">Recent Operations</h3>
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Recent Operations</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {operationHistory.slice(-5).reverse().map((step, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="p-3 bg-slate-700 rounded-xl text-sm"
+                      className="p-3 bg-white dark:bg-slate-700 rounded-xl text-sm"
                     >
-                      <div className="flex items-center gap-2 text-slate-200">
+                      <div className="flex items-center gap-2 text-gray-800 dark:text-slate-200">
                         <span className="px-2 py-1 bg-sky-500 text-white rounded text-xs font-bold">
                           {step.operation}
                         </span>

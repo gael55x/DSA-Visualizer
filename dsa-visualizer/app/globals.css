@@ -176,47 +176,6 @@ body {
   color: var(--muted) !important;
 }
 
-/* Beginner-friendly improvements */
-.beginner-card {
-  background: var(--background-secondary);
-  border: 2px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px var(--shadow);
-  transition: all 0.3s ease;
-}
-
-.beginner-card:hover {
-  border-color: var(--accent-sky);
-  box-shadow: 0 8px 25px var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.beginner-button {
-  background: var(--accent-sky);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px var(--shadow);
-}
-
-.beginner-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px var(--shadow-lg);
-}
-
-.beginner-button:disabled {
-  background: var(--muted);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
 /* Animation optimization */
 @media (prefers-reduced-motion: reduce) {
   * {
