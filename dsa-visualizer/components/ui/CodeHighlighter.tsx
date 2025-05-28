@@ -61,6 +61,48 @@ export default function CodeHighlighter({
 
   const syntaxTheme = theme === 'dark' ? vscDarkPlus : vs;
 
+  // Create custom renderer for highlighted lines
+  const CustomCode = ({ children, ...props }: any) => {
+    return (
+      <code {...props}>
+        {children}
+      </code>
+    );
+  };
+
+  const CustomPre = ({ children, ...props }: any) => {
+    return (
+      <pre {...props} className="relative">
+        {children}
+        {/* Overlay for line highlighting */}
+        {currentStepLine && (
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: `${(currentStepLine - 1) * 1.7 * 14 + 24}px`, // line height * font size + padding
+              left: '0',
+              right: '0',
+              height: `${1.7 * 14}px`, // line height * font size
+              backgroundColor: theme === 'dark' 
+                ? 'rgba(56, 189, 248, 0.25)' 
+                : 'rgba(56, 189, 248, 0.15)',
+              borderLeft: '4px solid rgb(56, 189, 248)',
+              borderRadius: '6px',
+              animation: theme === 'dark' 
+                ? 'pulse-highlight-dark 2.5s ease-in-out infinite' 
+                : 'pulse-highlight 2.5s ease-in-out infinite',
+              boxShadow: theme === 'dark'
+                ? '0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2)'
+                : '0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1)',
+              marginLeft: '3em', // Account for line numbers
+              zIndex: 1
+            }}
+          />
+        )}
+      </pre>
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -123,40 +165,8 @@ export default function CodeHighlighter({
                 lineHeight: '1.7'
               }
             }}
-            lineProps={(lineNumber) => {
-              const isCurrentLine = currentStepLine === lineNumber;
-              return {
-                style: {
-                  display: 'block',
-                  backgroundColor: isCurrentLine 
-                    ? theme === 'dark' 
-                      ? 'rgba(56, 189, 248, 0.25)' 
-                      : 'rgba(56, 189, 248, 0.15)'
-                    : 'transparent',
-                  borderLeft: isCurrentLine 
-                    ? '4px solid rgb(56, 189, 248)' 
-                    : '4px solid transparent',
-                  paddingLeft: '12px',
-                  paddingRight: '12px',
-                  paddingTop: '4px',
-                  paddingBottom: '4px',
-                  marginLeft: '-20px',
-                  marginRight: '-20px',
-                  transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                  animation: isCurrentLine 
-                    ? theme === 'dark' 
-                      ? 'pulse-highlight-dark 2.5s ease-in-out infinite' 
-                      : 'pulse-highlight 2.5s ease-in-out infinite'
-                    : 'none',
-                  boxShadow: isCurrentLine 
-                    ? theme === 'dark'
-                      ? '0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2)'
-                      : '0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1)'
-                    : 'none',
-                  borderRadius: isCurrentLine ? '6px' : '0px'
-                }
-              };
-            }}
+            PreTag={CustomPre}
+            CodeTag={CustomCode}
           >
             {code}
           </SyntaxHighlighter>
