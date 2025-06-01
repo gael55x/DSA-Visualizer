@@ -190,37 +190,51 @@ export default function BinaryTreeVisualizer() {
     const insertRecursive = async (node: TreeNode | null, val: number): Promise<TreeNode> => {
       const steps = CODE_STEPS.insert;
       
-      for (let step = 0; step < steps.length; step++) {
-        setCurrentStep(step);
+      // Step 0: Check if empty
+      setCurrentStep(0);
+      await delay(animationSpeed);
+      
+      if (node === null) {
+        // Step 1: Create new node
+        setCurrentStep(1);
         await delay(animationSpeed);
+        
+        const newNode: TreeNode = {
+          value: val,
+          left: null,
+          right: null,
+          id: generateId(),
+          isInserting: true
+        };
+        return newNode;
+      }
 
-        if (step === 0 && node === null) {
-          const newNode: TreeNode = {
-            value: val,
-            left: null,
-            right: null,
-            id: generateId(),
-            isInserting: true
-          };
-          return newNode;
-        } else if (step === 2 && node) {
-          setRoot(highlightNode(root, node.id, 'isHighlighted'));
-          await delay(animationSpeed * 0.5);
-          
-          if (val < node.value) {
-            setCurrentStep(3);
-            await delay(animationSpeed);
-            node.left = await insertRecursive(node.left, val);
-          } else if (val > node.value) {
-            setCurrentStep(4);
-            await delay(animationSpeed);
-            node.right = await insertRecursive(node.right, val);
-          }
-          break;
-        }
+      // Step 2: Compare values
+      setCurrentStep(2);
+      setRoot(prev => highlightNode(prev, node.id, 'isHighlighted'));
+      await delay(animationSpeed);
+
+      if (val < node.value) {
+        // Step 3: Go left
+        setCurrentStep(3);
+        await delay(animationSpeed);
+        node.left = await insertRecursive(node.left, val);
+      } else if (val > node.value) {
+        // Step 4: Go right
+        setCurrentStep(4);
+        await delay(animationSpeed);
+        node.right = await insertRecursive(node.right, val);
+      } else {
+        // Value already exists
+        showMessage(`Value ${val} already exists in the tree`, 'error');
+        return node;
       }
       
-      return node!;
+      // Step 5: Return root
+      setCurrentStep(5);
+      await delay(animationSpeed);
+      
+      return node;
     };
 
     try {
@@ -233,7 +247,7 @@ export default function BinaryTreeVisualizer() {
     } finally {
       setIsAnimating(false);
       setIsPlaying(false);
-      setTimeout(() => setRoot(clearHighlights(root)), 500);
+      setTimeout(() => setRoot(prev => clearHighlights(prev)), 500);
     }
   }, [inputValue, root, animationSpeed]);
 
@@ -256,37 +270,40 @@ export default function BinaryTreeVisualizer() {
     const searchRecursive = async (node: TreeNode | null, val: number): Promise<TreeNode | null> => {
       const steps = CODE_STEPS.search;
       
-      for (let step = 0; step < steps.length; step++) {
-        setCurrentStep(step);
-        await delay(animationSpeed);
-
-        if (step === 0) {
-          if (node === null || node.value === val) {
-            if (node) {
-              setRoot(highlightNode(root, node.id, 'isSearching'));
-              showMessage(`Value ${val} found!`, 'success');
-            } else {
-              showMessage(`Value ${val} not found`, 'error');
-            }
-            return node;
-          }
-        } else if (step === 2 && node) {
-          setRoot(highlightNode(root, node.id, 'isHighlighted'));
-          await delay(animationSpeed * 0.5);
-          
-          if (val < node.value) {
-            setCurrentStep(3);
-            await delay(animationSpeed);
-            return await searchRecursive(node.left, val);
-          } else {
-            setCurrentStep(4);
-            await delay(animationSpeed);
-            return await searchRecursive(node.right, val);
-          }
-        }
+      // Step 0: Check if empty or found
+      setCurrentStep(0);
+      await delay(animationSpeed);
+      
+      if (node === null) {
+        showMessage(`Value ${val} not found`, 'error');
+        return null;
       }
       
-      return null;
+      if (node.value === val) {
+        // Step 1: Found the value
+        setCurrentStep(1);
+        setRoot(prev => highlightNode(prev, node.id, 'isSearching'));
+        await delay(animationSpeed);
+        showMessage(`Value ${val} found!`, 'success');
+        return node;
+      }
+
+      // Step 2: Compare and decide direction
+      setCurrentStep(2);
+      setRoot(prev => highlightNode(prev, node.id, 'isHighlighted'));
+      await delay(animationSpeed);
+      
+      if (val < node.value) {
+        // Step 3: Search left
+        setCurrentStep(3);
+        await delay(animationSpeed);
+        return await searchRecursive(node.left, val);
+      } else {
+        // Step 4: Search right
+        setCurrentStep(4);
+        await delay(animationSpeed);
+        return await searchRecursive(node.right, val);
+      }
     };
 
     try {
@@ -297,7 +314,7 @@ export default function BinaryTreeVisualizer() {
     } finally {
       setIsAnimating(false);
       setIsPlaying(false);
-      setTimeout(() => setRoot(clearHighlights(root)), 2000);
+      setTimeout(() => setRoot(prev => clearHighlights(prev)), 2000);
     }
   }, [searchValue, root, animationSpeed]);
 
@@ -539,125 +556,141 @@ export default function BinaryTreeVisualizer() {
   const currentCodeSteps = CODE_STEPS[currentOperation as keyof typeof CODE_STEPS];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Compact Header */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
-              Binary Search Tree
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">
+              Binary Search Tree Visualizer
             </h1>
-            <p className="text-sm text-gray-600 dark:text-slate-400">
-              Interactive visualization with draggable tree
+            <p className="text-gray-600 dark:text-slate-400">
+              Interactive visualization with draggable tree and step-by-step code execution
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Tree Visualization - Full width on large screens */}
-          <div className="xl:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Tree Visualization */}
+          <div className="space-y-6">
             {/* Controls */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Input */}
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Value"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
-                    disabled={isAnimating}
-                  />
-                  <button
-                    onClick={insertNode}
-                    disabled={isAnimating}
-                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium"
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <button
-                    onClick={deleteNode}
-                    disabled={isAnimating}
-                    className="px-3 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium"
-                  >
-                    <Minus size={16} />
-                  </button>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-lg">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100 mb-6">Operations</h2>
+              
+              <div className="space-y-6">
+                {/* Insert/Delete Row */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Insert/Delete Node</h3>
+                  <div className="flex gap-3">
+                    <input
+                      type="number"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Enter a number"
+                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                      disabled={isAnimating}
+                    />
+                    <button
+                      onClick={insertNode}
+                      disabled={isAnimating}
+                      className="px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <Plus size={18} />
+                      Insert
+                    </button>
+                    <button
+                      onClick={deleteNode}
+                      disabled={isAnimating}
+                      className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <Minus size={18} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
 
-                {/* Search */}
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    placeholder="Search"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
-                    disabled={isAnimating}
-                  />
-                  <button
-                    onClick={searchNode}
-                    disabled={isAnimating}
-                    className="px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium"
-                  >
-                    <Search size={16} />
-                  </button>
+                {/* Search Row */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Search Node</h3>
+                  <div className="flex gap-3">
+                    <input
+                      type="number"
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      placeholder="Enter number to search"
+                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+                      disabled={isAnimating}
+                    />
+                    <button
+                      onClick={searchNode}
+                      disabled={isAnimating}
+                      className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <Search size={18} />
+                      Search
+                    </button>
+                  </div>
                 </div>
 
-                {/* Utils */}
-                <div className="flex gap-2">
+                {/* Animation Speed */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Animation Speed</h3>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-600 dark:text-slate-400 w-12">Slow</span>
+                    <input
+                      type="range"
+                      min="300"
+                      max="2000"
+                      step="100"
+                      value={animationSpeed}
+                      onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
+                      className="flex-1 h-2 bg-gray-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                      disabled={isAnimating}
+                    />
+                    <span className="text-sm text-gray-600 dark:text-slate-400 w-12">Fast</span>
+                    <div className="text-sm font-medium text-gray-900 dark:text-slate-100 w-8">
+                      {Math.round((2000 - animationSpeed + 300) / 300)}x
+                    </div>
+                  </div>
+                </div>
+
+                {/* Utility Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
                   <button
                     onClick={generateRandomTree}
                     disabled={isAnimating}
-                    className="flex-1 px-3 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium"
+                    className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                   >
-                    <Shuffle size={16} />
+                    <Shuffle size={18} />
+                    Random Tree
                   </button>
                   <button
                     onClick={clearTree}
                     disabled={isAnimating}
-                    className="flex-1 px-3 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium"
+                    className="flex-1 px-4 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                   >
-                    <RotateCcw size={16} />
+                    <RotateCcw size={18} />
+                    Clear Tree
                   </button>
-                </div>
-              </div>
-
-              {/* Speed Control */}
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600 dark:text-slate-400">Speed:</span>
-                  <input
-                    type="range"
-                    min="300"
-                    max="2000"
-                    step="100"
-                    value={animationSpeed}
-                    onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
-                    className="flex-1"
-                    disabled={isAnimating}
-                  />
-                  <span className="text-sm text-gray-600 dark:text-slate-400 w-16">
-                    {(2000 - animationSpeed + 300) / 300}x
-                  </span>
                 </div>
               </div>
             </div>
 
             {/* Tree Display */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
-              <div className="p-3 border-b border-gray-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-lg overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Tree Structure</h3>
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Drag to move • Hover to interact</span>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Tree Structure</h2>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span>Drag to move • Hover nodes to interact</span>
+                  </div>
                 </div>
               </div>
               
               <div 
-                className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 min-h-[500px] overflow-hidden cursor-grab active:cursor-grabbing"
+                className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 min-h-[500px] overflow-hidden cursor-grab active:cursor-grabbing relative"
                 onMouseDown={handleMouseDown}
               >
                 {root ? (
@@ -673,37 +706,40 @@ export default function BinaryTreeVisualizer() {
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500 dark:text-slate-400">
                     <div className="text-center">
-                      <div className="text-4xl mb-2">🌳</div>
-                      <p className="text-sm font-medium">Empty Tree</p>
-                      <p className="text-xs">Add nodes to get started</p>
+                      <div className="text-6xl mb-4">🌳</div>
+                      <h3 className="text-lg font-semibold mb-2">Empty Tree</h3>
+                      <p className="text-sm">Add some nodes to get started!</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Status */}
+            {/* Status Message */}
             {message && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-blue-800 dark:text-blue-200 text-sm"
+                className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-blue-800 dark:text-blue-200"
               >
-                {message}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span className="font-medium">{message}</span>
+                </div>
               </motion.div>
             )}
           </div>
 
           {/* Code Panel */}
-          <div className="xl:col-span-1">
+          <div className="sticky top-6">
             <CodeHighlighter
               code={currentCode}
               language="javascript"
               title={`${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Algorithm`}
               steps={currentCodeSteps}
               currentStep={currentStep}
-              className="h-fit sticky top-4"
-              compact={true}
+              className="h-fit"
+              compact={false}
             />
           </div>
         </div>
