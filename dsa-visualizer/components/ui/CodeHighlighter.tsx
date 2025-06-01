@@ -9,7 +9,8 @@ import { cn } from '../../lib/utils';
 import { useTheme } from '../../lib/theme-context';
 
 interface CodeStep {
-  line: number;
+  line?: number;
+  lines?: number[];
   description: string;
   highlight?: boolean;
 }
@@ -25,6 +26,7 @@ interface CodeHighlighterProps {
   onStepChange?: (step: number) => void;
   autoPlay?: boolean;
   playSpeed?: number;
+  compact?: boolean;
 }
 
 export default function CodeHighlighter({
@@ -37,13 +39,14 @@ export default function CodeHighlighter({
   showControls = true,
   onStepChange,
   autoPlay = false,
-  playSpeed = 1000
+  playSpeed = 1000,
+  compact = false
 }: CodeHighlighterProps) {
   const [copied, setCopied] = useState(false);
   const [step, setStep] = useState(currentStep);
   const { theme } = useTheme();
 
-  const currentStepLine = steps[step]?.line;
+  const currentStepLines = steps[step]?.lines || (steps[step]?.line ? [steps[step].line!] : []);
 
   useEffect(() => {
     setStep(currentStep);
@@ -75,11 +78,12 @@ export default function CodeHighlighter({
       <pre {...props} className="relative">
         {children}
         {/* Overlay for line highlighting */}
-        {currentStepLine && (
+        {currentStepLines.map((lineNumber, index) => (
           <div
+            key={`highlight-${lineNumber}-${index}`}
             className="absolute pointer-events-none"
             style={{
-              top: `${(currentStepLine - 1) * 1.7 * 14 + 24}px`, // line height * font size + padding
+              top: `${(lineNumber - 1) * 1.7 * 14 + 24}px`, // line height * font size + padding
               left: '0',
               right: '0',
               height: `${1.7 * 14}px`, // line height * font size
@@ -98,7 +102,7 @@ export default function CodeHighlighter({
               zIndex: 1
             }}
           />
-        )}
+        ))}
       </pre>
     );
   };
@@ -110,32 +114,45 @@ export default function CodeHighlighter({
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={cn(
         "bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-lg",
+        compact && "text-sm",
         className
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/80">
+      <div className={cn(
+        "flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/80",
+        compact ? "p-3" : "p-4"
+      )}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-400"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            <div className={cn("rounded-full bg-red-400", compact ? "w-2 h-2" : "w-3 h-3")}></div>
+            <div className={cn("rounded-full bg-yellow-400", compact ? "w-2 h-2" : "w-3 h-3")}></div>
+            <div className={cn("rounded-full bg-green-400", compact ? "w-2 h-2" : "w-3 h-3")}></div>
           </div>
-          <h3 className="text-gray-900 dark:text-slate-100 font-semibold text-sm">{title}</h3>
+          <h3 className={cn(
+            "text-gray-900 dark:text-slate-100 font-semibold",
+            compact ? "text-xs" : "text-sm"
+          )}>{title}</h3>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={copyCode}
-            className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-xs font-medium transition-colors"
+            className={cn(
+              "flex items-center gap-1 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors",
+              compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs"
+            )}
           >
-            <Copy size={12} />
+            <Copy size={compact ? 10 : 12} />
             {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
       </div>
 
       {/* Code Content */}
-      <div className="relative bg-white dark:bg-slate-900 p-6">
+      <div className={cn(
+        "relative bg-white dark:bg-slate-900",
+        compact ? "p-4" : "p-6"
+      )}>
         <div className="relative">
           <SyntaxHighlighter
             language={language}
@@ -145,14 +162,14 @@ export default function CodeHighlighter({
               minWidth: '3em',
               paddingRight: '1em',
               color: theme === 'dark' ? '#64748b' : '#94a3b8',
-              fontSize: '13px',
+              fontSize: compact ? '12px' : '13px',
               userSelect: 'none'
             }}
             customStyle={{
               margin: 0,
-              padding: '1.5rem',
+              padding: compact ? '1rem' : '1.5rem',
               background: 'transparent',
-              fontSize: '14px',
+              fontSize: compact ? '13px' : '14px',
               lineHeight: '1.7',
               fontFamily: 'var(--font-geist-mono), "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace',
               borderRadius: '12px',
@@ -161,7 +178,7 @@ export default function CodeHighlighter({
             codeTagProps={{
               style: {
                 fontFamily: 'var(--font-geist-mono), "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace',
-                fontSize: '14px',
+                fontSize: compact ? '13px' : '14px',
                 lineHeight: '1.7'
               }
             }}
@@ -175,9 +192,15 @@ export default function CodeHighlighter({
 
       {/* Step Information */}
       {steps.length > 0 && (
-        <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/50">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-gray-600 dark:text-slate-400 font-medium">
+        <div className={cn(
+          "border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/50",
+          compact ? "p-3" : "p-4"
+        )}>
+          <div className={cn("flex items-center justify-between", compact ? "mb-2" : "mb-3")}>
+            <span className={cn(
+              "text-gray-600 dark:text-slate-400 font-medium",
+              compact ? "text-xs" : "text-xs"
+            )}>
               Step {step + 1} of {steps.length}
             </span>
             <div className="flex gap-1">
@@ -191,7 +214,8 @@ export default function CodeHighlighter({
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
                   className={cn(
-                    "w-3 h-3 rounded-full transition-all duration-300",
+                    "rounded-full transition-all duration-300",
+                    compact ? "w-2 h-2" : "w-3 h-3",
                     idx <= step 
                       ? "bg-sky-400 shadow-lg" 
                       : "bg-gray-300 dark:bg-slate-600 hover:bg-gray-400 dark:hover:bg-slate-500"
@@ -210,7 +234,10 @@ export default function CodeHighlighter({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <p className="text-sm text-gray-800 dark:text-slate-200 font-medium">
+                <p className={cn(
+                  "text-gray-800 dark:text-slate-200 font-medium",
+                  compact ? "text-xs" : "text-sm"
+                )}>
                   {steps[step].description}
                 </p>
               </motion.div>
