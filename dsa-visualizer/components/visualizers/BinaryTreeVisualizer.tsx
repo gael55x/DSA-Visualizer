@@ -701,9 +701,9 @@ export default function BinaryTreeVisualizer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Tree Visualization */}
-          <div className="space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* Tree Display */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-lg overflow-hidden">
               <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700">
@@ -758,7 +758,7 @@ export default function BinaryTreeVisualizer() {
           </div>
 
           {/* Code Panel */}
-          <div className="sticky top-6">
+          <div className="lg:col-span-2 sticky top-6">
             <CodeHighlighter
               code={currentCode}
               language="javascript"
