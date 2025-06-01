@@ -43,14 +43,10 @@ export default function CodeHighlighter({
   compact = false
 }: CodeHighlighterProps) {
   const [copied, setCopied] = useState(false);
-  const [step, setStep] = useState(currentStep);
   const { theme } = useTheme();
 
-  const currentStepLines = steps[step]?.lines || (steps[step]?.line ? [steps[step].line!] : []);
-
-  useEffect(() => {
-    setStep(currentStep);
-  }, [currentStep]);
+  // Use currentStep directly from props, no local state
+  const currentStepLines = steps[currentStep]?.lines || (steps[currentStep]?.line ? [steps[currentStep].line!] : []);
 
   const copyCode = async () => {
     try {
@@ -79,9 +75,12 @@ export default function CodeHighlighter({
         {children}
         {/* Overlay for line highlighting */}
         {currentStepLines.map((lineNumber, index) => (
-          <div
+          <motion.div
             key={`highlight-${lineNumber}-${index}`}
             className="absolute pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             style={{
               top: `${(lineNumber - 1) * 1.7 * 14 + 24}px`, // line height * font size + padding
               left: '0',
@@ -201,14 +200,13 @@ export default function CodeHighlighter({
               "text-gray-600 dark:text-slate-400 font-medium",
               compact ? "text-xs" : "text-xs"
             )}>
-              Step {step + 1} of {steps.length}
+              Step {currentStep + 1} of {steps.length}
             </span>
             <div className="flex gap-1">
               {steps.map((_, idx) => (
                 <motion.button
                   key={idx}
                   onClick={() => {
-                    setStep(idx);
                     onStepChange?.(idx);
                   }}
                   whileHover={{ scale: 1.2 }}
@@ -216,7 +214,7 @@ export default function CodeHighlighter({
                   className={cn(
                     "rounded-full transition-all duration-300",
                     compact ? "w-2 h-2" : "w-3 h-3",
-                    idx <= step 
+                    idx <= currentStep 
                       ? "bg-sky-400 shadow-lg" 
                       : "bg-gray-300 dark:bg-slate-600 hover:bg-gray-400 dark:hover:bg-slate-500"
                   )}
@@ -226,9 +224,9 @@ export default function CodeHighlighter({
           </div>
           
           <AnimatePresence mode="wait">
-            {steps[step] && (
+            {steps[currentStep] && (
               <motion.div
-                key={step}
+                key={currentStep}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -238,7 +236,7 @@ export default function CodeHighlighter({
                   "text-gray-800 dark:text-slate-200 font-medium",
                   compact ? "text-xs" : "text-sm"
                 )}>
-                  {steps[step].description}
+                  {steps[currentStep].description}
                 </p>
               </motion.div>
             )}

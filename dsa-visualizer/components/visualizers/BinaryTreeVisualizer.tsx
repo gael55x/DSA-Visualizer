@@ -186,10 +186,11 @@ export default function BinaryTreeVisualizer() {
     setIsAnimating(true);
     setIsPlaying(true);
     setCurrentOperation('insert');
+    
+    // Clear previous highlights
+    setRoot(prev => clearHighlights(prev));
 
-    const insertRecursive = async (node: TreeNode | null, val: number): Promise<TreeNode> => {
-      const steps = CODE_STEPS.insert;
-      
+    const insertRecursive = async (node: TreeNode | null, val: number, parentRoot: TreeNode | null = null): Promise<TreeNode> => {
       // Step 0: Check if empty
       setCurrentStep(0);
       await delay(animationSpeed);
@@ -206,24 +207,33 @@ export default function BinaryTreeVisualizer() {
           id: generateId(),
           isInserting: true
         };
+        
+        // Update the root immediately if this is the first node
+        if (parentRoot === null) {
+          setRoot(newNode);
+        }
+        
         return newNode;
       }
 
       // Step 2: Compare values
       setCurrentStep(2);
-      setRoot(prev => highlightNode(prev, node.id, 'isHighlighted'));
+      
+      // Highlight current node
+      const highlightedRoot = highlightNode(parentRoot || node, node.id, 'isHighlighted');
+      setRoot(highlightedRoot);
       await delay(animationSpeed);
 
       if (val < node.value) {
         // Step 3: Go left
         setCurrentStep(3);
         await delay(animationSpeed);
-        node.left = await insertRecursive(node.left, val);
+        node.left = await insertRecursive(node.left, val, parentRoot || node);
       } else if (val > node.value) {
         // Step 4: Go right
         setCurrentStep(4);
         await delay(animationSpeed);
-        node.right = await insertRecursive(node.right, val);
+        node.right = await insertRecursive(node.right, val, parentRoot || node);
       } else {
         // Value already exists
         showMessage(`Value ${val} already exists in the tree`, 'error');
@@ -238,7 +248,7 @@ export default function BinaryTreeVisualizer() {
     };
 
     try {
-      const newRoot = await insertRecursive(root, value);
+      const newRoot = await insertRecursive(root, value, root);
       setRoot(newRoot);
       setInputValue('');
       showMessage(`Value ${value} inserted successfully!`, 'success');
@@ -495,7 +505,7 @@ export default function BinaryTreeVisualizer() {
             className="text-gray-400 dark:text-slate-500"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           />
         )}
         {node.right && node.right.x && node.right.y && (
@@ -509,7 +519,7 @@ export default function BinaryTreeVisualizer() {
             className="text-gray-400 dark:text-slate-500"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           />
         )}
         
@@ -518,32 +528,42 @@ export default function BinaryTreeVisualizer() {
           cx={node.x}
           cy={node.y}
           r="28"
-          initial={{ scale: 0, rotate: 0 }}
+          initial={{ scale: 0 }}
           animate={{ 
             scale: 1,
-            rotate: node.isHighlighted ? 360 : 0
+            stroke: node.isHighlighted ? '#EAB308' : 
+                   node.isSearching ? '#10B981' : 
+                   node.isInserting ? '#3B82F6' : 
+                   node.isDeleting ? '#EF4444' : '#9CA3AF'
           }}
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
+          transition={{ 
+            scale: { duration: 0.2 }, 
+            stroke: { duration: 0.3 }
+          }}
           className={cn(
             "transition-all duration-300 cursor-pointer",
-            node.isHighlighted && "fill-yellow-400 stroke-yellow-600 drop-shadow-lg",
-            node.isSearching && "fill-green-400 stroke-green-600 drop-shadow-lg",
-            node.isInserting && "fill-blue-400 stroke-blue-600 drop-shadow-lg",
-            node.isDeleting && "fill-red-400 stroke-red-600 drop-shadow-lg",
+            node.isHighlighted && "fill-yellow-100 dark:fill-yellow-900/50",
+            node.isSearching && "fill-green-100 dark:fill-green-900/50",
+            node.isInserting && "fill-blue-100 dark:fill-blue-900/50",
+            node.isDeleting && "fill-red-100 dark:fill-red-900/50",
             !node.isHighlighted && !node.isSearching && !node.isInserting && !node.isDeleting && 
-            "fill-white dark:fill-slate-700 stroke-gray-400 dark:stroke-slate-500"
+            "fill-white dark:fill-slate-700"
           )}
           strokeWidth="3"
         />
         
-        <text
+        <motion.text
           x={node.x}
           y={node.y + 6}
           textAnchor="middle"
           className="text-sm font-bold fill-gray-900 dark:fill-slate-100 pointer-events-none select-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
         >
           {node.value}
-        </text>
+        </motion.text>
         
         {/* Render children */}
         {renderNode(node.left)}
@@ -571,112 +591,119 @@ export default function BinaryTreeVisualizer() {
           <ThemeToggle />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Tree Visualization */}
-          <div className="space-y-6">
-            {/* Controls */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100 mb-6">Operations</h2>
-              
-              <div className="space-y-6">
-                {/* Insert/Delete Row */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Insert/Delete Node</h3>
-                  <div className="flex gap-3">
-                    <input
-                      type="number"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Enter a number"
-                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                      disabled={isAnimating}
-                    />
-                    <button
-                      onClick={insertNode}
-                      disabled={isAnimating}
-                      className="px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                    >
-                      <Plus size={18} />
-                      Insert
-                    </button>
-                    <button
-                      onClick={deleteNode}
-                      disabled={isAnimating}
-                      className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                    >
-                      <Minus size={18} />
-                      Delete
-                    </button>
-                  </div>
-                </div>
-
-                {/* Search Row */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Search Node</h3>
-                  <div className="flex gap-3">
-                    <input
-                      type="number"
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      placeholder="Enter number to search"
-                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-green-400 focus:border-transparent"
-                      disabled={isAnimating}
-                    />
-                    <button
-                      onClick={searchNode}
-                      disabled={isAnimating}
-                      className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                    >
-                      <Search size={18} />
-                      Search
-                    </button>
-                  </div>
-                </div>
-
-                {/* Animation Speed */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Animation Speed</h3>
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600 dark:text-slate-400 w-12">Slow</span>
-                    <input
-                      type="range"
-                      min="300"
-                      max="2000"
-                      step="100"
-                      value={animationSpeed}
-                      onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
-                      className="flex-1 h-2 bg-gray-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer"
-                      disabled={isAnimating}
-                    />
-                    <span className="text-sm text-gray-600 dark:text-slate-400 w-12">Fast</span>
-                    <div className="text-sm font-medium text-gray-900 dark:text-slate-100 w-8">
-                      {Math.round((2000 - animationSpeed + 300) / 300)}x
-                    </div>
-                  </div>
-                </div>
-
-                {/* Utility Buttons */}
-                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
+        {/* Operations Bar */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-lg mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Insert/Delete */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Insert/Delete Node</h3>
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Enter number"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  disabled={isAnimating}
+                />
+                <div className="flex gap-2">
                   <button
-                    onClick={generateRandomTree}
+                    onClick={insertNode}
                     disabled={isAnimating}
-                    className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
                   >
-                    <Shuffle size={18} />
-                    Random Tree
+                    <Plus size={16} />
+                    Insert
                   </button>
                   <button
-                    onClick={clearTree}
+                    onClick={deleteNode}
                     disabled={isAnimating}
-                    className="flex-1 px-4 py-3 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
                   >
-                    <RotateCcw size={18} />
-                    Clear Tree
+                    <Minus size={16} />
+                    Delete
                   </button>
                 </div>
               </div>
             </div>
 
+            {/* Search */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Search Node</h3>
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder="Search number"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+                  disabled={isAnimating}
+                />
+                <button
+                  onClick={searchNode}
+                  disabled={isAnimating}
+                  className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <Search size={16} />
+                  Search
+                </button>
+              </div>
+            </div>
+
+            {/* Animation Speed */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Animation Speed</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-600 dark:text-slate-400">Fast</span>
+                  <input
+                    type="range"
+                    min="300"
+                    max="2000"
+                    step="100"
+                    value={animationSpeed}
+                    onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
+                    className="flex-1 h-2 bg-gray-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    disabled={isAnimating}
+                  />
+                  <span className="text-xs text-gray-600 dark:text-slate-400">Slow</span>
+                </div>
+                <div className="text-center">
+                  <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                    {Math.round((2000 - animationSpeed + 300) / 300)}x Speed
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Utilities */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Tree Actions</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={generateRandomTree}
+                  disabled={isAnimating}
+                  className="w-full px-3 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <Shuffle size={16} />
+                  Random Tree
+                </button>
+                <button
+                  onClick={clearTree}
+                  disabled={isAnimating}
+                  className="w-full px-3 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <RotateCcw size={16} />
+                  Clear Tree
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Tree Visualization */}
+          <div className="space-y-6">
             {/* Tree Display */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-lg overflow-hidden">
               <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700">
