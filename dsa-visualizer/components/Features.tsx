@@ -37,7 +37,7 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-20 bg-slate-900 relative overflow-hidden">
+    <section id="features" className="py-20 bg-slate-900 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-64 h-64 bg-sky-400/5 rounded-full blur-3xl"></div>
