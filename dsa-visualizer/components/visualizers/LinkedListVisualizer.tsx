@@ -73,27 +73,30 @@ const CODE_STEPS = {
     { line: 5, description: "Check if inserting at the beginning" },
     { line: 6, description: "Point new node to current head" },
     { line: 7, description: "Return new node as the new head" },
-    { line: 11, description: "Traverse to the position before insertion point" },
-    { line: 16, description: "Link new node to the next node" },
-    { line: 17, description: "Link previous node to the new node" },
-    { line: 19, description: "Return the head of the modified list" }
+    { line: 11, description: "Start from head to traverse to position" },
+    { lines: [12, 13, 14], description: "Traverse to the position before insertion point" },
+    { line: 17, description: "Link new node to the next node" },
+    { line: 18, description: "Link previous node to the new node" },
+    { line: 20, description: "Return the head of the modified list" }
   ],
   
   delete: [
     { line: 2, description: "Check if deleting from the beginning" },
     { line: 3, description: "Return the second node as new head" },
-    { line: 7, description: "Traverse to the node before deletion point" },
-    { line: 12, description: "Get reference to the node to be deleted" },
-    { line: 13, description: "Skip over the node to be deleted" },
-    { line: 15, description: "Return the head of the modified list" }
+    { line: 7, description: "Start from head to traverse to position" },
+    { lines: [8, 9, 10], description: "Traverse to the node before deletion point" },
+    { line: 13, description: "Get reference to the node to be deleted" },
+    { line: 14, description: "Skip over the node to be deleted" },
+    { line: 16, description: "Return the head of the modified list" }
   ],
   
   traverse: [
     { line: 2, description: "Start traversal from the head node" },
     { line: 3, description: "Initialize array to store values" },
-    { line: 6, description: "Continue while current node exists" },
+    { line: 6, description: "Check if current node exists" },
     { line: 7, description: "Add current node's value to array" },
     { line: 8, description: "Move to the next node" },
+    { line: 6, description: "Check next node in the loop" },
     { line: 11, description: "Return the collected values" }
   ]
 };
@@ -116,6 +119,7 @@ export default function LinkedListVisualizer() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
+  const [traversalIndex, setTraversalIndex] = useState<number>(-1);
 
   const handleAddNode = useCallback(async () => {
     if (newValue.trim() === '') {
@@ -131,6 +135,7 @@ export default function LinkedListVisualizer() {
 
     setIsAnimating(true);
     setCurrentOperation('insert');
+    setTraversalIndex(-1);
 
     const newNode = { value, id: `node-${nextId}` };
     setNextId(nextId + 1);
@@ -147,24 +152,61 @@ export default function LinkedListVisualizer() {
         // Create new node step
         continue;
       } else if (step === 1 && position === 'start') {
+        // Check if inserting at beginning
+        await delay(400);
+      } else if (step === 2 && position === 'start') {
         // Insert at beginning
         newNodes = [newNode, ...nodes];
         addedAtIndex = 0;
         setMessage(`Added ${value} at the beginning of the list`);
         break;
       } else if (step === 4 && (position === 'end' || position === 'index')) {
-        // Traverse and insert
-        if (position === 'end') {
-          newNodes = [...nodes, newNode];
-          addedAtIndex = nodes.length;
-          setMessage(`Added ${value} at the end of the list`);
-        } else if (position === 'index') {
+        // Start traversal visualization
+        setTraversalIndex(0);
+        if (nodes.length > 0) {
+          setHighlightedId(nodes[0].id);
+        }
+      } else if (step === 5 && (position === 'end' || position === 'index')) {
+        // Show traversal through nodes
+        const targetIdx = position === 'end' ? nodes.length : parseInt(index);
+        
+        if (position === 'index') {
           const idx = parseInt(index);
           if (isNaN(idx) || idx < 0 || idx > nodes.length) {
             setMessage(`Index must be between 0 and ${nodes.length}`);
             setIsAnimating(false);
             return;
           }
+        }
+        
+        // Animate traversal to target position
+        if (position === 'index') {
+          const targetIndex = parseInt(index);
+          for (let i = 0; i < targetIndex && i < nodes.length; i++) {
+            setTraversalIndex(i);
+            setHighlightedId(nodes[i].id);
+            await delay(600);
+          }
+        } else {
+          // For end insertion, traverse to the last node
+          for (let i = 0; i < nodes.length; i++) {
+            setTraversalIndex(i);
+            setHighlightedId(nodes[i].id);
+            await delay(600);
+          }
+        }
+      } else if (step === 6) {
+        // Link new node to the next node
+        setHighlightedId(null);
+        await delay(400);
+      } else if (step === 7) {
+        // Perform the actual insertion
+        if (position === 'end') {
+          newNodes = [...nodes, newNode];
+          addedAtIndex = nodes.length;
+          setMessage(`Added ${value} at the end of the list`);
+        } else if (position === 'index') {
+          const idx = parseInt(index);
           newNodes = [...nodes.slice(0, idx), newNode, ...nodes.slice(idx)];
           addedAtIndex = idx;
           setMessage(`Added ${value} at index ${idx}`);
@@ -175,6 +217,7 @@ export default function LinkedListVisualizer() {
 
     setNodes(newNodes);
     setNewValue('');
+    setTraversalIndex(-1);
     
     // Highlight the new node
     setHighlightedId(newNode.id);
@@ -192,6 +235,7 @@ export default function LinkedListVisualizer() {
 
     setIsAnimating(true);
     setCurrentOperation('delete');
+    setTraversalIndex(-1);
 
     let newNodes = [...nodes];
     let removedNode: Node | null = null;
@@ -202,13 +246,28 @@ export default function LinkedListVisualizer() {
       await delay(800);
       
       if (step === 0 && position === 'start') {
+        // Check if deleting from beginning
+        await delay(400);
+      } else if (step === 1 && position === 'start') {
+        // Delete from beginning
         removedNode = newNodes.shift() || null;
         setMessage(`Removed ${removedNode?.value} from the beginning of the list`);
         break;
+      } else if (step === 2 && (position === 'end' || position === 'index')) {
+        // Start traversal for end/index deletion
+        setTraversalIndex(0);
+        if (nodes.length > 0) {
+          setHighlightedId(nodes[0].id);
+        }
       } else if (step === 3 && (position === 'end' || position === 'index')) {
+        // Show traversal to target position
         if (position === 'end') {
-          removedNode = newNodes.pop() || null;
-          setMessage(`Removed ${removedNode?.value} from the end of the list`);
+          // Traverse to second-to-last node for end deletion
+          for (let i = 0; i < nodes.length - 1; i++) {
+            setTraversalIndex(i);
+            setHighlightedId(nodes[i].id);
+            await delay(600);
+          }
         } else if (position === 'index') {
           const idx = parseInt(index);
           if (isNaN(idx) || idx < 0 || idx >= nodes.length) {
@@ -217,11 +276,32 @@ export default function LinkedListVisualizer() {
             return;
           }
           
-          // Highlight node to be removed
+          // Traverse to node before target
+          for (let i = 0; i < idx; i++) {
+            setTraversalIndex(i);
+            setHighlightedId(nodes[i].id);
+            await delay(600);
+          }
+        }
+      } else if (step === 4) {
+        // Highlight node to be deleted
+        if (position === 'end') {
+          const lastNode = nodes[nodes.length - 1];
+          setHighlightedId(lastNode.id);
+          removedNode = lastNode;
+        } else if (position === 'index') {
+          const idx = parseInt(index);
           setHighlightedId(nodes[idx].id);
-          await delay(800);
-          
-          removedNode = newNodes[idx];
+          removedNode = nodes[idx];
+        }
+        await delay(800);
+      } else if (step === 5) {
+        // Perform the actual deletion
+        if (position === 'end') {
+          newNodes.pop();
+          setMessage(`Removed ${removedNode?.value} from the end of the list`);
+        } else if (position === 'index') {
+          const idx = parseInt(index);
           newNodes.splice(idx, 1);
           setMessage(`Removed ${removedNode?.value} from index ${idx}`);
         }
@@ -230,6 +310,7 @@ export default function LinkedListVisualizer() {
     }
 
     setNodes(newNodes);
+    setTraversalIndex(-1);
     setTimeout(() => {
       setHighlightedId(null);
       setIsAnimating(false);
@@ -244,22 +325,49 @@ export default function LinkedListVisualizer() {
 
     setIsAnimating(true);
     setCurrentOperation('traverse');
+    setTraversalIndex(-1);
 
     // Step-by-step traversal animation
     for (let step = 0; step < CODE_STEPS.traverse.length; step++) {
       setCurrentStep(step);
       await delay(800);
       
-      if (step === 2) {
-        // Start highlighting nodes one by one
+      if (step === 0) {
+        // Start from head
+        setTraversalIndex(0);
+        setHighlightedId(nodes[0].id);
+      } else if (step === 1) {
+        // Initialize values array
+        continue;
+      } else if (step === 2) {
+        // Start the traversal loop
         for (let i = 0; i < nodes.length; i++) {
+          setTraversalIndex(i);
           setHighlightedId(nodes[i].id);
-          await delay(600);
+          
+          // Show "add value to array" step
+          if (i < nodes.length) {
+            setCurrentStep(3); // Add current node's value
+            await delay(600);
+            
+            if (i < nodes.length - 1) {
+              setCurrentStep(4); // Move to next node
+              await delay(600);
+              setCurrentStep(5); // Check next node
+              await delay(600);
+            }
+          }
         }
+        
+        // Final step - return values
+        setCurrentStep(6);
+        await delay(800);
+        break;
       }
     }
 
     setMessage(`Traversed ${nodes.length} nodes: [${nodes.map(n => n.value).join(', ')}]`);
+    setTraversalIndex(-1);
     setTimeout(() => {
       setHighlightedId(null);
       setIsAnimating(false);
@@ -289,43 +397,103 @@ export default function LinkedListVisualizer() {
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Linked List Structure</h3>
               
-              <div className="mb-8 overflow-x-auto">
-                <div className="flex justify-center min-w-max p-4">
-                  {nodes.length === 0 ? (
+              <div className="mb-8 mt-5 overflow-x-auto">
+                {nodes.length === 0 ? (
+                  <div className="flex justify-center p-4">
                     <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
                       Empty Linked List
                     </div>
-                  ) : (
-                    <div className="flex items-center">
+                  </div>
+                ) : (
+                  <div className="min-w-max mx-auto">
+                    {/* Indicators row */}
+                    <div className="grid gap-6 mb-4" style={{ gridTemplateColumns: `repeat(${nodes.length + 1}, minmax(80px, 1fr))` }}>
                       {nodes.map((node, idx) => (
-                        <div key={node.id} className="flex items-center">
-                          <div 
-                            className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-md shadow-sm transition-all duration-300 ${
-                              highlightedId === node.id 
-                                ? 'border-sky-400 bg-sky-900/50 text-sky-100' 
-                                : 'border-slate-600 bg-slate-700 text-slate-200'
-                            }`}
-                          >
-                            <span className="text-lg font-semibold">{node.value}</span>
-                            <span className="text-xs text-slate-400">({idx})</span>
-                          </div>
-                          {idx < nodes.length - 1 && (
-                            <div className="mx-3 flex items-center">
-                              <div className="w-8 h-0.5 bg-slate-500"></div>
-                              <div className="w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-8 border-l-slate-500"></div>
+                        <div key={`indicator-${node.id}`} className="flex justify-center">
+                          {/* Traversal indicator */}
+                          {traversalIndex === idx && (
+                            <div className="bg-yellow-500 text-black text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                              CURRENT
+                            </div>
+                          )}
+                          
+                          {/* Highlight indicator */}
+                          {highlightedId === node.id && traversalIndex !== idx && (
+                            <div className="bg-sky-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                              ACTIVE
                             </div>
                           )}
                         </div>
                       ))}
-                      <div className="ml-3 px-3 py-2 bg-slate-600 text-slate-300 rounded text-sm">
-                        NULL
+                      <div></div> {/* Empty space for NULL */}
+                    </div>
+
+                    {/* Nodes and arrows row */}
+                    <div className="grid gap-6 items-center" style={{ gridTemplateColumns: `repeat(${nodes.length + 1}, minmax(80px, 1fr))` }}>
+                      {nodes.map((node, idx) => (
+                        <div key={`node-${node.id}`} className="flex items-center justify-center">
+                          <div className="flex items-center">
+                            {/* Node */}
+                            <div 
+                              className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
+                                highlightedId === node.id 
+                                  ? 'border-sky-400 bg-sky-900/50 text-sky-100 shadow-sky-400/25' 
+                                  : traversalIndex === idx 
+                                  ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100 shadow-yellow-400/25'
+                                  : 'border-slate-600 bg-slate-700 text-slate-200'
+                              }`}
+                            >
+                              <span className="text-lg font-semibold">{node.value}</span>
+                              <span className="text-xs text-slate-400">({idx})</span>
+                            </div>
+                            
+                            {/* Arrow to next node or NULL */}
+                            <div className="ml-4 flex items-center">
+                              <div className={`w-12 h-0.5 transition-colors duration-300 ${
+                                traversalIndex === idx ? 'bg-yellow-400' : 'bg-slate-400'
+                              }`}></div>
+                              <div className={`w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-8 transition-colors duration-300 ml-1 ${
+                                traversalIndex === idx ? 'border-l-yellow-400' : 'border-l-slate-400'
+                              }`}></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* NULL pointer */}
+                      <div className="flex justify-center">
+                        <div className="px-4 py-2 bg-slate-600 text-slate-300 rounded-lg text-sm font-medium border-2 border-slate-500 shadow-sm">
+                          NULL
+                        </div>
                       </div>
                     </div>
-                  )}
-                </div>
+
+                    {/* Labels row */}
+                    <div className="grid gap-6 mt-3" style={{ gridTemplateColumns: `repeat(${nodes.length + 1}, minmax(80px, 1fr))` }}>
+                      {nodes.map((node, idx) => (
+                        <div key={`label-${node.id}`} className="text-center">
+                          {idx === 0 && (
+                            <span className="text-xs text-green-400 font-medium">HEAD</span>
+                          )}
+                          {idx === nodes.length - 1 && (
+                            <span className="text-xs text-red-400 font-medium ml-2">TAIL</span>
+                          )}
+                        </div>
+                      ))}
+                      <div className="text-center">
+                        <span className="text-xs text-slate-500 font-medium">END</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="text-sm text-slate-400 text-center mb-4">
+                <div className="text-sm text-slate-400 text-center mt-6">
                   List Length: {nodes.length}
+                  {traversalIndex >= 0 && (
+                    <span className="ml-4 text-yellow-400">
+                      Traversing: Position {traversalIndex}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -428,63 +596,221 @@ export default function LinkedListVisualizer() {
               currentStep={currentStep}
               showControls={false}
             />
+          </div>
+        </div>
 
-            {/* Linked List Properties */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Linked List Properties</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Data Structure:</span>
-                  <span className="text-slate-200">Linear (Dynamic)</span>
+        {/* Separate Information Section */}
+        
+        <div className="mt-12 max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+              About Linked Lists
+            </h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Understanding the fundamentals, properties, and complexity analysis of linked list data structures
+            </p>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            
+            {/* What is a Linked List - Takes more space */}
+            <div className="xl:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Memory Allocation:</span>
-                  <span className="text-slate-200">Dynamic</span>
+                <h3 className="text-2xl font-bold text-slate-100">What is a Linked List?</h3>
+              </div>
+              
+              <p className="text-slate-300 mb-8 leading-relaxed text-lg">
+                A linked list is a linear data structure where elements are stored in nodes, each containing data and a 
+                pointer to the next node. Unlike arrays, nodes are not stored in contiguous memory locations, making 
+                them highly flexible for dynamic operations.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Advantages */}
+                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
+                  <h4 className="font-bold mb-4 text-green-400 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Advantages
+                  </h4>
+                  <ul className="space-y-3 text-slate-300">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Dynamic size allocation</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Efficient insertion/deletion at head</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Memory efficient - no pre-allocation</span>
+                    </li>
+                  </ul>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Insert Time Complexity:</span>
-                  <span className="text-green-400">O(1) at head, O(n) at position</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Delete Time Complexity:</span>
-                  <span className="text-green-400">O(1) at head, O(n) at position</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Search Time Complexity:</span>
-                  <span className="text-yellow-400">O(n)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Space Complexity:</span>
-                  <span className="text-yellow-400">O(n)</span>
+
+                {/* Disadvantages */}
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+                  <h4 className="font-bold mb-4 text-red-400 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Disadvantages
+                  </h4>
+                  <ul className="space-y-3 text-slate-300">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>No random access to elements</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Extra memory for storing pointers</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Poor cache locality</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
 
+            {/* Properties Card */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Properties</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Type:</span>
+                  <span className="text-slate-200 font-semibold">Linear Dynamic</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Memory:</span>
+                  <span className="text-slate-200 font-semibold">Dynamic</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Access:</span>
+                  <span className="text-yellow-400 font-mono font-bold">O(n)</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Search:</span>
+                  <span className="text-yellow-400 font-mono font-bold">O(n)</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Insert (Head):</span>
+                  <span className="text-green-400 font-mono font-bold">O(1)</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-slate-400 font-medium">Delete (Head):</span>
+                  <span className="text-green-400 font-mono font-bold">O(1)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Second Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            
             {/* Use Cases */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Common Use Cases</h3>
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Dynamic memory allocation
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Implementation of other data structures
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Undo functionality in applications
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Music players (next/previous song)
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full mt-2 flex-shrink-0" />
-                  Browser history navigation
-                </li>
-              </ul>
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Common Use Cases</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  {title: "Dynamic Memory Management", desc: "Allocate memory as needed" },
+                  {title: "Data Structure Foundation", desc: "Building blocks for stacks, queues" },
+                  {title: "Undo Functionality", desc: "Track operation history" },
+                  {title: "Media Players", desc: "Next/previous song navigation" },
+                  {title: "Browser History", desc: "Forward/backward page navigation" }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+                    <div>
+                      <h4 className="font-semibold text-slate-100 mb-1">{item.title}</h4>
+                      <p className="text-slate-400 text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Time Complexity Analysis */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Time Complexity</h3>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Access & Search */}
+                <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-yellow-400 text-sm uppercase tracking-wide">Access & Search</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Access by index</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Search element</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Insertion */}
+                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-green-400 text-sm uppercase tracking-wide">Insertion</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">At beginning</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(1)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">At end/position</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Deletion */}
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-red-400 text-sm uppercase tracking-wide">Deletion</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">From beginning</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(1)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">From end/by value</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
