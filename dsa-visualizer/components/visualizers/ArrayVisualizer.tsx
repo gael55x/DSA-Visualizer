@@ -200,10 +200,10 @@ export default function ArrayVisualizer() {
             isInserting: item.id === newElement.id
           }));
         });
-        
+
         setTimeout(() => {
           setArray(prev => prev.map(item => ({ ...item, isInserting: false })));
-        }, 400);
+        }, 600);
       }
     }
 
@@ -211,7 +211,7 @@ export default function ArrayVisualizer() {
     setInputIndex('');
     showMessage(`Successfully inserted ${value} at index ${index}`, 'success');
     setIsAnimating(false);
-  }, [inputValue, inputIndex, showMessage]);
+  }, [inputValue, inputIndex, array]);
 
   const searchElement = useCallback(async () => {
     if (!searchValue.trim()) {
@@ -219,8 +219,8 @@ export default function ArrayVisualizer() {
       return;
     }
 
-    const target = parseInt(searchValue);
-    if (isNaN(target)) {
+    const value = parseInt(searchValue);
+    if (isNaN(value)) {
       showMessage('Please enter a valid number', 'error');
       return;
     }
@@ -228,358 +228,506 @@ export default function ArrayVisualizer() {
     setIsAnimating(true);
     setCurrentOperation('search');
 
-    // Reset all highlights
+    // Clear previous highlights
     setArray(prev => prev.map(item => ({ ...item, isHighlighted: false, isSearching: false })));
 
-    const currentArray = array;
-    
-    for (let i = 0; i < currentArray.length; i++) {
-      setCurrentStep(1);
-      
-      // Highlight current element being checked
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isSearching: idx === i,
-        isHighlighted: false
-      })));
-
+    // Step-by-step animation with code highlighting
+    for (let step = 0; step < CODE_STEPS.search.length; step++) {
+      setCurrentStep(step);
       await delay(600);
 
-      if (currentArray[i].value === target) {
-        setCurrentStep(2);
-        setArray(prev => prev.map((item, idx) => ({
-          ...item,
-          isSearching: false,
-          isHighlighted: idx === i
-        })));
-        
-        showMessage(`Found ${target} at index ${i}!`, 'success');
-        addToHistory('SEARCH', `Found ${target} at index ${i}`, currentArray, i);
-        setIsAnimating(false);
-        return;
+      if (step === 0) {
+        // Start searching from index 0
+        for (let i = 0; i < array.length; i++) {
+          // Highlight current element being checked
+          setArray(prev => prev.map((item, idx) => ({
+            ...item,
+            isSearching: idx === i,
+            isHighlighted: false
+          })));
+
+          await delay(500);
+
+          // Check if found
+          if (array[i].value === value) {
+            setArray(prev => prev.map((item, idx) => ({
+              ...item,
+              isSearching: false,
+              isHighlighted: idx === i
+            })));
+            showMessage(`Found ${value} at index ${i}!`, 'success');
+            setIsAnimating(false);
+            setSearchValue('');
+            return;
+          }
+        }
+
+        // Not found
+        setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
+        showMessage(`Value ${value} not found in the array`, 'error');
+        break;
       }
     }
 
-    setCurrentStep(3);
-    setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
-    showMessage(`${target} not found in the array`, 'error');
-    addToHistory('SEARCH', `${target} not found`, currentArray);
+    setSearchValue('');
     setIsAnimating(false);
-  }, [searchValue, showMessage, addToHistory]);
+  }, [searchValue, array]);
 
-  const deleteElement = useCallback(async (index: number) => {
-    const currentArray = array;
-    
-    if (index < 0 || index >= currentArray.length) {
-      showMessage('Invalid index', 'error');
+  const deleteElement = useCallback(async (indexToDelete: number) => {
+    if (indexToDelete < 0 || indexToDelete >= array.length) {
+      showMessage('Invalid index for deletion', 'error');
       return;
     }
 
     setIsAnimating(true);
     setCurrentOperation('delete');
 
-    const valueToDelete = currentArray[index].value;
+    const valueToDelete = array[indexToDelete].value;
 
-    // Step-by-step deletion with code highlighting
+    // Step-by-step animation with code highlighting
     for (let step = 0; step < CODE_STEPS.delete.length; step++) {
       setCurrentStep(step);
       await delay(600);
 
-      if (step === 0) {
+      if (step === 1) {
         // Highlight element to be deleted
         setArray(prev => prev.map((item, idx) => ({
           ...item,
-          isRemoving: idx === index
+          isHighlighted: idx === indexToDelete,
+          isRemoving: idx === indexToDelete
         })));
-      } else if (step === 1) {
-        // Highlight elements that will be shifted
-        setArray(prev => prev.map((item, idx) => ({
-          ...item,
-          isHighlighted: idx > index,
-          isRemoving: idx === index
-        })));
+        await delay(400);
       } else if (step === 2) {
-        // Animate the shifting and remove element
+        // Remove element and shift others
         setArray(prev => {
-          const newArray = prev.filter((_, idx) => idx !== index);
-          return newArray.map(item => ({
-            ...item,
-            isHighlighted: false,
-            isRemoving: false
-          }));
+          const newArray = prev.filter((_, idx) => idx !== indexToDelete);
+          return newArray.map(item => ({ ...item, isHighlighted: false, isRemoving: false }));
         });
-        
-        addToHistory('DELETE', `Deleted ${valueToDelete} from index ${index}`, []);
       }
     }
 
-    showMessage(`Successfully deleted ${valueToDelete}`, 'success');
+    showMessage(`Successfully deleted ${valueToDelete} from the array`, 'success');
     setIsAnimating(false);
-  }, [showMessage, addToHistory]);
+  }, [array]);
 
-  const generateNewArray = useCallback(() => {
-    const newArray = generateRandomArray(6, 1, 99).map(value => ({
-      value,
+  const clearArray = () => {
+    setArray([]);
+    setMessage('Array cleared');
+  };
+
+  const generateRandomArray = () => {
+    const randomArray = Array.from({ length: Math.floor(Math.random() * 6) + 3 }, (_, i) => ({
+      value: Math.floor(Math.random() * 100) + 1,
       id: generateId(),
       isHighlighted: false
     }));
-    setArray(newArray);
-    showMessage('Generated new random array', 'success');
-  }, [showMessage]);
+    setArray(randomArray);
+    setMessage('Generated random array');
+  };
 
-  const clearArray = useCallback(() => {
-    setArray([]);
-    setOperationHistory([]);
-    showMessage('Array cleared', 'info');
-  }, [showMessage]);
+  const currentCode = useMemo(() => {
+    return ARRAY_OPERATIONS[currentOperation as keyof typeof ARRAY_OPERATIONS];
+  }, [currentOperation]);
 
-  // Memoize the current code and steps to prevent unnecessary re-renders
-  const currentCode = useMemo(() => ARRAY_OPERATIONS[currentOperation as keyof typeof ARRAY_OPERATIONS], [currentOperation]);
-  const currentCodeSteps = useMemo(() => CODE_STEPS[currentOperation as keyof typeof CODE_STEPS], [currentOperation]);
+  const currentCodeSteps = useMemo(() => {
+    return CODE_STEPS[currentOperation as keyof typeof CODE_STEPS];
+  }, [currentOperation]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 p-6 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header with Theme Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-slate-100 mb-2">Array Visualizer</h1>
-            <p className="text-gray-600 dark:text-slate-400 text-lg">
-              Interactive visualization of array operations with step-by-step code execution
-            </p>
-          </div>
-          <ThemeToggle />
-        </motion.div>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-100 mb-2">Array Visualizer</h1>
+          <p className="text-slate-400 text-lg">
+            Interactive visualization of array operations with step-by-step code execution
+          </p>
+        </div>
 
-        {/* Message Display */}
-        <AnimatePresence>
-          {message && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-2xl text-gray-900 dark:text-slate-100 text-center"
-            >
-              {message}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Visualization Panel */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-          >
-            {/* Array Display */}
-            <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Array Contents</h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={generateNewArray}
-                    disabled={isAnimating}
-                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
-                  >
-                    <Shuffle size={16} />
-                    Random
-                  </button>
-                  <button
-                    onClick={clearArray}
-                    disabled={isAnimating}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
-                  >
-                    <RotateCcw size={16} />
-                    Clear
-                  </button>
+          <div className="space-y-6">
+            {/* Array Visualization */}
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Array Structure</h3>
+              
+              <div className="mb-8 mt-5 overflow-x-auto">
+                {array.length === 0 ? (
+                  <div className="flex justify-center p-4">
+                    <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
+                      Empty Array
+                    </div>
+                  </div>
+                ) : (
+                  <div className="min-w-max mx-auto">
+                    <div className="flex gap-2 items-center justify-center">
+                      <AnimatePresence mode="popLayout">
+                        {array.map((item, index) => (
+                          <motion.div
+                            key={item.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                            animate={{ 
+                              opacity: 1, 
+                              scale: 1, 
+                              y: 0
+                            }}
+                            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="relative group"
+                          >
+                            <div 
+                              className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
+                                item.isHighlighted 
+                                  ? 'border-sky-400 bg-sky-900/50 text-sky-100 shadow-sky-400/25' 
+                                  : item.isSearching
+                                  ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100 shadow-yellow-400/25'
+                                  : item.isInserting
+                                  ? 'border-green-400 bg-green-900/50 text-green-100 shadow-green-400/25'
+                                  : item.isRemoving
+                                  ? 'border-red-400 bg-red-900/50 text-red-100 shadow-red-400/25'
+                                  : 'border-slate-600 bg-slate-700 text-slate-200'
+                              }`}
+                            >
+                              <span className="text-lg font-semibold">{item.value}</span>
+                              <span className="text-xs text-slate-400">[{index}]</span>
+                            </div>
+                            
+                            {/* Delete Button */}
+                            <button
+                              onClick={() => deleteElement(index)}
+                              disabled={isAnimating}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="text-sm text-slate-400 text-center mt-6">
+                  Array Length: {array.length} | Capacity: Dynamic
                 </div>
-              </div>
-
-              {/* Array Elements */}
-              <div className="flex flex-wrap gap-2 mb-4 min-h-[80px] items-center justify-center">
-                <AnimatePresence mode="popLayout">
-                  {array.length === 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-gray-500 dark:text-slate-400 text-center py-8"
-                    >
-                      Array is empty. Add some elements to get started!
-                    </motion.div>
-                  ) : (
-                    array.map((item, index) => (
-                      <motion.div
-                        key={item.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                        animate={{ 
-                          opacity: 1, 
-                          scale: 1, 
-                          y: 0,
-                          backgroundColor: item.isHighlighted 
-                            ? 'rgb(56, 189, 248)' 
-                            : item.isSearching 
-                            ? 'rgb(245, 158, 11)' 
-                            : item.isInserting
-                            ? 'rgb(34, 197, 94)'
-                            : item.isRemoving
-                            ? 'rgb(239, 68, 68)'
-                            : 'rgb(51, 65, 85)'
-                        }}
-                        exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                        transition={{ duration: 0.3 }}
-                        className="relative group"
-                      >
-                        <div className="w-16 h-16 flex items-center justify-center rounded-2xl border-2 border-slate-600 text-slate-100 font-bold text-lg shadow-lg">
-                          {item.value}
-                        </div>
-                        
-                        {/* Index Label */}
-                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 dark:text-slate-400">
-                          [{index}]
-                        </div>
-                        
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => deleteElement(index)}
-                          disabled={isAnimating}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </motion.div>
-                    ))
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="text-sm text-gray-600 dark:text-slate-400 text-center">
-                Array Length: {array.length} | Max Capacity: ∞
               </div>
             </div>
 
             {/* Controls */}
-            <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Operations</h3>
+            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Array Operations</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Insert Section */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-800 dark:text-slate-200">Insert Element</h4>
+              <div className="space-y-4">
+                {/* Insert Element */}
+                <div className="p-4 bg-slate-700 rounded-xl">
+                  <h4 className="font-medium text-slate-200 mb-3">Insert Element</h4>
                   <div className="space-y-3">
                     <input
                       type="number"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Enter value"
+                      className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+                      placeholder="Enter a number"
                       disabled={isAnimating}
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
                     />
+                    
                     <input
                       type="number"
                       value={inputIndex}
                       onChange={(e) => setInputIndex(e.target.value)}
-                      placeholder={`Index (0-${array.length})`}
+                      className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+                      placeholder={`Index (0-${array.length}), leave empty for end`}
                       disabled={isAnimating}
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
                     />
+                    
                     <button
                       onClick={insertElement}
-                      disabled={isAnimating || !inputValue}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-sky-500 hover:bg-sky-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-xl font-medium transition-colors"
+                      disabled={isAnimating || !inputValue.trim()}
+                      className="w-full px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-md font-medium transition-colors"
                     >
-                      {isAnimating && currentOperation === 'insert' ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                        />
-                      ) : (
-                        <Plus size={16} />
-                      )}
-                      Insert Element
+                      {isAnimating && currentOperation === 'insert' ? 'Inserting...' : 'Insert Element'}
                     </button>
                   </div>
                 </div>
 
-                {/* Search Section */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-800 dark:text-slate-200">Search Element</h4>
+                {/* Search Element */}
+                <div className="p-4 bg-slate-700 rounded-xl">
+                  <h4 className="font-medium text-slate-200 mb-3">Search Element</h4>
                   <div className="space-y-3">
                     <input
                       type="number"
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
                       placeholder="Search value"
                       disabled={isAnimating}
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-colors disabled:opacity-50"
                     />
+                    
                     <button
                       onClick={searchElement}
-                      disabled={isAnimating || !searchValue || array.length === 0}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 dark:disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-xl font-medium transition-colors"
+                      disabled={isAnimating || !searchValue.trim() || array.length === 0}
+                      className="w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-md font-medium transition-colors"
                     >
-                      {isAnimating && currentOperation === 'search' ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full"
-                        />
-                      ) : (
-                        <Search size={16} />
-                      )}
-                      Search Array
+                      {isAnimating && currentOperation === 'search' ? 'Searching...' : 'Search Array'}
                     </button>
                   </div>
                 </div>
+
+                {/* Other Operations */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <button
+                    onClick={generateRandomArray}
+                    disabled={isAnimating}
+                    className="px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-md font-medium transition-colors"
+                  >
+                    Random Array
+                  </button>
+                  
+                  <button
+                    onClick={clearArray}
+                    disabled={isAnimating}
+                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-md font-medium transition-colors"
+                  >
+                    Clear Array
+                  </button>
+                </div>
               </div>
+              
+              {message && (
+                <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-md text-sky-800 dark:text-sky-200">
+                  {message}
+                </div>
+              )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Code Panel */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             <CodeHighlighter
               code={currentCode}
               language="javascript"
-              title={`${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Algorithm`}
+              title={`Array ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
               steps={currentCodeSteps}
               currentStep={currentStep}
               showControls={false}
             />
+          </div>
+        </div>
 
-            {/* Operation History */}
-            {operationHistory.length > 0 && (
-              <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Recent Operations</h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {operationHistory.slice(-5).reverse().map((step, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="p-3 bg-white dark:bg-slate-700 rounded-xl text-sm"
-                    >
-                      <div className="flex items-center gap-2 text-gray-800 dark:text-slate-200">
-                        <span className="px-2 py-1 bg-sky-500 text-white rounded text-xs font-bold">
-                          {step.operation}
-                        </span>
-                        {step.description}
-                      </div>
-                    </motion.div>
-                  ))}
+        {/* Information Section */}
+        <div className="mt-12 max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+              About Arrays
+            </h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Understanding the fundamentals, properties, and complexity analysis of array data structures
+            </p>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            
+            {/* What is an Array - Takes more space */}
+            <div className="xl:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-100">What is an Array?</h3>
+              </div>
+              
+              <p className="text-slate-300 mb-8 leading-relaxed text-lg">
+                An array is a linear data structure where elements are stored in contiguous memory locations. 
+                Each element can be accessed directly using its index, making arrays one of the most fundamental 
+                and efficient data structures for random access operations.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Advantages */}
+                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
+                  <h4 className="font-bold mb-4 text-green-400 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Advantages
+                  </h4>
+                  <ul className="space-y-3 text-slate-300">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Constant time random access O(1)</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Memory efficient - no extra pointers</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Excellent cache locality</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Disadvantages */}
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+                  <h4 className="font-bold mb-4 text-red-400 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Disadvantages
+                  </h4>
+                  <ul className="space-y-3 text-slate-300">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Fixed size (in static arrays)</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Expensive insertion/deletion in middle</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Memory waste if not fully utilized</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
-            )}
-          </motion.div>
+            </div>
+
+            {/* Properties Card */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Properties</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Type:</span>
+                  <span className="text-slate-200 font-semibold">Linear Static</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Memory:</span>
+                  <span className="text-slate-200 font-semibold">Contiguous</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Access:</span>
+                  <span className="text-green-400 font-mono font-bold">O(1)</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Search:</span>
+                  <span className="text-yellow-400 font-mono font-bold">O(n)</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Insert (End):</span>
+                  <span className="text-green-400 font-mono font-bold">O(1)</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-slate-400 font-medium">Insert (Middle):</span>
+                  <span className="text-yellow-400 font-mono font-bold">O(n)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Second Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            
+            {/* Use Cases */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Common Use Cases</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  {title: "Data Storage", desc: "Store collections of similar elements" },
+                  {title: "Lookup Tables", desc: "Fast access to data by index" },
+                  {title: "Mathematical Computations", desc: "Matrix operations, vectors" },
+                  {title: "Sorting Algorithms", desc: "Foundation for sorting implementations" },
+                  {title: "Buffer Management", desc: "Temporary storage in I/O operations" }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+                    <div>
+                      <h4 className="font-semibold text-slate-100 mb-1">{item.title}</h4>
+                      <p className="text-slate-400 text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Time Complexity Analysis */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Time Complexity</h3>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Access & Search */}
+                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-green-400 text-sm uppercase tracking-wide">Access</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">By index</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(1)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Linear search</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Insertion */}
+                <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-yellow-400 text-sm uppercase tracking-wide">Insertion</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">At end</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(1)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">At beginning/middle</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Deletion */}
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-red-400 text-sm uppercase tracking-wide">Deletion</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">From end</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(1)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">From beginning/middle</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
