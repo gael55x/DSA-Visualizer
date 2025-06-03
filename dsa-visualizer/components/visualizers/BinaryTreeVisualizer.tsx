@@ -733,8 +733,8 @@ export default function BinaryTreeVisualizer() {
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500 dark:text-slate-400">
                     <div className="text-center">
-                      <div className="text-6xl mb-4">🌳</div>
-                      <h3 className="text-lg font-semibold mb-2">Empty Tree</h3>
+                      <div className="text-6xl mb-4"></div>
+                      <h3 className="text-lg font-semibold mb-2">This Tree is Empty!</h3>
                       <p className="text-sm">Add some nodes to get started!</p>
                     </div>
                   </div>
