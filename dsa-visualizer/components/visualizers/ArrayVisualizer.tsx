@@ -108,7 +108,7 @@ export default function ArrayVisualizer() {
   const [currentStep, setCurrentStep] = useState(0);
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = useCallback((text: string, _type?: 'success' | 'error' | 'info') => {
+  const showMessage = useCallback((text: string, _type?: string) => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3000);
   }, []);
