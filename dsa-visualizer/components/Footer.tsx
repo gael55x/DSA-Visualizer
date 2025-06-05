@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Database, Github, Heart } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -20,7 +21,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-r from-sky-400 to-yellow-400 rounded-lg flex items-center justify-center">
-                <Database size={20} className="text-slate-900" />
+                <Image src="/favicon.svg" alt="DSA Visualizer" width={32} height={32} />
               </div>
               <span className="font-bold text-xl text-slate-100">DSA Visualizer</span>
             </div>
@@ -66,7 +67,7 @@ export default function Footer() {
               </li>
               <li>
                 <a 
-                  href="https://github.com" 
+                  href="https://github.com/gael55x/DSA-Visualizer" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-slate-400 hover:text-sky-400 transition-colors duration-200"
