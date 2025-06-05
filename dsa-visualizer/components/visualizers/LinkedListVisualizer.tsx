@@ -116,6 +116,9 @@ export default function LinkedListVisualizer() {
   const [traversalIndex, setTraversalIndex] = useState<number>(-1);
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
+  const [isPanningCanvas, setIsPanningCanvas] = useState(false);
+  const [panStartPos, setPanStartPos] = useState({ x: 0, y: 0 });
 
   const handleAddNode = useCallback(async () => {
     if (newValue.trim() === '') {
@@ -382,6 +385,26 @@ export default function LinkedListVisualizer() {
     setMessage('Linked list cleared');
   };
 
+  const resetView = () => {
+    setCanvasOffset({ x: 0, y: 0 });
+    setMessage('View reset to center');
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    // Only pan if clicking on the background (not on nodes)
+    const target = e.target as HTMLElement;
+    const isNodeElement = target.closest('[data-node-id]') || target.classList.contains('cursor-move');
+    
+    console.log('Canvas mouse down:', { target, isNodeElement, isAnimating });
+    
+    if (!isNodeElement && !isAnimating) {
+      e.preventDefault();
+      console.log('Starting pan');
+      setIsPanningCanvas(true);
+      setPanStartPos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
   // Drag handlers
   const handleMouseDown = (e: React.MouseEvent, nodeId: string) => {
     if (isAnimating) return;
@@ -401,24 +424,33 @@ export default function LinkedListVisualizer() {
       if (!container) return;
       
       const containerRect = container.getBoundingClientRect();
-      const newX = e.clientX - containerRect.left - dragOffset.x;
-      const newY = e.clientY - containerRect.top - dragOffset.y;
+      const newX = e.clientX - containerRect.left - dragOffset.x - canvasOffset.x;
+      const newY = e.clientY - containerRect.top - dragOffset.y - canvasOffset.y;
       
       setNodes(prev => prev.map(node => 
         node.id === draggedNode 
-          ? { ...node, x: Math.max(50, Math.min(newX, containerRect.width - 100)), y: Math.max(50, Math.min(newY, containerRect.height - 100)) }
+          ? { ...node, x: newX, y: newY }
           : node
       ));
+    } else if (isPanningCanvas) {
+      const deltaX = e.clientX - panStartPos.x;
+      const deltaY = e.clientY - panStartPos.y;
+      setCanvasOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      setPanStartPos({ x: e.clientX, y: e.clientY });
     }
-  }, [draggedNode, dragOffset, isAnimating]);
+  }, [draggedNode, dragOffset, isAnimating, isPanningCanvas, panStartPos, canvasOffset]);
 
   const handleMouseUp = useCallback(() => {
     setDraggedNode(null);
+    setIsPanningCanvas(false);
   }, []);
 
-  // Add mouse event listeners for dragging
+  // Add mouse event listeners for dragging and panning
   React.useEffect(() => {
-    if (draggedNode) {
+    if (draggedNode || isPanningCanvas) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       return () => {
@@ -426,7 +458,7 @@ export default function LinkedListVisualizer() {
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [draggedNode, handleMouseMove, handleMouseUp]);
+  }, [draggedNode, isPanningCanvas, handleMouseMove, handleMouseUp]);
 
   return (
     <div className="min-h-screen bg-slate-900 p-6">
@@ -444,12 +476,28 @@ export default function LinkedListVisualizer() {
           <div className="space-y-6">
             {/* List Visualization */}
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
-                Linked List Structure
-                <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
-                  Drag nodes to reposition
-                </span>
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                  Linked List Structure
+                  <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
+                    • Drag nodes
+                  </span>
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={resetView}
+                    disabled={isAnimating}
+                    className="px-3 py-1 bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 text-slate-200 disabled:text-slate-400 rounded text-sm transition-colors"
+                  >
+                    Reset View
+                  </button>
+                  {nodes.length > 0 && (
+                    <div className="text-xs text-slate-400">
+                      Tip: Drag background to pan
+                    </div>
+                  )}
+                </div>
+              </div>
               
               <div className="mb-8 mt-5">
                 {nodes.length === 0 ? (
@@ -459,7 +507,19 @@ export default function LinkedListVisualizer() {
                     </div>
                   </div>
                 ) : (
-                  <div className="linked-list-container relative w-full h-96 bg-slate-900/30 rounded-xl border border-slate-600 overflow-hidden">
+                  <div 
+                    className={`linked-list-container relative w-full h-96 bg-slate-900/30 rounded-xl border border-slate-600 overflow-hidden ${
+                      isPanningCanvas ? 'cursor-grabbing bg-slate-800/50' : 'cursor-grab'
+                    }`}
+                    onMouseDown={handleCanvasMouseDown}
+                  >
+                    <div 
+                      className="absolute inset-0 w-full h-full"
+                      style={{
+                        transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px)`,
+                        transition: isPanningCanvas ? 'none' : 'transform 0.2s ease'
+                      }}
+                    >
                     <svg 
                       className="absolute inset-0 w-full h-full pointer-events-none"
                       style={{ zIndex: 1 }}
@@ -511,6 +571,7 @@ export default function LinkedListVisualizer() {
                     {nodes.map((node, idx) => (
                       <div
                         key={node.id}
+                        data-node-id={node.id}
                         className={`absolute cursor-move select-none transition-all duration-200 ${
                           draggedNode === node.id ? 'z-20 scale-105' : 'z-10'
                         }`}
@@ -579,9 +640,10 @@ export default function LinkedListVisualizer() {
                           <span className="text-xs text-slate-500 font-medium">END</span>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
+                                         )}
+                     </div>
+                   </div>
+                 )}
                 
                 <div className="text-sm text-slate-400 text-center mt-6">
                   List Length: {nodes.length}
@@ -593,6 +655,16 @@ export default function LinkedListVisualizer() {
                   {draggedNode && (
                     <span className="ml-4 text-purple-400">
                       Dragging node...
+                    </span>
+                  )}
+                  {isPanningCanvas && (
+                    <span className="ml-4 text-blue-400">
+                      Panning canvas...
+                    </span>
+                  )}
+                  {(canvasOffset.x !== 0 || canvasOffset.y !== 0) && (
+                    <span className="ml-4 text-cyan-400">
+                      Offset: ({Math.round(canvasOffset.x)}, {Math.round(canvasOffset.y)})
                     </span>
                   )}
                 </div>
