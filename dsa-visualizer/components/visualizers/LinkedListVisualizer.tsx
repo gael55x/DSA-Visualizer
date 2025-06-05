@@ -585,7 +585,7 @@ export default function LinkedListVisualizer() {
               title={`Linked List ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
               steps={CODE_STEPS[currentOperation as keyof typeof CODE_STEPS]}
               currentStep={currentStep}
-              showControls={false}
+
             />
           </div>
         </div>

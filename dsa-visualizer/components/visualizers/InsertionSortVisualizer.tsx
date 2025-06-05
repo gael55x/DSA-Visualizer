@@ -471,7 +471,7 @@ export default function InsertionSortVisualizer() {
               
               <p className="text-slate-300 mb-8 leading-relaxed text-lg">
                 Insertion Sort builds the sorted array one element at a time by taking each element from the 
-                unsorted portion and inserting it into its correct position in the sorted portion. It's similar 
+                unsorted portion and inserting it into its correct position in the sorted portion. It&apos;s similar 
                 to how you would sort playing cards in your hand - picking up cards one by one and placing them 
                 in their proper position.
               </p>
