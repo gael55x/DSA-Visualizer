@@ -65,7 +65,6 @@ export default function Navbar() {
                   onClick={() => setIsSortingOpen(!isSortingOpen)}
                   className="group flex items-center gap-2 text-slate-300 hover:text-sky-400 transition-colors"
                 >
-                  <ArrowUpDown size={16} />
                   <span className="font-medium">Sorting</span>
                   <ChevronDown 
                     size={16} 
