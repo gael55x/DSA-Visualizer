@@ -36,12 +36,9 @@ export default function CodeHighlighter({
   currentStep = 0,
   title = 'Code',
   className,
-  showControls: _showControls = true,
   onStepChange,
-  autoPlay: _autoPlay = false,
-  playSpeed: _playSpeed = 1000,
   compact = false
-}: CodeHighlighterProps) {
+}: Omit<CodeHighlighterProps, 'showControls' | 'autoPlay' | 'playSpeed'>) {
   const [copied, setCopied] = useState(false);
   const { theme } = useTheme();
 

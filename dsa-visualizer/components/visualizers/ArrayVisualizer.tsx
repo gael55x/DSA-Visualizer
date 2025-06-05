@@ -112,25 +112,12 @@ export default function ArrayVisualizer() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
-  const [operationHistory, _setOperationHistory] = useState<OperationStep[]>([]);
-
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = useCallback((text: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showMessage = useCallback((text: string, _type?: 'success' | 'error' | 'info') => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3000);
   }, []);
-
-  const addToHistory = useCallback((operation: string, description: string, newArray: ArrayElement[], highlightIndex?: number) => {
-    const step: OperationStep = {
-      operation,
-      description,
-      array: [...newArray],
-      highlightIndex,
-      codeStep: currentStep
-    };
-    setOperationHistory(prev => [...prev.slice(-9), step]);
-  }, [currentStep]);
 
   const insertElement = useCallback(async () => {
     if (!inputValue.trim()) {
@@ -210,7 +197,7 @@ export default function ArrayVisualizer() {
     setInputIndex('');
     showMessage(`Successfully inserted ${value} at index ${index}`, 'success');
     setIsAnimating(false);
-  }, [inputValue, inputIndex, array]);
+  }, [inputValue, inputIndex, array, showMessage]);
 
   const searchElement = useCallback(async () => {
     if (!searchValue.trim()) {
@@ -270,7 +257,7 @@ export default function ArrayVisualizer() {
 
     setSearchValue('');
     setIsAnimating(false);
-  }, [searchValue, array]);
+  }, [searchValue, array, showMessage]);
     
   const deleteElement = useCallback(async (indexToDelete: number) => {
     if (indexToDelete < 0 || indexToDelete >= array.length) {
@@ -307,7 +294,7 @@ export default function ArrayVisualizer() {
 
     showMessage(`Successfully deleted ${valueToDelete} from the array`, 'success');
     setIsAnimating(false);
-  }, [array]);
+  }, [array, showMessage]);
 
   const clearArray = () => {
     setArray([]);
@@ -315,7 +302,7 @@ export default function ArrayVisualizer() {
   };
 
   const generateRandomArray = () => {
-    const randomArray = Array.from({ length: Math.floor(Math.random() * 6) + 3 }, (_, i) => ({
+    const randomArray = Array.from({ length: Math.floor(Math.random() * 6) + 3 }, (_) => ({
       value: Math.floor(Math.random() * 100) + 1,
       id: generateId(),
       isHighlighted: false
@@ -509,7 +496,6 @@ export default function ArrayVisualizer() {
               title={`Array ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
               steps={currentCodeSteps}
               currentStep={currentStep}
-              showControls={false}
             />
           </div>
         </div>

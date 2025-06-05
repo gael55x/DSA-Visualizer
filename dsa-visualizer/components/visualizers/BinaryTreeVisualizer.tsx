@@ -2,10 +2,9 @@
 
 import React from 'react';
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, Search, RotateCcw, Shuffle, Play, Pause, SkipForward, SkipBack, Settings } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Plus, Minus, Search, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
-import ThemeToggle from '../ui/ThemeToggle';
 import { cn, delay } from '../../lib/utils';
 
 interface TreeNode {
