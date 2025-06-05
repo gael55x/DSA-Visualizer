@@ -444,7 +444,7 @@ export default function SelectionSortVisualizer() {
               title="Selection Sort Algorithm"
               steps={CODE_STEPS.selectionSort}
               currentStep={currentStep}
-              showControls={false}
+
             />
           </div>
         </div>
