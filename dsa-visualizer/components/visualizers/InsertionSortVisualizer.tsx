@@ -223,7 +223,7 @@ export default function InsertionSortVisualizer() {
       await delay(speed);
       
       // Clear highlighting
-      setArray(prev => prev.map((item, idx) => ({
+      setArray(currentArray.map((item, idx) => ({
         ...item,
         isKey: false,
         isSorted: idx <= i,
@@ -236,7 +236,7 @@ export default function InsertionSortVisualizer() {
     }
 
     // Mark all as sorted
-    setArray(prev => prev.map(item => ({ 
+    setArray(currentArray.map(item => ({ 
       ...item, 
       isSorted: true,
       isKey: false,
