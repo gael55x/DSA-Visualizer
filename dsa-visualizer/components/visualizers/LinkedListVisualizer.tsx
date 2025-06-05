@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 
 interface Node {
@@ -132,7 +132,7 @@ export default function LinkedListVisualizer() {
     setNextId(nextId + 1);
 
     let newNodes = [...nodes];
-    let addedAtIndex = -1;
+    let _addedAtIndex = -1;
 
     // Step-by-step animation with code highlighting
     for (let step = 0; step < CODE_STEPS.insert.length; step++) {
@@ -148,7 +148,7 @@ export default function LinkedListVisualizer() {
       } else if (step === 2 && position === 'start') {
         // Insert at beginning
         newNodes = [newNode, ...nodes];
-        addedAtIndex = 0;
+        _addedAtIndex = 0;
         setMessage(`Added ${value} at the beginning of the list`);
         break;
       } else if (step === 4 && (position === 'end' || position === 'index')) {
@@ -159,7 +159,7 @@ export default function LinkedListVisualizer() {
         }
       } else if (step === 5 && (position === 'end' || position === 'index')) {
         // Show traversal through nodes
-        const targetIdx = position === 'end' ? nodes.length : parseInt(index);
+        const _targetIdx = position === 'end' ? nodes.length : parseInt(index);
         
         if (position === 'index') {
           const idx = parseInt(index);
@@ -194,12 +194,12 @@ export default function LinkedListVisualizer() {
         // Perform the actual insertion
         if (position === 'end') {
           newNodes = [...nodes, newNode];
-          addedAtIndex = nodes.length;
+          _addedAtIndex = nodes.length;
           setMessage(`Added ${value} at the end of the list`);
         } else if (position === 'index') {
           const idx = parseInt(index);
           newNodes = [...nodes.slice(0, idx), newNode, ...nodes.slice(idx)];
-          addedAtIndex = idx;
+                      _addedAtIndex = idx;
           setMessage(`Added ${value} at index ${idx}`);
         }
         break;
