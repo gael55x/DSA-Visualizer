@@ -70,33 +70,24 @@ const LINKEDLIST_OPERATIONS = {
 const CODE_STEPS = {
   insert: [
     { line: 2, description: "Create a new node with the given value" },
-    { line: 5, description: "Check if inserting at the beginning" },
-    { line: 6, description: "Point new node to current head" },
-    { line: 7, description: "Return new node as the new head" },
-    { line: 11, description: "Start from head to traverse to position" },
+    { lines: [5, 6, 7], description: "Check if inserting at beginning and handle special case" },
+    { lines: [11, 12], description: "Start from head to traverse to position" },
     { lines: [12, 13, 14], description: "Traverse to the position before insertion point" },
-    { line: 17, description: "Link new node to the next node" },
-    { line: 18, description: "Link previous node to the new node" },
+    { lines: [17, 18], description: "Link new node to next and previous node to new node" },
     { line: 20, description: "Return the head of the modified list" }
   ],
   
   delete: [
-    { line: 2, description: "Check if deleting from the beginning" },
-    { line: 3, description: "Return the second node as new head" },
-    { line: 7, description: "Start from head to traverse to position" },
+    { lines: [2, 3], description: "Check if deleting from beginning and return new head" },
+    { lines: [7, 8], description: "Start from head to traverse to position" },
     { lines: [8, 9, 10], description: "Traverse to the node before deletion point" },
-    { line: 13, description: "Get reference to the node to be deleted" },
-    { line: 14, description: "Skip over the node to be deleted" },
+    { lines: [13, 14], description: "Get reference and skip over the node to be deleted" },
     { line: 16, description: "Return the head of the modified list" }
   ],
   
   traverse: [
-    { line: 2, description: "Start traversal from the head node" },
-    { line: 3, description: "Initialize array to store values" },
-    { line: 6, description: "Check if current node exists" },
-    { line: 7, description: "Add current node's value to array" },
-    { line: 8, description: "Move to the next node" },
-    { line: 6, description: "Check next node in the loop" },
+    { lines: [2, 3], description: "Start traversal from head and initialize array" },
+    { lines: [6, 7, 8], description: "Loop: check node exists, add value, move to next" },
     { line: 11, description: "Return the collected values" }
   ]
 };
