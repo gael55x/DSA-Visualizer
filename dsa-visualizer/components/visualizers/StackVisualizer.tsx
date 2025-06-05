@@ -94,7 +94,7 @@ export default function StackVisualizer() {
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showMessage = (text: string, _type?: 'success' | 'error' | 'info') => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3000);
   };
@@ -414,7 +414,7 @@ export default function StackVisualizer() {
               
               <p className="text-slate-300 mb-8 leading-relaxed text-lg">
                 A stack is a linear data structure that follows the Last In, First Out (LIFO) principle. 
-                Elements are added and removed from the same end, called the "top" of the stack. Think of it 
+                Elements are added and removed from the same end, called the &quot;top&quot; of the stack. Think of it 
                 like a stack of plates - you can only add or remove plates from the top.
               </p>
               
