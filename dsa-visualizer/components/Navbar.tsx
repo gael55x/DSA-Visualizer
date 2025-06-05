@@ -7,11 +7,11 @@ import { Menu, X, Database } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const dataStructures = [
-  { name: 'Arrays', href: '/array', icon: '[]' },
-  { name: 'Linked Lists', href: '/linked-list', icon: '→' },
-  { name: 'Stacks', href: '/stack', icon: '||' },
-  { name: 'Queues', href: '/queue', icon: '←→' },
-  { name: 'Binary Trees', href: '/binary-tree', icon: '⟨⟩' },
+  { name: 'Arrays', href: '/array' },
+  { name: 'Linked Lists', href: '/linked-list' },
+  { name: 'Stacks', href: '/stack' },
+  { name: 'Queues', href: '/queue' },
+  { name: 'Binary Trees', href: '/binary-tree' },
 ];
 
 export default function Navbar() {
@@ -45,9 +45,6 @@ export default function Navbar() {
                   href={item.href}
                   className="group flex items-center gap-2 text-slate-300 hover:text-sky-400 transition-colors"
                 >
-                  <span className="font-mono text-sm group-hover:scale-110 transition-transform">
-                    {item.icon}
-                  </span>
                   <span className="font-medium">{item.name}</span>
                 </Link>
               ))}

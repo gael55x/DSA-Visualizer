@@ -576,19 +576,14 @@ export default function BinaryTreeVisualizer() {
   const currentCodeSteps = CODE_STEPS[currentOperation as keyof typeof CODE_STEPS];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-6">
+    <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">
-              Binary Search Tree Visualizer
-            </h1>
-            <p className="text-gray-600 dark:text-slate-400">
-              Interactive visualization with draggable tree and step-by-step code execution
-            </p>
-          </div>
-          <ThemeToggle />
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-100 mb-2">Binary Tree Visualizer</h1>
+          <p className="text-slate-400 text-lg">
+            Interactive visualization of binary tree operations with step-by-step code execution
+          </p>
         </div>
 
         {/* Operations Bar */}
@@ -701,9 +696,9 @@ export default function BinaryTreeVisualizer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Tree Visualization */}
-          <div className="lg:col-span-3 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Visualization Panel */}
+          <div className="space-y-6">
             {/* Tree Display */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-lg overflow-hidden">
               <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700">
@@ -758,16 +753,238 @@ export default function BinaryTreeVisualizer() {
           </div>
 
           {/* Code Panel */}
-          <div className="lg:col-span-2 sticky top-6">
+          <div className="space-y-6">
             <CodeHighlighter
               code={currentCode}
               language="javascript"
-              title={`${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Algorithm`}
+              title={`Binary Tree ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
               steps={currentCodeSteps}
               currentStep={currentStep}
-              className="h-fit"
-              compact={false}
+              showControls={false}
             />
+          </div>
+        </div>
+
+        {/* Information Section */}
+        <div className="mt-12 max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+              About Binary Trees
+            </h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Understanding the fundamentals, properties, and complexity analysis of binary tree data structures
+            </p>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            
+            {/* What is a Binary Tree - Takes more space */}
+            <div className="xl:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-100">What is a Binary Tree?</h3>
+              </div>
+              
+              <p className="text-slate-300 mb-8 leading-relaxed text-lg">
+                A binary tree is a hierarchical data structure where each node has at most two children, 
+                referred to as the left child and right child. In a Binary Search Tree (BST), the left 
+                subtree contains values less than the parent, and the right subtree contains values greater than the parent.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Advantages */}
+                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
+                  <h4 className="font-bold mb-4 text-green-400 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Advantages
+                  </h4>
+                  <ul className="space-y-3 text-slate-300">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Efficient searching O(log n) average case</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Dynamic size with ordered data</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>In-order traversal gives sorted sequence</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Disadvantages */}
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+                  <h4 className="font-bold mb-4 text-red-400 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Disadvantages
+                  </h4>
+                  <ul className="space-y-3 text-slate-300">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Can become unbalanced O(n) worst case</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>No constant-time access by index</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
+                      <span>Extra memory overhead for pointers</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Properties Card */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Properties</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Type:</span>
+                  <span className="text-slate-200 font-semibold">Hierarchical</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Structure:</span>
+                  <span className="text-slate-200 font-semibold">Non-linear</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Search (avg):</span>
+                  <span className="text-green-400 font-mono font-bold">O(log n)</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Search (worst):</span>
+                  <span className="text-yellow-400 font-mono font-bold">O(n)</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                  <span className="text-slate-400 font-medium">Insert (avg):</span>
+                  <span className="text-green-400 font-mono font-bold">O(log n)</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-slate-400 font-medium">Delete (avg):</span>
+                  <span className="text-green-400 font-mono font-bold">O(log n)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Second Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            
+            {/* Use Cases */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Common Use Cases</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  {title: "Database Indexing", desc: "Fast data retrieval in databases" },
+                  {title: "File Systems", desc: "Directory structure organization" },
+                  {title: "Expression Parsing", desc: "Parse mathematical expressions" },
+                  {title: "Decision Trees", desc: "Machine learning algorithms" },
+                  {title: "Huffman Coding", desc: "Data compression algorithms" }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+                    <div>
+                      <h4 className="font-semibold text-slate-100 mb-1">{item.title}</h4>
+                      <p className="text-slate-400 text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Time Complexity Analysis */}
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-slate-100">Time Complexity</h3>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Balanced Tree */}
+                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-green-400 text-sm uppercase tracking-wide">Balanced Tree</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Search</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(log n)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Insert</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(log n)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Delete</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(log n)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Unbalanced Tree */}
+                <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-yellow-400 text-sm uppercase tracking-wide">Unbalanced Tree</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Search</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Insert</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Delete</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Space Complexity */}
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-5">
+                  <h4 className="font-bold mb-4 text-blue-400 text-sm uppercase tracking-wide">Space Complexity</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Total space</span>
+                      <span className="text-yellow-400 font-mono font-bold text-lg">O(n)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Auxiliary space</span>
+                      <span className="text-green-400 font-mono font-bold text-lg">O(log n)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
