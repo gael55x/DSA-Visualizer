@@ -173,18 +173,14 @@ export default function InsertionSortVisualizer() {
         totalShifts++;
         setShifts(totalShifts);
         
-        // Update visual array with shift
-        setArray(prev => {
-          const newArr = [...prev];
-          newArr[j + 1] = { ...newArr[j] };
-          return newArr.map((item, idx) => ({
-            ...item,
-            isShifting: idx === j || idx === j + 1,
-            isComparing: false,
-            isKey: false,
-            isActive: false
-          }));
-        });
+        // Update visual array with the current state
+        setArray(currentArray.map((item, idx) => ({
+          ...item,
+          isShifting: idx === j || idx === j + 1,
+          isComparing: false,
+          isKey: false,
+          isActive: false
+        })));
         
         await delay(speed);
         
@@ -215,18 +211,14 @@ export default function InsertionSortVisualizer() {
       currentArray[j + 1] = keyElement;
       
       // Update visual array with insertion
-      setArray(prev => {
-        const newArr = [...prev];
-        newArr[j + 1] = keyElement;
-        return newArr.map((item, idx) => ({
-          ...item,
-          isKey: idx === j + 1,
-          isSorted: idx <= i,
-          isComparing: false,
-          isShifting: false,
-          isActive: false
-        }));
-      });
+      setArray(currentArray.map((item, idx) => ({
+        ...item,
+        isKey: idx === j + 1,
+        isSorted: idx <= i,
+        isComparing: false,
+        isShifting: false,
+        isActive: false
+      })));
       
       await delay(speed);
       
