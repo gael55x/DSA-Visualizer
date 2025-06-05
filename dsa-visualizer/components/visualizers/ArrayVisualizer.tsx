@@ -15,13 +15,7 @@ interface ArrayElement {
   isRemoving?: boolean;
 }
 
-interface OperationStep {
-  operation: string;
-  description: string;
-  array: ArrayElement[];
-  highlightIndex?: number;
-  codeStep: number;
-}
+
 
 const ARRAY_OPERATIONS = {
   insert: `function insertAtIndex(array, index, value) {

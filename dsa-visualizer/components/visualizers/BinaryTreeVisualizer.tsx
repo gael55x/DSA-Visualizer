@@ -138,12 +138,12 @@ export default function BinaryTreeVisualizer() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
-  const [searchResult, setSearchResult] = useState<TreeNode | null>(null);
+  const [_searchResult, setSearchResult] = useState<TreeNode | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [treeOffset, setTreeOffset] = useState({ x: 0, y: 0 });
   const [animationSpeed, setAnimationSpeed] = useState(1200);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [_isPlaying, setIsPlaying] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -165,7 +165,7 @@ export default function BinaryTreeVisualizer() {
 
   const positionedRoot = useMemo(() => calculatePositions(root), [root, calculatePositions]);
 
-  const showMessage = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showMessage = (text: string, _type: 'success' | 'error' | 'info' = 'info') => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3000);
   };
@@ -251,7 +251,7 @@ export default function BinaryTreeVisualizer() {
       setRoot(newRoot);
       setInputValue('');
       showMessage(`Value ${value} inserted successfully!`, 'success');
-    } catch (error) {
+    } catch (_error) {
       showMessage('Error inserting node', 'error');
     } finally {
       setIsAnimating(false);
@@ -277,7 +277,7 @@ export default function BinaryTreeVisualizer() {
     setCurrentOperation('search');
 
     const searchRecursive = async (node: TreeNode | null, val: number): Promise<TreeNode | null> => {
-      const steps = CODE_STEPS.search;
+      const _steps = CODE_STEPS.search;
       
       // Step 0: Check if empty or found
       setCurrentStep(0);
@@ -318,7 +318,7 @@ export default function BinaryTreeVisualizer() {
     try {
       const result = await searchRecursive(root, value);
       setSearchResult(result);
-    } catch (error) {
+    } catch (_error) {
       showMessage('Error searching node', 'error');
     } finally {
       setIsAnimating(false);
@@ -368,8 +368,8 @@ export default function BinaryTreeVisualizer() {
     };
 
     // Animate through steps
-    const steps = CODE_STEPS.delete;
-    for (let step = 0; step < steps.length; step++) {
+    const _steps = CODE_STEPS.delete;
+    for (let step = 0; step < _steps.length; step++) {
       setCurrentStep(step);
       await delay(animationSpeed);
     }
@@ -379,7 +379,7 @@ export default function BinaryTreeVisualizer() {
       setRoot(newRoot);
       setInputValue('');
       showMessage(`Value ${value} deleted successfully!`, 'success');
-    } catch (error) {
+    } catch (_error) {
       showMessage('Error deleting node', 'error');
     } finally {
       setIsAnimating(false);
@@ -759,7 +759,7 @@ export default function BinaryTreeVisualizer() {
               title={`Binary Tree ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
               steps={currentCodeSteps}
               currentStep={currentStep}
-              showControls={false}
+
             />
           </div>
         </div>
