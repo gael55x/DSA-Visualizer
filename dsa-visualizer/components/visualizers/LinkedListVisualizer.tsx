@@ -132,7 +132,6 @@ export default function LinkedListVisualizer() {
     setNextId(nextId + 1);
 
     let newNodes = [...nodes];
-    let _addedAtIndex = -1;
 
     // Step-by-step animation with code highlighting
     for (let step = 0; step < CODE_STEPS.insert.length; step++) {
@@ -141,26 +140,26 @@ export default function LinkedListVisualizer() {
       
       if (step === 0) {
         // Create new node step
-        continue;
-      } else if (step === 1 && position === 'start') {
-        // Check if inserting at beginning
-        await delay(400);
-      } else if (step === 2 && position === 'start') {
-        // Insert at beginning
-        newNodes = [newNode, ...nodes];
-        _addedAtIndex = 0;
-        setMessage(`Added ${value} at the beginning of the list`);
-        break;
-      } else if (step === 4 && (position === 'end' || position === 'index')) {
-        // Start traversal visualization
-        setTraversalIndex(0);
-        if (nodes.length > 0) {
-          setHighlightedId(nodes[0].id);
+        setMessage(`Creating new node with value ${value}`);
+      } else if (step === 1) {
+        // Check insertion position
+        if (position === 'start') {
+          // Insert at beginning
+          newNodes = [newNode, ...nodes];
+          setMessage(`Added ${value} at the beginning of the list`);
+          break;
         }
-      } else if (step === 5 && (position === 'end' || position === 'index')) {
-        // Show traversal through nodes
-        const _targetIdx = position === 'end' ? nodes.length : parseInt(index);
-        
+      } else if (step === 2) {
+        // Start traversal for end/index insertion
+        if (position === 'end' || position === 'index') {
+          setMessage('Starting traversal to find insertion point');
+          if (nodes.length > 0) {
+            setTraversalIndex(0);
+            setHighlightedId(nodes[0].id);
+          }
+        }
+      } else if (step === 3) {
+        // Show traversal animation
         if (position === 'index') {
           const idx = parseInt(index);
           if (isNaN(idx) || idx < 0 || idx > nodes.length) {
@@ -168,17 +167,14 @@ export default function LinkedListVisualizer() {
             setIsAnimating(false);
             return;
           }
-        }
-        
-        // Animate traversal to target position
-        if (position === 'index') {
-          const targetIndex = parseInt(index);
-          for (let i = 0; i < targetIndex && i < nodes.length; i++) {
+          
+          // Animate traversal to target position
+          for (let i = 0; i < idx && i < nodes.length; i++) {
             setTraversalIndex(i);
             setHighlightedId(nodes[i].id);
             await delay(600);
           }
-        } else {
+        } else if (position === 'end') {
           // For end insertion, traverse to the last node
           for (let i = 0; i < nodes.length; i++) {
             setTraversalIndex(i);
@@ -186,20 +182,15 @@ export default function LinkedListVisualizer() {
             await delay(600);
           }
         }
-      } else if (step === 6) {
-        // Link new node to the next node
-        setHighlightedId(null);
-        await delay(400);
-      } else if (step === 7) {
+      } else if (step === 4) {
         // Perform the actual insertion
+        setHighlightedId(null);
         if (position === 'end') {
           newNodes = [...nodes, newNode];
-          _addedAtIndex = nodes.length;
           setMessage(`Added ${value} at the end of the list`);
         } else if (position === 'index') {
           const idx = parseInt(index);
           newNodes = [...nodes.slice(0, idx), newNode, ...nodes.slice(idx)];
-                      _addedAtIndex = idx;
           setMessage(`Added ${value} at index ${idx}`);
         }
         break;
