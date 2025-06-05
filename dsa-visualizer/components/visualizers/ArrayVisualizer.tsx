@@ -200,7 +200,7 @@ export default function ArrayVisualizer() {
             isInserting: item.id === newElement.id
           }));
         });
-
+        
         setTimeout(() => {
           setArray(prev => prev.map(item => ({ ...item, isInserting: false })));
         }, 600);
@@ -239,31 +239,31 @@ export default function ArrayVisualizer() {
       if (step === 0) {
         // Start searching from index 0
         for (let i = 0; i < array.length; i++) {
-          // Highlight current element being checked
-          setArray(prev => prev.map((item, idx) => ({
-            ...item,
-            isSearching: idx === i,
-            isHighlighted: false
-          })));
+      // Highlight current element being checked
+      setArray(prev => prev.map((item, idx) => ({
+        ...item,
+        isSearching: idx === i,
+        isHighlighted: false
+      })));
 
           await delay(500);
 
           // Check if found
           if (array[i].value === value) {
-            setArray(prev => prev.map((item, idx) => ({
-              ...item,
-              isSearching: false,
-              isHighlighted: idx === i
-            })));
+        setArray(prev => prev.map((item, idx) => ({
+          ...item,
+          isSearching: false,
+          isHighlighted: idx === i
+        })));
             showMessage(`Found ${value} at index ${i}!`, 'success');
-            setIsAnimating(false);
+        setIsAnimating(false);
             setSearchValue('');
-            return;
-          }
-        }
+        return;
+      }
+    }
 
         // Not found
-        setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
+    setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
         showMessage(`Value ${value} not found in the array`, 'error');
         break;
       }
@@ -272,7 +272,7 @@ export default function ArrayVisualizer() {
     setSearchValue('');
     setIsAnimating(false);
   }, [searchValue, array]);
-
+    
   const deleteElement = useCallback(async (indexToDelete: number) => {
     if (indexToDelete < 0 || indexToDelete >= array.length) {
       showMessage('Invalid index for deletion', 'error');
@@ -340,9 +340,9 @@ export default function ArrayVisualizer() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-slate-100 mb-2">Array Visualizer</h1>
           <p className="text-slate-400 text-lg">
-            Interactive visualization of array operations with step-by-step code execution
-          </p>
-        </div>
+              Interactive visualization of array operations with step-by-step code execution
+            </p>
+          </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Visualization Panel */}
@@ -356,26 +356,26 @@ export default function ArrayVisualizer() {
                   <div className="flex justify-center p-4">
                     <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
                       Empty Array
-                    </div>
-                  </div>
+                </div>
+              </div>
                 ) : (
                   <div className="min-w-max mx-auto">
                     <div className="flex gap-2 items-center justify-center">
-                      <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="popLayout">
                         {array.map((item, index) => (
-                          <motion.div
-                            key={item.id}
-                            layout
-                            initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                            animate={{ 
-                              opacity: 1, 
-                              scale: 1, 
+                      <motion.div
+                        key={item.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                        animate={{ 
+                          opacity: 1, 
+                          scale: 1, 
                               y: 0
-                            }}
-                            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                            transition={{ duration: 0.3 }}
-                            className="relative group"
-                          >
+                        }}
+                        exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative group"
+                      >
                             <div 
                               className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
                                 item.isHighlighted 
@@ -391,23 +391,23 @@ export default function ArrayVisualizer() {
                             >
                               <span className="text-lg font-semibold">{item.value}</span>
                               <span className="text-xs text-slate-400">[{index}]</span>
-                            </div>
-                            
-                            {/* Delete Button */}
-                            <button
-                              onClick={() => deleteElement(index)}
-                              disabled={isAnimating}
-                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          </motion.div>
+                        </div>
+                        
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => deleteElement(index)}
+                          disabled={isAnimating}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </motion.div>
                         ))}
-                      </AnimatePresence>
-                    </div>
+                </AnimatePresence>
+              </div>
                   </div>
                 )}
-                
+
                 <div className="text-sm text-slate-400 text-center mt-6">
                   Array Length: {array.length} | Capacity: Dynamic
                 </div>
@@ -418,7 +418,7 @@ export default function ArrayVisualizer() {
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Array Operations</h3>
               
-              <div className="space-y-4">
+                <div className="space-y-4">
                 {/* Insert Element */}
                 <div className="p-4 bg-slate-700 rounded-xl">
                   <h4 className="font-medium text-slate-200 mb-3">Insert Element</h4>
@@ -664,7 +664,7 @@ export default function ArrayVisualizer() {
                       <h4 className="font-semibold text-slate-100 mb-1">{item.title}</h4>
                       <p className="text-slate-400 text-sm">{item.desc}</p>
                     </div>
-                  </div>
+                      </div>
                 ))}
               </div>
             </div>

@@ -247,14 +247,14 @@ export default function StackVisualizer() {
                   <div className="flex justify-center p-4">
                     <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
                       Empty Stack
-                    </div>
-                  </div>
+              </div>
+                </div>
                 ) : (
                   <div className="min-w-max mx-auto">
                     <div className="flex flex-col-reverse items-center gap-2 min-h-[300px] justify-end">
-                      <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="popLayout">
                         {stack.map((item, index) => (
-                          <motion.div
+                            <motion.div
                             key={item.id}
                             layout
                             initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -282,30 +282,30 @@ export default function StackVisualizer() {
                               <div className="absolute -right-16 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
                                 <ArrowUp className="text-green-400" size={20} />
                                 <span className="text-green-400 font-medium text-sm">TOP</span>
-                              </div>
-                            )}
-                            
+                                </div>
+                                )}
+                                
                             {/* Bottom indicator */}
                             {index === 0 && stack.length > 1 && (
                               <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
                                 <ArrowDown className="text-red-400" size={20} />
                                 <span className="text-red-400 font-medium text-sm">BOTTOM</span>
-                              </div>
-                            )}
-                          </motion.div>
+                                </div>
+                                )}
+                            </motion.div>
                         ))}
                       </AnimatePresence>
                     </div>
                   </div>
                 )}
-                
+
                 <div className="text-sm text-slate-400 text-center mt-6">
                   Stack Size: {stack.length}
-                  {peekedValue !== null && (
+                {peekedValue !== null && (
                     <span className="ml-4 text-sky-400">
-                      Peeked Value: {peekedValue}
-                    </span>
-                  )}
+                    Peeked Value: {peekedValue}
+                  </span>
+                )}
                 </div>
               </div>
             </div>
@@ -511,7 +511,7 @@ export default function StackVisualizer() {
 
           {/* Second Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-            
+
             {/* Use Cases */}
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
               <div className="flex items-center gap-3 mb-6">

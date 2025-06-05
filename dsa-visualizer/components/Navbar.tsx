@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Database } from 'lucide-react';
+import { Menu, X, Database, ChevronDown, ArrowUpDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const dataStructures = [
@@ -14,8 +14,18 @@ const dataStructures = [
   { name: 'Binary Trees', href: '/binary-tree' },
 ];
 
+const sortingAlgorithms = [
+  { name: 'Bubble Sort', href: '/sorting/bubble-sort' },
+  { name: 'Selection Sort', href: '/sorting/selection-sort' },
+  { name: 'Insertion Sort', href: '/sorting/insertion-sort' },
+  { name: 'Merge Sort', href: '/sorting/merge-sort' },
+  { name: 'Quick Sort', href: '/sorting/quick-sort' },
+  { name: 'Heap Sort', href: '/sorting/heap-sort' },
+];
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSortingOpen, setIsSortingOpen] = useState(false);
 
   return (
     <motion.nav
@@ -48,6 +58,49 @@ export default function Navbar() {
                   <span className="font-medium">{item.name}</span>
                 </Link>
               ))}
+              
+              {/* Sorting Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsSortingOpen(!isSortingOpen)}
+                  className="group flex items-center gap-2 text-slate-300 hover:text-sky-400 transition-colors"
+                >
+                  <ArrowUpDown size={16} />
+                  <span className="font-medium">Sorting</span>
+                  <ChevronDown 
+                    size={16} 
+                    className={cn(
+                      "transition-transform duration-200",
+                      isSortingOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+                
+                <AnimatePresence>
+                  {isSortingOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden"
+                    >
+                      <div className="py-2">
+                        {sortingAlgorithms.map((algorithm) => (
+                          <Link
+                            key={algorithm.name}
+                            href={algorithm.href}
+                            onClick={() => setIsSortingOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-slate-300 hover:text-sky-400 hover:bg-slate-700/50 transition-colors"
+                          >
+                            <span className="font-medium">{algorithm.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
             
             <Link
@@ -85,12 +138,29 @@ export default function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className="flex items-center gap-3 text-slate-300 hover:text-sky-400 transition-colors p-2"
                   >
-                    <span className="font-mono text-lg w-8 text-center">
-                      {item.icon}
-                    </span>
                     <span className="font-medium">{item.name}</span>
                   </Link>
                 ))}
+                
+                {/* Mobile Sorting Section */}
+                <div className="border-t border-slate-700 pt-4">
+                  <div className="flex items-center gap-3 text-slate-300 p-2 mb-2">
+                    <ArrowUpDown size={16} />
+                    <span className="font-medium">Sorting Algorithms</span>
+                  </div>
+                  <div className="pl-6 space-y-2">
+                    {sortingAlgorithms.map((algorithm) => (
+                      <Link
+                        key={algorithm.name}
+                        href={algorithm.href}
+                        onClick={() => setIsOpen(false)}
+                        className="block text-slate-400 hover:text-sky-400 transition-colors p-2"
+                      >
+                        {algorithm.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
                 
                 <Link
                   href="/about"
