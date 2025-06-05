@@ -359,7 +359,7 @@ export default function ArrayVisualizer() {
                             <div 
                               className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
                                 item.isHighlighted 
-                                  ? 'border-sky-400 bg-sky-900/50 text-sky-100 shadow-sky-400/25' 
+                                  ? 'border-green-400 bg-green-900/50 text-green-100 shadow-green-400/25' 
                                   : item.isSearching
                                   ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100 shadow-yellow-400/25'
                                   : item.isInserting

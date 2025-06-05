@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 import { delay } from '../../lib/utils';
 
@@ -257,6 +257,7 @@ export default function QueueVisualizer() {
                       {/* Front indicator */}
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-green-400 font-medium text-sm">FRONT</span>
+                        <span className="text-green-300 text-xs">(dequeue)</span>
                         <ArrowRight className="text-green-400" size={20} />
                       </div>
                       
@@ -301,7 +302,8 @@ export default function QueueVisualizer() {
                       {/* Rear indicator */}
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-red-400 font-medium text-sm">REAR</span>
-                        <ArrowRight className="text-red-400 rotate-180" size={20} />
+                        <span className="text-red-300 text-xs">(enqueue)</span>
+                        <ArrowLeft className="text-red-400" size={20} />
                       </div>
                     </div>
                   </div>

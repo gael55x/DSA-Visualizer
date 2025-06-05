@@ -29,8 +29,8 @@ export default function AboutPage() {
   ];
 
   const stats = [
-    { number: "10+", label: "Data Structures" },
-    { number: "15+", label: "Algorithms" },
+    { number: "5", label: "Data Structures (more are coming)" },
+    { number: "10+", label: "Algorithms (more are coming)" },
     { number: "100%", label: "Interactive" },
     { number: "0$", label: "Cost" }
   ];
@@ -77,7 +77,7 @@ export default function AboutPage() {
               <div>
                 <h2 className="text-4xl font-bold text-slate-100 mb-6">Our Mission</h2>
                 <p className="text-lg text-slate-300 leading-relaxed mb-6">
-                  We believe that understanding data structures and algorithms shouldn&apos;t be 
+                  I believe that understanding data structures and algorithms shouldn&apos;t be 
                   intimidating or abstract. Our mission is to make these fundamental 
                   computer science concepts accessible, engaging, and intuitive through 
                   interactive visualizations.
@@ -148,7 +148,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
             className="bg-gradient-to-r from-sky-500/10 to-yellow-500/10 border border-sky-500/20 rounded-3xl p-12"
           >
-            <h2 className="text-3xl font-bold text-slate-100 text-center mb-12">By the Numbers</h2>
+            <h2 className="text-3xl font-bold text-slate-100 text-center mb-12">By the Numbers (Mostly WIP)</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                 <motion.div

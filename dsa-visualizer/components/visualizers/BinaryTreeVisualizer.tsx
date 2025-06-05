@@ -540,15 +540,17 @@ export default function BinaryTreeVisualizer() {
             scale: { duration: 0.2 }, 
             stroke: { duration: 0.3 }
           }}
-          className={cn(
-            "transition-all duration-300 cursor-pointer",
-            node.isHighlighted && "fill-yellow-100 dark:fill-yellow-900/50",
-            node.isSearching && "fill-green-100 dark:fill-green-900/50",
-            node.isInserting && "fill-blue-100 dark:fill-blue-900/50",
-            node.isDeleting && "fill-red-100 dark:fill-red-900/50",
-            !node.isHighlighted && !node.isSearching && !node.isInserting && !node.isDeleting && 
-            "fill-white dark:fill-slate-700"
-          )}
+          className={`transition-all duration-300 cursor-pointer ${
+            node.isHighlighted 
+              ? 'fill-green-100 dark:fill-green-900/50' 
+              : node.isSearching
+              ? 'fill-green-100 dark:fill-green-900/50'
+              : node.isInserting
+              ? 'fill-blue-100 dark:fill-blue-900/50'
+              : node.isDeleting
+              ? 'fill-red-100 dark:fill-red-900/50'
+              : 'fill-white dark:fill-slate-700'
+          }`}
           strokeWidth="3"
         />
         

@@ -499,7 +499,7 @@ export default function LinkedListVisualizer() {
                   <h4 className="font-medium text-slate-200 mb-3">Insert Node</h4>
                   <div className="space-y-3">
                     <input
-                      type="text"
+                      type="number"
                       value={newValue}
                       onChange={(e) => setNewValue(e.target.value)}
                       className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
@@ -521,7 +521,7 @@ export default function LinkedListVisualizer() {
                       
                       {position === 'index' && (
                         <input
-                          type="text"
+                          type="number"
                           value={index}
                           onChange={(e) => setIndex(e.target.value)}
                           className="w-20 px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
