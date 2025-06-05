@@ -1,9 +1,9 @@
 'use client';
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, Eye, RotateCcw, ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
-import { cn, delay } from '../../lib/utils';
+import { delay } from '../../lib/utils';
 
 interface StackElement {
   value: number;
