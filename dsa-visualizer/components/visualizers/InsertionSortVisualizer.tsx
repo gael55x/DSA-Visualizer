@@ -286,7 +286,7 @@ export default function InsertionSortVisualizer() {
                   <AnimatePresence mode="wait">
                     {array.map((item, index) => (
                       <motion.div
-                        key={item.id}
+                        key={index}
                         layout
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

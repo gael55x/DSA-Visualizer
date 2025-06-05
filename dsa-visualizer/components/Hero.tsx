@@ -166,7 +166,7 @@ export default function Hero() {
 
               <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
                 <p className="text-slate-500 text-sm">
-                  Made with ❤️ for the programming community
+                  For the community
                 </p>
               </div>
             </div>
