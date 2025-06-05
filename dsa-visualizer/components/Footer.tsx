@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Database, Github, Heart } from "lucide-react";
+import { Github, Heart } from "lucide-react";
 import Image from "next/image";
 
 export default function Footer() {
