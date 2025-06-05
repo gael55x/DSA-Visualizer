@@ -696,7 +696,7 @@ export default function BinaryTreeVisualizer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-8">
           {/* Visualization Panel */}
           <div className="space-y-6">
             {/* Tree Display */}
