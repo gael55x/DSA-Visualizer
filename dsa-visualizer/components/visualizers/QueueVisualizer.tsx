@@ -254,11 +254,11 @@ export default function QueueVisualizer() {
                 ) : (
                   <div className="min-w-max mx-auto">
                     <div className="flex items-center gap-4 justify-center">
-                      {/* Front indicator */}
+                      {/* Rear indicator */}
                       <div className="flex flex-col items-center gap-2">
-                        <span className="text-green-400 font-medium text-sm">FRONT</span>
-                        <span className="text-green-300 text-xs">(dequeue)</span>
-                        <ArrowRight className="text-green-400" size={20} />
+                        <span className="text-red-400 font-medium text-sm">REAR</span>
+                        <span className="text-red-300 text-xs">(enqueue)</span>
+                        <ArrowRight className="text-red-400" size={20} />
                       </div>
                       
                       <div className="flex gap-2 items-center">
@@ -299,11 +299,11 @@ export default function QueueVisualizer() {
                         </AnimatePresence>
                       </div>
                       
-                      {/* Rear indicator */}
+                      {/* Front indicator */}
                       <div className="flex flex-col items-center gap-2">
-                        <span className="text-red-400 font-medium text-sm">REAR</span>
-                        <span className="text-red-300 text-xs">(enqueue)</span>
-                        <ArrowLeft className="text-red-400" size={20} />
+                        <span className="text-green-400 font-medium text-sm">FRONT</span>
+                        <span className="text-green-300 text-xs">(dequeue)</span>
+                        <ArrowLeft className="text-green-400" size={20} />
                       </div>
                     </div>
                   </div>
