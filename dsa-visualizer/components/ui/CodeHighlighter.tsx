@@ -61,7 +61,7 @@ export default function CodeHighlighter({
   const syntaxTheme = theme === 'dark' ? vscDarkPlus : vs;
 
   // Create custom renderer for highlighted lines
-  const CustomCode = ({ children, ...props }: any) => {
+  const CustomCode = ({ children, ...props }: React.ComponentProps<'code'> & { children: React.ReactNode } ) => {
     return (
       <code {...props}>
         {children}
@@ -69,7 +69,7 @@ export default function CodeHighlighter({
     );
   };
 
-  const CustomPre = ({ children, ...props }: any) => {
+  const CustomPre = ({ children, ...props }: React.ComponentProps<'pre'> & { children: React.ReactNode } ) => {
     return (
       <pre {...props} className="relative">
         {children}

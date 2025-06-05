@@ -2,10 +2,9 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Trash2, Shuffle, RotateCcw } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
-import ThemeToggle from '../ui/ThemeToggle';
-import { cn, delay, generateRandomArray } from '../../lib/utils';
+import { delay } from '../../lib/utils';
 
 interface ArrayElement {
   value: number;
@@ -113,7 +112,7 @@ export default function ArrayVisualizer() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
-  const [operationHistory, setOperationHistory] = useState<OperationStep[]>([]);
+  const [operationHistory, _setOperationHistory] = useState<OperationStep[]>([]);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
