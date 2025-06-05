@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Database, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Menu, X, ChevronDown, ArrowUpDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const dataStructures = [

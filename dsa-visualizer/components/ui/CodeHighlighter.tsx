@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -36,10 +36,10 @@ export default function CodeHighlighter({
   currentStep = 0,
   title = 'Code',
   className,
-  showControls = true,
+  showControls: _showControls = true,
   onStepChange,
-  autoPlay = false,
-  playSpeed = 1000,
+  autoPlay: _autoPlay = false,
+  playSpeed: _playSpeed = 1000,
   compact = false
 }: CodeHighlighterProps) {
   const [copied, setCopied] = useState(false);

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, GitBranch, Coffee, Heart, Code, Zap } from 'lucide-react';
+import { ArrowRight, GitBranch, Coffee, Heart, Code, Zap } from 'lucide-react';
 
 export default function Hero() {
   return (
