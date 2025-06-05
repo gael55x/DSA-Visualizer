@@ -198,7 +198,7 @@ export default function QueueVisualizer() {
     for (let step = 0; step < CODE_STEPS.peek.length; step++) {
       setCurrentStep(step);
       await delay(800);
-      
+
       if (step === 1) {
         // Highlight the front element
         setQueue(prev => prev.map((item, idx) => ({
@@ -250,7 +250,7 @@ export default function QueueVisualizer() {
                     <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
                       Empty Queue
                     </div>
-                  </div>
+              </div>
                 ) : (
                   <div className="min-w-max mx-auto">
                     <div className="flex items-center gap-4 justify-center">
@@ -259,20 +259,20 @@ export default function QueueVisualizer() {
                         <span className="text-red-400 font-medium text-sm">REAR</span>
                         <span className="text-red-300 text-xs">(enqueue)</span>
                         <ArrowRight className="text-red-400" size={20} />
-                      </div>
-                      
+                </div>
+                
                       <div className="flex gap-2 items-center">
-                        <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="popLayout">
                           {queue.map((item, index) => (
-                            <motion.div
-                              key={item.id}
-                              layout
+                        <motion.div
+                          key={item.id}
+                          layout
                               initial={{ opacity: 0, scale: 0.8, x: -20 }}
                               animate={{ opacity: 1, scale: 1, x: 0 }}
                               exit={{ opacity: 0, scale: 0.8, x: 20 }}
                               transition={{ duration: 0.3 }}
-                              className="relative"
-                            >
+                          className="relative"
+                        >
                               <div 
                                 className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
                                   item.isHighlighted 
@@ -286,36 +286,36 @@ export default function QueueVisualizer() {
                               >
                                 <span className="text-lg font-semibold">{item.value}</span>
                                 <span className="text-xs text-slate-400">[{index}]</span>
-                              </div>
-                              
-                              {/* Arrow between elements */}
-                              {index < queue.length - 1 && (
+                          </div>
+                          
+                          {/* Arrow between elements */}
+                          {index < queue.length - 1 && (
                                 <div className="absolute -right-3 top-1/2 transform -translate-y-1/2">
                                   <ArrowRight className="text-slate-400" size={16} />
-                                </div>
-                              )}
-                            </motion.div>
+                            </div>
+                          )}
+                        </motion.div>
                           ))}
-                        </AnimatePresence>
-                      </div>
-                      
+                  </AnimatePresence>
+                </div>
+
                       {/* Front indicator */}
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-green-400 font-medium text-sm">FRONT</span>
                         <span className="text-green-300 text-xs">(dequeue)</span>
                         <ArrowLeft className="text-green-400" size={20} />
                       </div>
-                    </div>
-                  </div>
+                </div>
+              </div>
                 )}
-                
+
                 <div className="text-sm text-slate-400 text-center mt-6">
-                  Queue Size: {queue.length}
-                  {peekedValue !== null && (
+                Queue Size: {queue.length}
+                {peekedValue !== null && (
                     <span className="ml-4 text-sky-400">
                       Peeked Value: {peekedValue}
-                    </span>
-                  )}
+                  </span>
+                )}
                 </div>
               </div>
             </div>
@@ -521,7 +521,7 @@ export default function QueueVisualizer() {
 
           {/* Second Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-            
+
             {/* Use Cases */}
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
               <div className="flex items-center gap-3 mb-6">

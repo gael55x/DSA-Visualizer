@@ -227,30 +227,25 @@ export default function LinkedListVisualizer() {
       setCurrentStep(step);
       await delay(800);
       
-      if (step === 0 && position === 'start') {
+      if (step === 0) {
         // Check if deleting from beginning
-        await delay(400);
-      } else if (step === 1 && position === 'start') {
-        // Delete from beginning
-        removedNode = newNodes.shift() || null;
-        setMessage(`Removed ${removedNode?.value} from the beginning of the list`);
-        break;
-      } else if (step === 2 && (position === 'end' || position === 'index')) {
-        // Start traversal for end/index deletion
-        setTraversalIndex(0);
-        if (nodes.length > 0) {
-          setHighlightedId(nodes[0].id);
+        if (position === 'start') {
+          removedNode = newNodes.shift() || null;
+          setMessage(`Removed ${removedNode?.value} from the beginning of the list`);
+          break;
         }
-      } else if (step === 3 && (position === 'end' || position === 'index')) {
-        // Show traversal to target position
-        if (position === 'end') {
-          // Traverse to second-to-last node for end deletion
-          for (let i = 0; i < nodes.length - 1; i++) {
-            setTraversalIndex(i);
-            setHighlightedId(nodes[i].id);
-            await delay(600);
+      } else if (step === 1) {
+        // Start traversal for end/index deletion
+        if (position === 'end' || position === 'index') {
+          setMessage('Starting traversal to find deletion point');
+          if (nodes.length > 0) {
+            setTraversalIndex(0);
+            setHighlightedId(nodes[0].id);
           }
-        } else if (position === 'index') {
+        }
+      } else if (step === 2) {
+        // Show traversal animation
+        if (position === 'index') {
           const idx = parseInt(index);
           if (isNaN(idx) || idx < 0 || idx >= nodes.length) {
             setMessage(`Index must be between 0 and ${nodes.length - 1}`);
@@ -258,27 +253,29 @@ export default function LinkedListVisualizer() {
             return;
           }
           
-          // Traverse to node before target
-          for (let i = 0; i < idx; i++) {
+          // Traverse to target position
+          for (let i = 0; i <= idx && i < nodes.length; i++) {
             setTraversalIndex(i);
             setHighlightedId(nodes[i].id);
             await delay(600);
           }
-        }
-      } else if (step === 4) {
-        // Highlight node to be deleted
-        if (position === 'end') {
-          const lastNode = nodes[nodes.length - 1];
-          setHighlightedId(lastNode.id);
-          removedNode = lastNode;
-        } else if (position === 'index') {
-          const idx = parseInt(index);
-          setHighlightedId(nodes[idx].id);
           removedNode = nodes[idx];
+        } else if (position === 'end') {
+          // Traverse to the last node
+          for (let i = 0; i < nodes.length; i++) {
+            setTraversalIndex(i);
+            setHighlightedId(nodes[i].id);
+            await delay(600);
+          }
+          removedNode = nodes[nodes.length - 1];
         }
+      } else if (step === 3) {
+        // Highlight node to be deleted
+        setMessage(`Deleting node with value ${removedNode?.value}`);
         await delay(800);
-      } else if (step === 5) {
+      } else if (step === 4) {
         // Perform the actual deletion
+        setHighlightedId(null);
         if (position === 'end') {
           newNodes.pop();
           setMessage(`Removed ${removedNode?.value} from the end of the list`);
@@ -379,7 +376,7 @@ export default function LinkedListVisualizer() {
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Linked List Structure</h3>
               
-              <div className="mb-8 mt-5 overflow-x-auto">
+              <div className="mb-8 mt-5">
                 {nodes.length === 0 ? (
                   <div className="flex justify-center p-4">
                     <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
@@ -387,34 +384,27 @@ export default function LinkedListVisualizer() {
                     </div>
                   </div>
                 ) : (
-                  <div className="min-w-max mx-auto">
-                    {/* Indicators row */}
-                    <div className="grid gap-6 mb-4" style={{ gridTemplateColumns: `repeat(${nodes.length + 1}, minmax(80px, 1fr))` }}>
+                  <div className="overflow-x-auto overflow-y-hidden pb-4 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+                    <div className="flex items-center gap-1 min-w-max px-4" style={{ minWidth: `${(nodes.length + 1) * 120}px` }}>
+                      {/* Render each node with arrow */}
                       {nodes.map((node, idx) => (
-                        <div key={`indicator-${node.id}`} className="flex justify-center">
-                          {/* Traversal indicator */}
-                          {traversalIndex === idx && (
-                            <div className="bg-yellow-500 text-black text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
-                              CURRENT
+                        <div key={`node-container-${node.id}`} className="flex items-center">
+                          {/* Node container with indicators */}
+                          <div className="flex flex-col items-center">
+                            {/* Indicator above node */}
+                            <div className="h-8 flex items-center justify-center mb-2">
+                              {traversalIndex === idx && (
+                                <div className="bg-yellow-500 text-black text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                                  CURRENT
+                                </div>
+                              )}
+                              {highlightedId === node.id && traversalIndex !== idx && (
+                                <div className="bg-sky-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                                  ACTIVE
+                                </div>
+                              )}
                             </div>
-                          )}
-                          
-                          {/* Highlight indicator */}
-                          {highlightedId === node.id && traversalIndex !== idx && (
-                            <div className="bg-sky-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
-                              ACTIVE
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      <div></div> {/* Empty space for NULL */}
-                    </div>
-
-                    {/* Nodes and arrows row */}
-                    <div className="grid gap-6 items-center" style={{ gridTemplateColumns: `repeat(${nodes.length + 1}, minmax(80px, 1fr))` }}>
-                      {nodes.map((node, idx) => (
-                        <div key={`node-${node.id}`} className="flex items-center justify-center">
-                          <div className="flex items-center">
+                            
                             {/* Node */}
                             <div 
                               className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
@@ -429,41 +419,38 @@ export default function LinkedListVisualizer() {
                               <span className="text-xs text-slate-400">({idx})</span>
                             </div>
                             
-                            {/* Arrow to next node or NULL */}
-                            <div className="ml-4 flex items-center">
-                              <div className={`w-12 h-0.5 transition-colors duration-300 ${
-                                traversalIndex === idx ? 'bg-yellow-400' : 'bg-slate-400'
-                              }`}></div>
-                              <div className={`w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-8 transition-colors duration-300 ml-1 ${
-                                traversalIndex === idx ? 'border-l-yellow-400' : 'border-l-slate-400'
-                              }`}></div>
+                            {/* Label below node */}
+                            <div className="h-6 flex items-center justify-center mt-2">
+                              {idx === 0 && (
+                                <span className="text-xs text-green-400 font-medium">HEAD</span>
+                              )}
+                              {idx === nodes.length - 1 && nodes.length > 1 && (
+                                <span className="text-xs text-red-400 font-medium">TAIL</span>
+                              )}
                             </div>
+                          </div>
+                          
+                          {/* Arrow to next node (always show if not last node) */}
+                          <div className="flex items-center mx-3">
+                            <div className={`w-8 h-0.5 transition-colors duration-300 ${
+                              traversalIndex === idx ? 'bg-yellow-400' : 'bg-slate-400'
+                            }`}></div>
+                            <div className={`w-0 h-0 border-t-2 border-t-transparent border-b-2 border-b-transparent border-l-4 transition-colors duration-300 ${
+                              traversalIndex === idx ? 'border-l-yellow-400' : 'border-l-slate-400'
+                            }`}></div>
                           </div>
                         </div>
                       ))}
                       
-                      {/* NULL pointer */}
-                      <div className="flex justify-center">
+                      {/* NULL pointer - always at the end */}
+                      <div className="flex flex-col items-center">
+                        <div className="h-8 mb-2"></div> {/* Space for indicator */}
                         <div className="px-4 py-2 bg-slate-600 text-slate-300 rounded-lg text-sm font-medium border-2 border-slate-500 shadow-sm">
                           NULL
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Labels row */}
-                    <div className="grid gap-6 mt-3" style={{ gridTemplateColumns: `repeat(${nodes.length + 1}, minmax(80px, 1fr))` }}>
-                      {nodes.map((node, idx) => (
-                        <div key={`label-${node.id}`} className="text-center">
-                          {idx === 0 && (
-                            <span className="text-xs text-green-400 font-medium">HEAD</span>
-                          )}
-                          {idx === nodes.length - 1 && (
-                            <span className="text-xs text-red-400 font-medium ml-2">TAIL</span>
-                          )}
+                        <div className="h-6 flex items-center justify-center mt-2">
+                          <span className="text-xs text-slate-500 font-medium">END</span>
                         </div>
-                      ))}
-                      <div className="text-center">
-                        <span className="text-xs text-slate-500 font-medium">END</span>
                       </div>
                     </div>
                   </div>

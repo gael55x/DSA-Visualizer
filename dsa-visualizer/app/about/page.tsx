@@ -78,7 +78,7 @@ export default function AboutPage() {
                 <h2 className="text-4xl font-bold text-slate-100 mb-6">Our Mission</h2>
                 <p className="text-lg text-slate-300 leading-relaxed mb-6">
                   I believe that understanding data structures and algorithms shouldn&apos;t be 
-                  intimidating or abstract. Our mission is to make these fundamental 
+                  intimidating or abstract. My mission for this summer is to make these fundamental 
                   computer science concepts accessible, engaging, and intuitive through 
                   interactive visualizations.
                 </p>
