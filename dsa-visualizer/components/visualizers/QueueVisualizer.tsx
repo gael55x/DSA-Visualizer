@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, Eye, RotateCcw, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
-import { cn, delay } from '../../lib/utils';
+import { delay } from '../../lib/utils';
 
 interface QueueElement {
   value: number;
@@ -95,7 +95,7 @@ export default function QueueVisualizer() {
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showMessage = (text: string, _type?: 'success' | 'error' | 'info') => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3000);
   };
