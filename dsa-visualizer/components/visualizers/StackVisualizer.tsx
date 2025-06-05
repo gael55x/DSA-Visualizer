@@ -58,22 +58,22 @@ const STACK_OPERATIONS = {
 
 const CODE_STEPS = {
   push: [
-    { line: 2, description: "Add the new element to the top of the stack" },
-    { line: 5, description: "Move the top pointer to the next position" },
-    { line: 8, description: "Increment the stack size counter" },
+    { lines: [2, 3], description: "Add the new element to the top of the stack" },
+    { lines: [5, 6], description: "Move the top pointer to the next position" },
+    { lines: [8, 9], description: "Increment the stack size counter" },
     { line: 10, description: "Return the modified stack" }
   ],
   
   pop: [
-    { line: 2, description: "Check if the stack is empty (underflow condition)" },
-    { line: 7, description: "Get reference to the top element" },
-    { line: 10, description: "Move the top pointer to the previous position" },
-    { line: 13, description: "Decrement the stack size counter" },
+    { lines: [2, 3, 4], description: "Check if the stack is empty (underflow condition)" },
+    { lines: [7, 8], description: "Get reference to the top element" },
+    { lines: [10, 11], description: "Move the top pointer to the previous position" },
+    { lines: [13, 14], description: "Decrement the stack size counter" },
     { line: 15, description: "Return the removed element" }
   ],
   
   peek: [
-    { line: 2, description: "Check if the stack is empty" },
+    { lines: [2, 3, 4], description: "Check if the stack is empty" },
     { line: 7, description: "Return the top element without removing it" }
   ]
 };

@@ -59,22 +59,22 @@ const QUEUE_OPERATIONS = {
 
 const CODE_STEPS = {
   enqueue: [
-    { line: 2, description: "Add the new element to the rear of the queue" },
-    { line: 5, description: "Move the rear pointer to the next position" },
-    { line: 8, description: "Increment the queue size counter" },
+    { lines: [2, 3], description: "Add the new element to the rear of the queue" },
+    { lines: [5, 6], description: "Move the rear pointer to the next position" },
+    { lines: [8, 9], description: "Increment the queue size counter" },
     { line: 10, description: "Return the modified queue" }
   ],
   
   dequeue: [
-    { line: 2, description: "Check if the queue is empty (underflow condition)" },
-    { line: 7, description: "Get reference to the front element" },
-    { line: 10, description: "Move the front pointer to the next position" },
-    { line: 13, description: "Decrement the queue size counter" },
+    { lines: [2, 3, 4], description: "Check if the queue is empty (underflow condition)" },
+    { lines: [7, 8], description: "Get reference to the front element" },
+    { lines: [10, 11], description: "Move the front pointer to the next position" },
+    { lines: [13, 14], description: "Decrement the queue size counter" },
     { line: 15, description: "Return the removed element" }
   ],
   
   peek: [
-    { line: 2, description: "Check if the queue is empty" },
+    { lines: [2, 3, 4], description: "Check if the queue is empty" },
     { line: 7, description: "Return the front element without removing it" }
   ]
 };

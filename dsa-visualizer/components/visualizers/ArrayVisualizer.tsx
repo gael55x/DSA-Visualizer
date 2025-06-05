@@ -74,23 +74,23 @@ const ARRAY_OPERATIONS = {
 
 const CODE_STEPS = {
   insert: [
-    { line: 2, description: "Validate that the index is within valid bounds" },
-    { line: 7, description: "Start shifting elements from the end to make space" },
+    { lines: [2, 3, 4], description: "Validate that the index is within valid bounds" },
+    { lines: [7, 8, 9], description: "Start shifting elements from the end to make space" },
     { line: 8, description: "Move each element one position to the right" },
     { line: 11, description: "Insert the new value at the specified index" },
     { line: 13, description: "Return the modified array" }
   ],
   
   search: [
-    { line: 2, description: "Start iterating through the array from index 0" },
-    { line: 4, description: "Compare current element with the target value" },
+    { lines: [2, 3], description: "Start iterating through the array from index 0" },
+    { lines: [4, 5], description: "Compare current element with the target value" },
     { line: 5, description: "Found a match! Return the current index" },
     { line: 9, description: "Target not found in the array, return -1" }
   ],
   
   delete: [
-    { line: 2, description: "Validate that the index is within valid bounds" },
-    { line: 7, description: "Start shifting elements from the deletion point" },
+    { lines: [2, 3, 4], description: "Validate that the index is within valid bounds" },
+    { lines: [7, 8, 9], description: "Start shifting elements from the deletion point" },
     { line: 8, description: "Move each element one position to the left" },
     { line: 12, description: "Reduce the array length to remove the last element" },
     { line: 14, description: "Return the modified array" }

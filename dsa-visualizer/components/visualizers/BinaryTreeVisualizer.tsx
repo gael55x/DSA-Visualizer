@@ -102,32 +102,32 @@ const TREE_OPERATIONS = {
 const CODE_STEPS = {
   insert: [
     { lines: [2, 3], description: "Check if we've reached an empty spot (base case)" },
-    { lines: [4], description: "Create and return a new node with the value" },
+    { line: 4, description: "Create and return a new node with the value" },
     { lines: [7, 8], description: "Compare value with current node to decide direction" },
-    { lines: [9], description: "Go left if value is smaller" },
+    { line: 9, description: "Go left if value is smaller" },
     { lines: [10, 11], description: "Go right if value is larger" },
-    { lines: [14], description: "Return the modified tree" }
+    { line: 14, description: "Return the modified tree" }
   ],
   
   search: [
     { lines: [2, 3], description: "Check if tree is empty or value is found" },
-    { lines: [4], description: "Return the node (null if not found, node if found)" },
+    { line: 4, description: "Return the node (null if not found, node if found)" },
     { lines: [7, 8], description: "If target is smaller, search left subtree" },
-    { lines: [9], description: "Recursively search the left side" },
+    { line: 9, description: "Recursively search the left side" },
     { lines: [12, 13], description: "Otherwise, search right subtree" }
   ],
   
   delete: [
     { lines: [2, 3], description: "Check if tree is empty" },
     { lines: [6, 7], description: "Find the node to delete by comparing values" },
-    { lines: [8], description: "Go left if target is smaller" },
+    { line: 8, description: "Go left if target is smaller" },
     { lines: [9, 10], description: "Go right if target is larger" },
-    { lines: [12], description: "Node found! Handle deletion cases" },
+    { line: 12, description: "Node found! Handle deletion cases" },
     { lines: [14, 15], description: "Case 1: Leaf node (no children)" },
     { lines: [19, 20, 21, 22], description: "Case 2: Node with one child" },
     { lines: [25, 26, 27, 28], description: "Case 3: Node with two children - find successor" },
-    { lines: [31], description: "Replace current node's value with successor's value" },
-    { lines: [34], description: "Delete the successor node" }
+    { line: 31, description: "Replace current node's value with successor's value" },
+    { line: 34, description: "Delete the successor node" }
   ]
 };
 
