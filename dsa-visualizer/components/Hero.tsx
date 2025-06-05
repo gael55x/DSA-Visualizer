@@ -53,7 +53,7 @@ export default function Hero() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-lg md:text-xl text-slate-400 mb-12 max-w-4xl mx-auto leading-relaxed"
           >
-            Master complex computer science concepts through interactive visualizations. 
+            Understand computer science concepts through interactive visualizations. 
             Watch algorithms come to life with step-by-step animations and comprehensive code analysis.
           </motion.p>
 
@@ -93,7 +93,6 @@ export default function Hero() {
               href="/array"
               className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-sky-500/25"
             >
-              <Play size={20} />
               Start Learning
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -152,7 +151,7 @@ export default function Hero() {
                     Enjoyed learning with DSA Visualizer? Support development with a coffee!
                   </p>
                   <Link
-                    href="https://buymeacoffee.com/gael55x"
+                    href="https://coff.ee/gailleamolg"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 hover:text-yellow-300 rounded-lg text-sm font-medium transition-all duration-300"

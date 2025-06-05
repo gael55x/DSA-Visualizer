@@ -32,7 +32,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 text-slate-400">
               <span>Made with</span>
               <Heart size={16} className="text-red-400 fill-current" />
-              <span>for learners</span>
+              <span>for learners (and for myself lol)</span>
             </div>
           </div>
 
