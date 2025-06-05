@@ -57,7 +57,7 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto leading-relaxed">
-              Empowering learners to master data structures and algorithms through 
+              Empowering learners to understand and master data structures and algorithms through 
               interactive visualizations and comprehensive educational content.
             </p>
           </motion.div>

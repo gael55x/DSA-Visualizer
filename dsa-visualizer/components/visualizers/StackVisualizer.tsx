@@ -1,7 +1,7 @@
 'use client';
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 import { delay } from '../../lib/utils';
 
@@ -280,18 +280,11 @@ export default function StackVisualizer() {
                             {/* Top indicator */}
                             {index === stack.length - 1 && (
                               <div className="absolute -right-16 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                                <ArrowUp className="text-green-400" size={20} />
+                                <ArrowLeft className="text-green-400" size={20} />
                                 <span className="text-green-400 font-medium text-sm">TOP</span>
                                 </div>
                                 )}
                                 
-                            {/* Bottom indicator */}
-                            {index === 0 && stack.length > 1 && (
-                              <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                                <ArrowDown className="text-red-400" size={20} />
-                                <span className="text-red-400 font-medium text-sm">BOTTOM</span>
-                                </div>
-                                )}
                             </motion.div>
                         ))}
                       </AnimatePresence>

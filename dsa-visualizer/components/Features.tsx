@@ -191,7 +191,7 @@ export default function Features() {
         >
           <div className="bg-gradient-to-r from-sky-500/10 to-yellow-500/10 border border-sky-500/20 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-slate-100 mb-4">
-              Ready to Master Data Structures?
+              Ready to Understand Data Structures?
             </h3>
             <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
               Start with the fundamentals and work your way up to complex algorithms. 
