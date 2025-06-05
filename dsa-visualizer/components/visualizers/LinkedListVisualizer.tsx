@@ -395,11 +395,8 @@ export default function LinkedListVisualizer() {
     const target = e.target as HTMLElement;
     const isNodeElement = target.closest('[data-node-id]') || target.classList.contains('cursor-move');
     
-    console.log('Canvas mouse down:', { target, isNodeElement, isAnimating });
-    
     if (!isNodeElement && !isAnimating) {
       e.preventDefault();
-      console.log('Starting pan');
       setIsPanningCanvas(true);
       setPanStartPos({ x: e.clientX, y: e.clientY });
     }
