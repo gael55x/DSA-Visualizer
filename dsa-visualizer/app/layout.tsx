@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DSA Visualizer",
   description: "Interactive visualizations for data structures and algorithms",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

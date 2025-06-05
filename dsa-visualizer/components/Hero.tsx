@@ -2,19 +2,30 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight, Play, GitBranch, Coffee, Heart, Code, Zap } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="relative bg-slate-900 min-h-[80vh] flex items-center justify-center overflow-hidden">
+    <section className="relative bg-slate-900 min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-sky-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        
+        {/* Animated DSA Nodes */}
+        <div className="absolute top-20 left-20 w-4 h-4 bg-sky-400/20 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-3 h-3 bg-yellow-400/30 rounded-full animate-pulse delay-500"></div>
+        <div className="absolute bottom-32 left-40 w-5 h-5 bg-green-400/20 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 right-20 w-3 h-3 bg-purple-400/25 rounded-full animate-pulse delay-700"></div>
+        
+        {/* Connecting Lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none">
+          <line x1="10%" y1="20%" x2="30%" y2="60%" stroke="#38bdf8" strokeWidth="1" className="animate-pulse"/>
+          <line x1="70%" y1="25%" x2="85%" y2="70%" stroke="#fbbf24" strokeWidth="1" className="animate-pulse delay-300"/>
+          <line x1="20%" y1="80%" x2="80%" y2="30%" stroke="#22d3ee" strokeWidth="1" className="animate-pulse delay-600"/>
+        </svg>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -27,10 +38,12 @@ export default function Hero() {
             transition={{ delay: 0.2, duration: 0.8 }}
             className="text-5xl md:text-7xl font-bold text-slate-100 mb-6 leading-tight"
           >
-            Learn Data Structures{' '}
-            <span className="bg-gradient-to-r from-sky-400 to-yellow-400 bg-clip-text text-transparent">
-              Visually
+            Visualize{' '}
+            <span className="bg-gradient-to-r from-sky-400 via-cyan-400 to-yellow-400 bg-clip-text text-transparent">
+              Data Structures
             </span>
+            <br/>
+            <span className="text-4xl md:text-5xl text-slate-300">& Algorithms</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -38,22 +51,47 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-slate-400 mb-12 max-w-4xl mx-auto leading-relaxed"
           >
-            Interactive visualizations with step-by-step animations. 
-            Master arrays, linked lists, stacks, queues, and trees through hands-on exploration.
+            Master complex computer science concepts through interactive visualizations. 
+            Watch algorithms come to life with step-by-step animations and comprehensive code analysis.
           </motion.p>
+
+          {/* Feature Highlights */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="flex flex-wrap justify-center gap-6 mb-12"
+          >
+            {[
+              { icon: Zap, text: 'Real-time Animations', color: 'text-yellow-400' },
+              { icon: Code, text: 'Step-by-step Code', color: 'text-sky-400' },
+              { icon: GitBranch, text: 'Interactive Controls', color: 'text-green-400' }
+            ].map((feature, index) => (
+              <motion.div
+                key={feature.text}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-xl"
+              >
+                <feature.icon size={18} className={feature.color} />
+                <span className="text-slate-300 text-sm font-medium">{feature.text}</span>
+              </motion.div>
+            ))}
+          </motion.div>
 
           {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
           >
             <Link
               href="/array"
-              className="group inline-flex items-center gap-3 px-8 py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-sky-500/25"
+              className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-sky-500/25"
             >
               <Play size={20} />
               Start Learning
@@ -61,43 +99,76 @@ export default function Hero() {
             </Link>
             
             <Link
-              href="#features"
+              href="/sorting/bubble-sort"
               className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 hover:border-slate-500 rounded-2xl font-semibold text-lg transition-all duration-300"
             >
-              Explore Features
+              Try Sorting
             </Link>
           </motion.div>
 
-          {/* Quick Access */}
+          {/* Support Section */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 1 }}
-            className="text-center"
+            transition={{ delay: 0.8, duration: 1 }}
+            className="max-w-4xl mx-auto"
           >
-            <p className="text-slate-400 text-sm mb-6">Quick Access</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {[
-                { name: 'Arrays', href: '/array' },
-                { name: 'Linked Lists', href: '/linked-list' },
-                { name: 'Stacks', href: '/stack' },
-                { name: 'Queues', href: '/queue' },
-                { name: 'Binary Trees', href: '/binary-tree' }
-              ].map((item, index) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 + index * 0.1, duration: 0.5 }}
-                >
+            <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm">
+              <h3 className="text-2xl font-bold text-slate-100 mb-6">Support This Project</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Contribute Section */}
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                      <GitBranch size={20} className="text-green-400" />
+                    </div>
+                    <h4 className="text-lg font-bold text-slate-100">Contribute</h4>
+                  </div>
+                  <p className="text-slate-400 mb-4 text-sm leading-relaxed">
+                    Help improve DSA Visualizer by contributing new algorithms, fixing bugs, or enhancing the UI.
+                  </p>
                   <Link
-                    href={item.href}
-                    className="px-4 py-2 bg-slate-800/50 hover:bg-slate-700/70 border border-slate-600/50 hover:border-slate-500 text-slate-300 hover:text-slate-100 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105"
+                    href="https://github.com/gael55x/DSA-Visualizer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 hover:text-green-300 rounded-lg text-sm font-medium transition-all duration-300"
                   >
-                    {item.name}
+                    <GitBranch size={16} />
+                    View on GitHub
+                    <ArrowRight size={14} />
                   </Link>
-                </motion.div>
-              ))}
+                </div>
+
+                {/* Coffee Section */}
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+                      <Coffee size={20} className="text-yellow-400" />
+                    </div>
+                    <h4 className="text-lg font-bold text-slate-100">Buy Me a Coffee</h4>
+                  </div>
+                  <p className="text-slate-400 mb-4 text-sm leading-relaxed">
+                    Enjoyed learning with DSA Visualizer? Support development with a coffee!
+                  </p>
+                  <Link
+                    href="https://buymeacoffee.com/gael55x"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 hover:text-yellow-300 rounded-lg text-sm font-medium transition-all duration-300"
+                  >
+                    <Coffee size={16} />
+                    Buy Coffee
+                    <Heart size={14} className="text-red-400" />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
+                <p className="text-slate-500 text-sm">
+                  Made with ❤️ for the programming community
+                </p>
+              </div>
             </div>
           </motion.div>
         </motion.div>
