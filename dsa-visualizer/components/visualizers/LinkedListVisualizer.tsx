@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 
 interface Node {
   value: number;
   id: string;
+  x?: number;
+  y?: number;
+  isDragging?: boolean;
 }
 
 // Linked List operation code templates
@@ -97,9 +100,9 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default function LinkedListVisualizer() {
   const [nodes, setNodes] = useState<Node[]>([
-    { value: 10, id: 'node-1' },
-    { value: 20, id: 'node-2' },
-    { value: 30, id: 'node-3' },
+    { value: 10, id: 'node-1', x: 100, y: 200 },
+    { value: 20, id: 'node-2', x: 250, y: 200 },
+    { value: 30, id: 'node-3', x: 400, y: 200 },
   ]);
   const [newValue, setNewValue] = useState<string>('');
   const [position, setPosition] = useState<string>('end');
@@ -111,6 +114,8 @@ export default function LinkedListVisualizer() {
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
   const [traversalIndex, setTraversalIndex] = useState<number>(-1);
+  const [draggedNode, setDraggedNode] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const handleAddNode = useCallback(async () => {
     if (newValue.trim() === '') {
@@ -128,7 +133,26 @@ export default function LinkedListVisualizer() {
     setCurrentOperation('insert');
     setTraversalIndex(-1);
 
-    const newNode = { value, id: `node-${nextId}` };
+    // Calculate position for new node
+    let newX = 100, newY = 200;
+    if (nodes.length > 0) {
+      if (position === 'start') {
+        newX = (nodes[0]?.x || 100) - 150;
+        newY = nodes[0]?.y || 200;
+      } else if (position === 'end') {
+        const lastNode = nodes[nodes.length - 1];
+        newX = (lastNode?.x || 100) + 150;
+        newY = lastNode?.y || 200;
+      } else {
+        const idx = parseInt(index);
+        if (idx < nodes.length) {
+          newX = (nodes[idx]?.x || 100) - 75;
+          newY = (nodes[idx]?.y || 200) + 100;
+        }
+      }
+    }
+
+    const newNode = { value, id: `node-${nextId}`, x: newX, y: newY };
     setNextId(nextId + 1);
 
     let newNodes = [...nodes];
@@ -358,6 +382,52 @@ export default function LinkedListVisualizer() {
     setMessage('Linked list cleared');
   };
 
+  // Drag handlers
+  const handleMouseDown = (e: React.MouseEvent, nodeId: string) => {
+    if (isAnimating) return;
+    
+    e.preventDefault();
+    setDraggedNode(nodeId);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (draggedNode && !isAnimating) {
+      const container = document.querySelector('.linked-list-container') as HTMLElement;
+      if (!container) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const newX = e.clientX - containerRect.left - dragOffset.x;
+      const newY = e.clientY - containerRect.top - dragOffset.y;
+      
+      setNodes(prev => prev.map(node => 
+        node.id === draggedNode 
+          ? { ...node, x: Math.max(50, Math.min(newX, containerRect.width - 100)), y: Math.max(50, Math.min(newY, containerRect.height - 100)) }
+          : node
+      ));
+    }
+  }, [draggedNode, dragOffset, isAnimating]);
+
+  const handleMouseUp = useCallback(() => {
+    setDraggedNode(null);
+  }, []);
+
+  // Add mouse event listeners for dragging
+  React.useEffect(() => {
+    if (draggedNode) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [draggedNode, handleMouseMove, handleMouseUp]);
+
   return (
     <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -374,7 +444,12 @@ export default function LinkedListVisualizer() {
           <div className="space-y-6">
             {/* List Visualization */}
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Linked List Structure</h3>
+              <h3 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
+                Linked List Structure
+                <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
+                  Drag nodes to reposition
+                </span>
+              </h3>
               
               <div className="mb-8 mt-5">
                 {nodes.length === 0 ? (
@@ -384,75 +459,127 @@ export default function LinkedListVisualizer() {
                     </div>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto overflow-y-hidden pb-4 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
-                    <div className="flex items-center gap-1 min-w-max px-4" style={{ minWidth: `${(nodes.length + 1) * 120}px` }}>
-                      {/* Render each node with arrow */}
-                      {nodes.map((node, idx) => (
-                        <div key={`node-container-${node.id}`} className="flex items-center">
-                          {/* Node container with indicators */}
-                          <div className="flex flex-col items-center">
-                            {/* Indicator above node */}
-                            <div className="h-8 flex items-center justify-center mb-2">
-                              {traversalIndex === idx && (
-                                <div className="bg-yellow-500 text-black text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
-                                  CURRENT
-                                </div>
-                              )}
-                              {highlightedId === node.id && traversalIndex !== idx && (
-                                <div className="bg-sky-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
-                                  ACTIVE
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Node */}
-                            <div 
-                              className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
-                                highlightedId === node.id 
-                                  ? 'border-sky-400 bg-sky-900/50 text-sky-100 shadow-sky-400/25' 
-                                  : traversalIndex === idx 
-                                  ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100 shadow-yellow-400/25'
-                                  : 'border-slate-600 bg-slate-700 text-slate-200'
-                              }`}
-                            >
-                              <span className="text-lg font-semibold">{node.value}</span>
-                              <span className="text-xs text-slate-400">({idx})</span>
-                            </div>
-                            
-                            {/* Label below node */}
-                            <div className="h-6 flex items-center justify-center mt-2">
-                              {idx === 0 && (
-                                <span className="text-xs text-green-400 font-medium">HEAD</span>
-                              )}
-                              {idx === nodes.length - 1 && nodes.length > 1 && (
-                                <span className="text-xs text-red-400 font-medium">TAIL</span>
-                              )}
-                            </div>
-                          </div>
+                  <div className="linked-list-container relative w-full h-96 bg-slate-900/30 rounded-xl border border-slate-600 overflow-hidden">
+                    <svg 
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                      style={{ zIndex: 1 }}
+                    >
+                      {/* Draw arrows between connected nodes */}
+                                              {nodes.map((node, idx) => {
+                          const nextNode = nodes[idx + 1];
+                          if (idx < nodes.length - 1 && node.x && node.y && nextNode?.x && nextNode?.y) {
+                            const startX = node.x + 40; // center of current node
+                            const startY = node.y + 32;
+                            const endX = nextNode.x + 40; // center of next node
+                            const endY = nextNode.y + 32;
                           
-                          {/* Arrow to next node (always show if not last node) */}
-                          <div className="flex items-center mx-3">
-                            <div className={`w-8 h-0.5 transition-colors duration-300 ${
-                              traversalIndex === idx ? 'bg-yellow-400' : 'bg-slate-400'
-                            }`}></div>
-                            <div className={`w-0 h-0 border-t-2 border-t-transparent border-b-2 border-b-transparent border-l-4 transition-colors duration-300 ${
-                              traversalIndex === idx ? 'border-l-yellow-400' : 'border-l-slate-400'
-                            }`}></div>
-                          </div>
-                        </div>
-                      ))}
+                          return (
+                            <line
+                              key={`arrow-${node.id}`}
+                              x1={startX}
+                              y1={startY}
+                              x2={endX}
+                              y2={endY}
+                              stroke={traversalIndex === idx ? '#fbbf24' : '#64748b'}
+                              strokeWidth="2"
+                              markerEnd="url(#arrowhead)"
+                            />
+                          );
+                        }
+                        return null;
+                      })}
                       
-                      {/* NULL pointer - always at the end */}
-                      <div className="flex flex-col items-center">
-                        <div className="h-8 mb-2"></div> {/* Space for indicator */}
-                        <div className="px-4 py-2 bg-slate-600 text-slate-300 rounded-lg text-sm font-medium border-2 border-slate-500 shadow-sm">
+                      {/* Arrow marker definition */}
+                      <defs>
+                        <marker
+                          id="arrowhead"
+                          markerWidth="10"
+                          markerHeight="7"
+                          refX="9"
+                          refY="3.5"
+                          orient="auto"
+                        >
+                          <polygon
+                            points="0 0, 10 3.5, 0 7"
+                            fill="#64748b"
+                          />
+                        </marker>
+                      </defs>
+                    </svg>
+
+                    {/* Render draggable nodes */}
+                    {nodes.map((node, idx) => (
+                      <div
+                        key={node.id}
+                        className={`absolute cursor-move select-none transition-all duration-200 ${
+                          draggedNode === node.id ? 'z-20 scale-105' : 'z-10'
+                        }`}
+                        style={{
+                          left: node.x || 0,
+                          top: node.y || 0,
+                          transform: draggedNode === node.id ? 'scale(1.05)' : 'scale(1)',
+                        }}
+                        onMouseDown={(e) => handleMouseDown(e, node.id)}
+                      >
+                        {/* Indicator above node */}
+                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                          {traversalIndex === idx && (
+                            <div className="bg-yellow-500 text-black text-xs px-2 py-1 rounded-full font-semibold shadow-lg whitespace-nowrap">
+                              CURRENT
+                            </div>
+                          )}
+                          {highlightedId === node.id && traversalIndex !== idx && (
+                            <div className="bg-sky-500 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg whitespace-nowrap">
+                              ACTIVE
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Node */}
+                        <div 
+                          className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-lg transition-all duration-300 ${
+                            highlightedId === node.id 
+                              ? 'border-sky-400 bg-sky-900/50 text-sky-100 shadow-sky-400/25' 
+                              : traversalIndex === idx 
+                              ? 'border-yellow-400 bg-yellow-900/50 text-yellow-100 shadow-yellow-400/25'
+                              : draggedNode === node.id
+                              ? 'border-purple-400 bg-purple-900/50 text-purple-100 shadow-purple-400/25'
+                              : 'border-slate-600 bg-slate-700 text-slate-200'
+                          }`}
+                        >
+                          <span className="text-lg font-semibold">{node.value}</span>
+                          <span className="text-xs text-slate-400">({idx})</span>
+                        </div>
+                        
+                        {/* Label below node */}
+                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+                          {idx === 0 && (
+                            <span className="text-xs text-green-400 font-medium whitespace-nowrap">HEAD</span>
+                          )}
+                          {idx === nodes.length - 1 && nodes.length > 1 && (
+                            <span className="text-xs text-red-400 font-medium whitespace-nowrap">TAIL</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* NULL pointer */}
+                    {nodes.length > 0 && (
+                      <div
+                        className="absolute z-10"
+                        style={{
+                          left: (nodes[nodes.length - 1]?.x || 0) + 120,
+                          top: (nodes[nodes.length - 1]?.y || 0) + 20,
+                        }}
+                      >
+                        <div className="px-3 py-2 bg-slate-600 text-slate-300 rounded-lg text-sm font-medium border-2 border-slate-500 shadow-lg">
                           NULL
                         </div>
-                        <div className="h-6 flex items-center justify-center mt-2">
+                        <div className="text-center mt-1">
                           <span className="text-xs text-slate-500 font-medium">END</span>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
                 
@@ -461,6 +588,11 @@ export default function LinkedListVisualizer() {
                   {traversalIndex >= 0 && (
                     <span className="ml-4 text-yellow-400">
                       Traversing: Position {traversalIndex}
+                    </span>
+                  )}
+                  {draggedNode && (
+                    <span className="ml-4 text-purple-400">
+                      Dragging node...
                     </span>
                   )}
                 </div>
