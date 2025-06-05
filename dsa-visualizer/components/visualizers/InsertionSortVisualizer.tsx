@@ -109,8 +109,8 @@ export default function InsertionSortVisualizer() {
     setIsPlaying(true);
     setIsComplete(false);
     
-    const arr = [...array];
-    const n = arr.length;
+    let currentArray = [...array];
+    const n = currentArray.length;
     let totalComparisons = 0;
     let totalShifts = 0;
 
@@ -132,7 +132,8 @@ export default function InsertionSortVisualizer() {
       await delay(speed);
       
       // Step 2: Store key and set position
-      const key = arr[i].value;
+      const keyElement = currentArray[i];
+      const key = keyElement.value;
       setKeyValue(key);
       let j = i - 1;
       setCurrentJ(j);
@@ -142,7 +143,7 @@ export default function InsertionSortVisualizer() {
       setArray(prev => prev.map((item, idx) => ({
         ...item,
         isKey: idx === i,
-        isActive: idx === j,
+        isActive: idx === j && j >= 0,
         isComparing: false,
         isShifting: false
       })));
@@ -152,7 +153,7 @@ export default function InsertionSortVisualizer() {
       // Step 3: Shift elements
       setCurrentStep(3);
       
-      while (j >= 0 && arr[j].value > key) {
+      while (j >= 0 && currentArray[j].value > key) {
         totalComparisons++;
         setComparisons(totalComparisons);
         
@@ -167,28 +168,21 @@ export default function InsertionSortVisualizer() {
         
         await delay(speed);
         
-        // Shift element
-        arr[j + 1] = arr[j];
+        // Shift element in working array
+        currentArray[j + 1] = currentArray[j];
         totalShifts++;
         setShifts(totalShifts);
         
-        // Highlight shifting
-        setArray(prev => prev.map((item, idx) => ({
-          ...item,
-          isShifting: idx === j || idx === j + 1,
-          isComparing: false,
-          isKey: idx === i,
-          isActive: false
-        })));
-        
-        // Update array visually
+        // Update visual array with shift
         setArray(prev => {
           const newArr = [...prev];
           newArr[j + 1] = { ...newArr[j] };
           return newArr.map((item, idx) => ({
             ...item,
             isShifting: idx === j || idx === j + 1,
-            isKey: idx === i
+            isComparing: false,
+            isKey: false,
+            isActive: false
           }));
         });
         
@@ -206,7 +200,7 @@ export default function InsertionSortVisualizer() {
         setArray(prev => prev.map((item, idx) => ({
           ...item,
           isComparing: idx === j,
-          isKey: idx === i,
+          isKey: false,
           isShifting: false,
           isActive: false
         })));
@@ -217,12 +211,13 @@ export default function InsertionSortVisualizer() {
       // Step 4: Insert key at correct position
       setCurrentStep(4);
       
-      arr[j + 1] = { value: key, id: array[i].id };
+      // Insert key in working array
+      currentArray[j + 1] = keyElement;
       
-      // Update array and highlight insertion
+      // Update visual array with insertion
       setArray(prev => {
         const newArr = [...prev];
-        newArr[j + 1] = { value: key, id: array[i].id };
+        newArr[j + 1] = keyElement;
         return newArr.map((item, idx) => ({
           ...item,
           isKey: idx === j + 1,
