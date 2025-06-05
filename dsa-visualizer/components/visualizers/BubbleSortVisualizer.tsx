@@ -419,7 +419,7 @@ export default function BubbleSortVisualizer() {
               <p className="text-slate-300 mb-8 leading-relaxed text-lg">
                 Bubble Sort is a simple comparison-based sorting algorithm. It works by repeatedly comparing 
                 adjacent elements and swapping them if they are in the wrong order. The largest element 
-                "bubbles up" to its correct position in each pass, like bubbles rising to the surface.
+                &quot;bubbles up&quot; to its correct position in each pass, like bubbles rising to the surface.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

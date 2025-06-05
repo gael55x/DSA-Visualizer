@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Shuffle, SkipForward } from 'lucide-react';
+import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
 import { cn, delay } from '../../lib/utils';
 
@@ -109,7 +109,7 @@ export default function InsertionSortVisualizer() {
     setIsPlaying(true);
     setIsComplete(false);
     
-    let currentArray = [...array];
+    const currentArray = [...array];
     const n = currentArray.length;
     let totalComparisons = 0;
     let totalShifts = 0;
@@ -439,7 +439,7 @@ export default function InsertionSortVisualizer() {
               title="Insertion Sort Algorithm"
               steps={CODE_STEPS.insertionSort}
               currentStep={currentStep}
-              showControls={false}
+
             />
           </div>
         </div>
