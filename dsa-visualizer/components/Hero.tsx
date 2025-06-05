@@ -62,22 +62,23 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="flex flex-wrap justify-center gap-6 mb-12"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto"
           >
             {[
-              { icon: Zap, text: 'Real-time Animations', color: 'text-yellow-400' },
-              { icon: Code, text: 'Step-by-step Code', color: 'text-sky-400' },
-              { icon: GitBranch, text: 'Interactive Controls', color: 'text-green-400' }
+              { icon: Zap, text: 'Real-time Animations', desc: 'Watch algorithms execute step by step', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
+              { icon: Code, text: 'Code Analysis', desc: 'Comprehensive complexity analysis', color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20' },
+              { icon: GitBranch, text: 'Interactive Learning', desc: 'Hands-on exploration and control', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' }
             ].map((feature, index) => (
               <motion.div
                 key={feature.text}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-xl"
+                className={`${feature.bg} border ${feature.border} rounded-xl p-6 text-center backdrop-blur-sm`}
               >
-                <feature.icon size={18} className={feature.color} />
-                <span className="text-slate-300 text-sm font-medium">{feature.text}</span>
+                <feature.icon size={24} className={`${feature.color} mx-auto mb-3`} />
+                <h3 className="text-slate-100 font-semibold mb-2">{feature.text}</h3>
+                <p className="text-slate-400 text-sm">{feature.desc}</p>
               </motion.div>
             ))}
           </motion.div>
