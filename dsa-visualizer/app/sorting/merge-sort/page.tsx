@@ -1,17 +1,10 @@
-import ComingSoon from '../../../components/ComingSoon';
+import MergeSortVisualizer from '../../../components/visualizers/MergeSortVisualizer';
 
 export default function MergeSortPage() {
-  return (
-    <ComingSoon
-      title="Merge Sort"
-      description="Experience the divide-and-conquer approach with interactive merge sort visualization."
-      backHref="/sorting/bubble-sort"
-      backText="Try Bubble Sort"
-    />
-  );
+  return <MergeSortVisualizer />;
 }
 
 export const metadata = {
-  title: 'Merge Sort - Coming Soon | DSA Visualizer',
-  description: 'Merge sort visualization is coming soon to DSA Visualizer.',
+  title: 'Merge Sort Visualizer | DSA Visualizer',
+  description: 'Interactive merge sort algorithm visualization with step-by-step code execution and divide-and-conquer approach.',
 }; 

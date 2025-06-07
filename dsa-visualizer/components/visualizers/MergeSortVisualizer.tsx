@@ -71,28 +71,28 @@ function merge(left, right) {
 
 const CODE_STEPS = {
   mergeSort: [
-    { lines: [2, 3, 4], description: "Check base case: arrays with 0 or 1 element are already sorted" },
-    { lines: [7, 8, 9], description: "Divide: split array into two halves at middle point" },
-    { lines: [11, 12], description: "Conquer: recursively sort both halves" },
-    { lines: [14], description: "Combine: merge the sorted halves together" },
-    { lines: [17, 18, 19, 20], description: "Initialize merge process with pointers and result array" },
-    { lines: [22, 23, 24, 25, 26, 27, 28, 29], description: "Compare elements and merge in sorted order" },
-    { lines: [31, 32, 33, 34], description: "Add remaining elements from left array" },
-    { lines: [36, 37, 38, 39], description: "Add remaining elements from right array" },
-    { lines: [41], description: "Return merged result array" }
+    { lines: [3, 4], description: "Check base case: arrays with 0 or 1 element are already sorted" },
+    { lines: [8, 9, 10], description: "Divide: split array into two halves at middle point" },
+    { lines: [13, 14], description: "Conquer: recursively sort both halves" },
+    { lines: [17], description: "Combine: merge the sorted halves together" },
+    { lines: [21, 22, 23], description: "Initialize merge process with pointers and result array" },
+    { lines: [26, 27, 28, 29, 30, 31, 32, 33, 34], description: "Compare elements and merge in sorted order" },
+    { lines: [37, 38, 39, 40], description: "Add remaining elements from left array" },
+    { lines: [43, 44, 45, 46], description: "Add remaining elements from right array" },
+    { lines: [48], description: "Return merged result array" }
   ]
 };
 
 export default function MergeSortVisualizer() {
   const [array, setArray] = useState<ArrayElement[]>([
-    { value: 64, id: '1' },
-    { value: 34, id: '2' },
-    { value: 25, id: '3' },
-    { value: 12, id: '4' },
-    { value: 22, id: '5' },
-    { value: 11, id: '6' },
-    { value: 90, id: '7' },
-    { value: 88, id: '8' }
+    { value: 64, id: 'element-0' },
+    { value: 34, id: 'element-1' },
+    { value: 25, id: 'element-2' },
+    { value: 12, id: 'element-3' },
+    { value: 22, id: 'element-4' },
+    { value: 11, id: 'element-5' },
+    { value: 90, id: 'element-6' },
+    { value: 88, id: 'element-7' }
   ]);
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -106,14 +106,14 @@ export default function MergeSortVisualizer() {
   const [currentOperation, setCurrentOperation] = useState('');
   const [mergeLevels, setMergeLevels] = useState<ArrayElement[][]>([]);
 
-  const generateId = () => Math.random().toString(36).substr(2, 9);
+  const generateId = (index: number) => `element-${index}-${Date.now()}`;
 
   const generateRandomArray = useCallback(() => {
     const newArray = [];
     for (let i = 0; i < 8; i++) {
       newArray.push({
         value: Math.floor(Math.random() * 100) + 1,
-        id: generateId()
+        id: generateId(i)
       });
     }
     setArray(newArray);
@@ -143,136 +143,165 @@ export default function MergeSortVisualizer() {
     })));
   }, []);
 
-  const merge = async (left: ArrayElement[], right: ArrayElement[], startIndex: number) => {
-    const result: ArrayElement[] = [];
-    let leftIndex = 0;
-    let rightIndex = 0;
-    let totalComparisons = comparisons;
-    
+  const merge = async (leftStart: number, leftEnd: number, rightStart: number, rightEnd: number) => {
+    // Step 4: Initialize merge process with pointers and result array
     setCurrentStep(4);
-    setCurrentOperation(`Merging arrays [${left.map(el => el.value).join(', ')}] and [${right.map(el => el.value).join(', ')}]`);
-    await delay(speed);
-
+    setCurrentOperation(`Merging elements from index ${leftStart} to ${rightEnd}`);
+    
     // Highlight elements being merged
-    setArray(prev => prev.map(item => ({
+    setArray(prev => prev.map((item, idx) => ({
       ...item,
-      isMerging: [...left, ...right].some(el => el.id === item.id),
-      isActive: [...left, ...right].some(el => el.id === item.id)
+      isMerging: idx >= leftStart && idx <= rightEnd,
+      isActive: idx >= leftStart && idx <= rightEnd
     })));
 
-    setCurrentStep(5);
     await delay(speed);
 
-    while (leftIndex < left.length && rightIndex < right.length) {
-      totalComparisons++;
-      setComparisons(totalComparisons);
+    // Step 5: Compare elements and merge in sorted order
+    setCurrentStep(5);
+    setCurrentOperation('Comparing and merging elements in sorted order');
+    await delay(speed);
+
+    // Create temporary arrays for merging using current array state
+    setArray(prev => {
+      const currentArray = [...prev];
+      const leftArray = currentArray.slice(leftStart, leftEnd + 1);
+      const rightArray = currentArray.slice(rightStart, rightEnd + 1);
       
-      // Highlight elements being compared
-      setArray(prev => prev.map(item => ({
-        ...item,
-        isComparing: item.id === left[leftIndex].id || item.id === right[rightIndex].id
-      })));
-
-      await delay(speed);
-
-      if (left[leftIndex].value <= right[rightIndex].value) {
-        result.push({ ...left[leftIndex], isSorted: true });
-        leftIndex++;
-      } else {
-        result.push({ ...right[rightIndex], isSorted: true });
-        rightIndex++;
+      let i = 0, j = 0, k = leftStart;
+      const mergedArray = [...currentArray];
+      
+      // Create the merge result array first
+      const tempResult = [];
+      let leftIdx = 0, rightIdx = 0;
+      
+      // Merge logic to determine order
+      while (leftIdx < leftArray.length && rightIdx < rightArray.length) {
+        if (leftArray[leftIdx].value <= rightArray[rightIdx].value) {
+          tempResult.push(leftArray[leftIdx]);
+          leftIdx++;
+        } else {
+          tempResult.push(rightArray[rightIdx]);
+          rightIdx++;
+        }
       }
       
-      await delay(speed);
-    }
-
-    // Add remaining elements
-    setCurrentStep(6);
-    while (leftIndex < left.length) {
-      result.push({ ...left[leftIndex], isSorted: true });
-      leftIndex++;
-    }
-
-    setCurrentStep(7);
-    while (rightIndex < right.length) {
-      result.push({ ...right[rightIndex], isSorted: true });
-      rightIndex++;
-    }
-
-    // Update the main array with merged result
-    setArray(prev => {
-      const newArray = [...prev];
-      result.forEach((item, idx) => {
-        if (startIndex + idx < newArray.length) {
-          newArray[startIndex + idx] = { ...item, isMerging: false, isComparing: false };
+      // Add remaining elements from left
+      while (leftIdx < leftArray.length) {
+        tempResult.push(leftArray[leftIdx]);
+        leftIdx++;
+      }
+      
+      // Add remaining elements from right
+      while (rightIdx < rightArray.length) {
+        tempResult.push(rightArray[rightIdx]);
+        rightIdx++;
+      }
+      
+      // Apply the result back to the merged section
+      tempResult.forEach((item, idx) => {
+        if (leftStart + idx < mergedArray.length) {
+          mergedArray[leftStart + idx] = { 
+            ...item, 
+            isMerging: true,
+            isComparing: false,
+            isActive: true 
+          };
         }
       });
-      return newArray;
+      
+      return mergedArray;
     });
 
-    setMerges(prev => prev + 1);
-    setCurrentStep(8);
+    setComparisons(prev => prev + leftEnd - leftStart + rightEnd - rightStart + 2);
+    
+    // Show step 6: Add remaining elements from left array
+    setCurrentStep(6);
+    setCurrentOperation('Adding remaining elements from left array');
+    await delay(speed);
+    
+    // Show step 7: Add remaining elements from right array  
+    setCurrentStep(7);
+    setCurrentOperation('Adding remaining elements from right array');
     await delay(speed);
 
-    return result;
+    // Mark merged section as sorted
+    setArray(prev => prev.map((item, idx) => ({
+      ...item,
+      isMerging: false,
+      isActive: false,
+      isComparing: false,
+      isSorted: idx >= leftStart && idx <= rightEnd ? true : item.isSorted
+    })));
+
+    setMerges(prev => prev + 1);
+    
+    // Step 8: Return merged result
+    setCurrentStep(8);
+    setCurrentOperation('Merge completed - returning result');
+    await delay(speed);
   };
 
-  const mergeSortRecursive = async (arr: ArrayElement[], startIndex: number, level: number = 0): Promise<ArrayElement[]> => {
+  const mergeSortRecursive = async (left: number, right: number, level: number = 0): Promise<void> => {
     // Update recursion depth
     setRecursionDepth(Math.max(recursionDepth, level + 1));
     
-    // Base case
-    if (arr.length <= 1) {
+    // Step 0: Check base case: arrays with 0 or 1 element are already sorted
+    if (left >= right) {
       setCurrentStep(0);
-      setCurrentOperation(`Base case: array of length ${arr.length} is already sorted`);
+      setCurrentOperation(`Base case: single element at index ${left} is already sorted`);
       
-      setArray(prev => prev.map(item => ({
+      setArray(prev => prev.map((item, idx) => ({
         ...item,
-        isSorted: arr.some(el => el.id === item.id) ? true : item.isSorted,
-        level: arr.some(el => el.id === item.id) ? level : item.level
+        isSorted: idx === left ? true : item.isSorted,
+        level: idx === left ? level : item.level
       })));
       
-      await delay(speed);
-      return arr;
+      await delay(speed * 0.5);
+      return;
     }
 
+    // Step 1: Divide: split array into two halves at middle point
     setCurrentStep(1);
-    setCurrentOperation(`Dividing array [${arr.map(el => el.value).join(', ')}] at level ${level}`);
+    setCurrentOperation(`Dividing array from index ${left} to ${right} at level ${level}`);
     
     // Highlight elements being divided
-    setArray(prev => prev.map(item => ({
+    setArray(prev => prev.map((item, idx) => ({
       ...item,
-      isDividing: arr.some(el => el.id === item.id),
-      level: arr.some(el => el.id === item.id) ? level : item.level
+      isDividing: idx >= left && idx <= right,
+      level: idx >= left && idx <= right ? level : item.level
     })));
     
     await delay(speed);
 
     // Divide
-    const middle = Math.floor(arr.length / 2);
-    const left = arr.slice(0, middle);
-    const right = arr.slice(middle);
+    const middle = Math.floor((left + right) / 2);
 
     // Mark left and right children
-    setArray(prev => prev.map(item => ({
+    setArray(prev => prev.map((item, idx) => ({
       ...item,
-      leftChild: left.some(el => el.id === item.id),
-      rightChild: right.some(el => el.id === item.id),
+      leftChild: idx >= left && idx <= middle,
+      rightChild: idx >= middle + 1 && idx <= right,
       isDividing: false
     })));
 
     await delay(speed);
 
+    // Step 2: Conquer: recursively sort both halves
     setCurrentStep(2);
     setCurrentOperation('Recursively sorting left and right halves');
     
     // Conquer - recursively sort both halves
-    const sortedLeft = await mergeSortRecursive(left, startIndex, level + 1);
-    const sortedRight = await mergeSortRecursive(right, startIndex + middle, level + 1);
+    await mergeSortRecursive(left, middle, level + 1);
+    await mergeSortRecursive(middle + 1, right, level + 1);
 
+    // Step 3: Combine: merge the sorted halves together
     setCurrentStep(3);
+    setCurrentOperation('Combining: merging sorted halves');
+    await delay(speed * 0.5);
+    
     // Combine - merge the sorted halves
-    const result = await merge(sortedLeft, sortedRight, startIndex);
+    await merge(left, middle, middle + 1, right);
     
     // Clear child markings for this level
     setArray(prev => prev.map(item => ({
@@ -281,19 +310,16 @@ export default function MergeSortVisualizer() {
       rightChild: false,
       isActive: false
     })));
-
-    return result;
   };
 
   const mergeSort = useCallback(async () => {
     setIsPlaying(true);
     setIsComplete(false);
     setCurrentOperation('Starting merge sort...');
-    
-    const arr = [...array];
+    setCurrentStep(0);
     
     try {
-      const sortedArray = await mergeSortRecursive(arr, 0, 0);
+      await mergeSortRecursive(0, array.length - 1, 0);
       
       // Mark all elements as sorted
       setArray(prev => prev.map(item => ({ 
@@ -308,8 +334,8 @@ export default function MergeSortVisualizer() {
       })));
       
       setIsComplete(true);
-      setCurrentOperation('Merge sort completed!');
-      setCurrentStep(8);
+      setCurrentOperation('Merge sort completed! All elements are now sorted.');
+      setCurrentStep(8); // Final step - return result
     } catch (error) {
       console.error('Error during merge sort:', error);
     }
