@@ -401,145 +401,96 @@ export default function HeapSortVisualizer() {
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Heap Tree Structure</h3>
               
-              <div className="flex justify-center items-center min-h-[200px]">
-                <div className="relative">
-                  {array.slice(0, heapSize).map((item, index) => {
-                    const pos = getTreePosition(index, heapSize);
-                    const x = (pos.position - pos.maxPositions / 2) * 80 + 200;
-                    const y = pos.level * 60 + 20;
-                    
-                    return (
-                      <motion.div
-                        key={item.id}
-                        className={cn(
-                          "absolute w-10 h-10 flex items-center justify-center text-white font-bold text-xs rounded-full border-2 transition-all duration-300",
-                          item.isSorted 
-                            ? "bg-green-500 border-green-400" 
-                            : item.isSwapping
-                            ? "bg-red-500 border-red-400"
-                            : item.isComparing
-                            ? "bg-yellow-500 border-yellow-400"
-                            : item.isActive
-                            ? "bg-blue-500 border-blue-400"
-                            : item.isHeapified
-                            ? "bg-purple-500 border-purple-400"
-                            : "bg-slate-600 border-slate-500"
-                        )}
-                        style={{
-                          left: `${x}px`,
-                          top: `${y}px`,
-                        }}
-                        animate={{
-                          scale: item.isComparing || item.isSwapping || item.isActive ? 1.2 : 1,
-                        }}
-                      >
-                        {item.value}
-                      </motion.div>
-                    );
-                  })}
-                  
-                  {/* Draw connections */}
-                  {array.slice(0, heapSize).map((_, index) => {
-                    const leftChild = 2 * index + 1;
-                    const rightChild = 2 * index + 2;
-                    const connections = [];
-                    
-                    if (leftChild < heapSize) {
-                      const parentPos = getTreePosition(index, heapSize);
-                      const childPos = getTreePosition(leftChild, heapSize);
-                      const parentX = (parentPos.position - parentPos.maxPositions / 2) * 80 + 200;
-                      const parentY = parentPos.level * 60 + 20;
-                      const childX = (childPos.position - childPos.maxPositions / 2) * 80 + 200;
-                      const childY = childPos.level * 60 + 20;
-                      
-                      connections.push(
-                        <line
-                          key={`${index}-${leftChild}`}
-                          x1={parentX + 20}
-                          y1={parentY + 40}
-                          x2={childX + 20}
-                          y2={childY}
-                          stroke="#64748b"
-                          strokeWidth="2"
-                        />
-                      );
-                    }
-                    
-                    if (rightChild < heapSize) {
-                      const parentPos = getTreePosition(index, heapSize);
-                      const childPos = getTreePosition(rightChild, heapSize);
-                      const parentX = (parentPos.position - parentPos.maxPositions / 2) * 80 + 200;
-                      const parentY = parentPos.level * 60 + 20;
-                      const childX = (childPos.position - childPos.maxPositions / 2) * 80 + 200;
-                      const childY = childPos.level * 60 + 20;
-                      
-                      connections.push(
-                        <line
-                          key={`${index}-${rightChild}`}
-                          x1={parentX + 20}
-                          y1={parentY + 40}
-                          x2={childX + 20}
-                          y2={childY}
-                          stroke="#64748b"
-                          strokeWidth="2"
-                        />
-                      );
-                    }
-                    
-                    return connections;
-                  })}
-                  
-                  <svg className="absolute inset-0 pointer-events-none" style={{ width: '400px', height: '240px' }}>
-                    {array.slice(0, heapSize).map((_, index) => {
-                      const leftChild = 2 * index + 1;
-                      const rightChild = 2 * index + 2;
-                      const connections = [];
-                      
-                      if (leftChild < heapSize) {
-                        const parentPos = getTreePosition(index, heapSize);
-                        const childPos = getTreePosition(leftChild, heapSize);
-                        const parentX = (parentPos.position - parentPos.maxPositions / 2) * 80 + 200;
-                        const parentY = parentPos.level * 60 + 20;
-                        const childX = (childPos.position - childPos.maxPositions / 2) * 80 + 200;
-                        const childY = childPos.level * 60 + 20;
+              <div className="relative overflow-x-auto">
+                <div className="flex justify-center items-center min-h-[200px] min-w-[600px]">
+                  <div className="relative w-full h-full">
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                      {array.slice(0, heapSize).map((_, index) => {
+                        const leftChild = 2 * index + 1;
+                        const rightChild = 2 * index + 2;
+                        const connections = [];
                         
-                        connections.push(
-                          <line
-                            key={`${index}-${leftChild}`}
-                            x1={parentX + 20}
-                            y1={parentY + 40}
-                            x2={childX + 20}
-                            y2={childY}
-                            stroke="#64748b"
-                            strokeWidth="2"
-                          />
-                        );
-                      }
-                      
-                      if (rightChild < heapSize) {
-                        const parentPos = getTreePosition(index, heapSize);
-                        const childPos = getTreePosition(rightChild, heapSize);
-                        const parentX = (parentPos.position - parentPos.maxPositions / 2) * 80 + 200;
-                        const parentY = parentPos.level * 60 + 20;
-                        const childX = (childPos.position - childPos.maxPositions / 2) * 80 + 200;
-                        const childY = childPos.level * 60 + 20;
+                        if (leftChild < heapSize) {
+                          const parentPos = getTreePosition(index, heapSize);
+                          const childPos = getTreePosition(leftChild, heapSize);
+                          const parentX = (parentPos.position - parentPos.maxPositions / 2) * 60 + 300;
+                          const parentY = parentPos.level * 50 + 30;
+                          const childX = (childPos.position - childPos.maxPositions / 2) * 60 + 300;
+                          const childY = childPos.level * 50 + 30;
+                          
+                          connections.push(
+                            <line
+                              key={`${index}-${leftChild}`}
+                              x1={parentX}
+                              y1={parentY + 20}
+                              x2={childX}
+                              y2={childY}
+                              stroke="#64748b"
+                              strokeWidth="2"
+                            />
+                          );
+                        }
                         
-                        connections.push(
-                          <line
-                            key={`${index}-${rightChild}`}
-                            x1={parentX + 20}
-                            y1={parentY + 40}
-                            x2={childX + 20}
-                            y2={childY}
-                            stroke="#64748b"
-                            strokeWidth="2"
-                          />
-                        );
-                      }
+                        if (rightChild < heapSize) {
+                          const parentPos = getTreePosition(index, heapSize);
+                          const childPos = getTreePosition(rightChild, heapSize);
+                          const parentX = (parentPos.position - parentPos.maxPositions / 2) * 60 + 300;
+                          const parentY = parentPos.level * 50 + 30;
+                          const childX = (childPos.position - childPos.maxPositions / 2) * 60 + 300;
+                          const childY = childPos.level * 50 + 30;
+                          
+                          connections.push(
+                            <line
+                              key={`${index}-${rightChild}`}
+                              x1={parentX}
+                              y1={parentY + 20}
+                              x2={childX}
+                              y2={childY}
+                              stroke="#64748b"
+                              strokeWidth="2"
+                            />
+                          );
+                        }
+                        
+                        return connections;
+                      })}
+                    </svg>
+                    
+                    {array.slice(0, heapSize).map((item, index) => {
+                      const pos = getTreePosition(index, heapSize);
+                      const x = (pos.position - pos.maxPositions / 2) * 60 + 300;
+                      const y = pos.level * 50 + 30;
                       
-                      return connections;
+                      return (
+                        <motion.div
+                          key={item.id}
+                          className={cn(
+                            "absolute w-10 h-10 flex items-center justify-center text-white font-bold text-xs rounded-full border-2 transition-all duration-300",
+                            item.isSorted 
+                              ? "bg-green-500 border-green-400" 
+                              : item.isSwapping
+                              ? "bg-red-500 border-red-400"
+                              : item.isComparing
+                              ? "bg-yellow-500 border-yellow-400"
+                              : item.isActive
+                              ? "bg-blue-500 border-blue-400"
+                              : item.isHeapified
+                              ? "bg-purple-500 border-purple-400"
+                              : "bg-slate-600 border-slate-500"
+                          )}
+                          style={{
+                            left: `${x - 20}px`,
+                            top: `${y}px`,
+                          }}
+                          animate={{
+                            scale: item.isComparing || item.isSwapping || item.isActive ? 1.2 : 1,
+                          }}
+                        >
+                          {item.value}
+                        </motion.div>
+                      );
                     })}
-                  </svg>
+                  </div>
                 </div>
               </div>
             </div>
