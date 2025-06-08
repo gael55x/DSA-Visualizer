@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
@@ -70,6 +70,9 @@ export default function InsertionSortVisualizer() {
   const [speed, setSpeed] = useState(500);
   const [comparisons, setComparisons] = useState(0);
   const [shifts, setShifts] = useState(0);
+
+  // Add cancellation ref for pause functionality
+  const cancelRef = useRef(false);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -274,7 +277,7 @@ export default function InsertionSortVisualizer() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-8">
           {/* Visualization Panel */}
           <div className="space-y-6">
             {/* Array Visualization */}
