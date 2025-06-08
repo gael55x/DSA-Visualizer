@@ -89,6 +89,7 @@ export default function InsertionSortVisualizer() {
   }, []);
 
   const resetSort = useCallback(() => {
+    cancelRef.current = true; // Cancel any ongoing animation
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentStep(0);
@@ -106,20 +107,47 @@ export default function InsertionSortVisualizer() {
       isActive: false,
       isKey: false
     })));
+    setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
   }, []);
 
-  const insertionSort = useCallback(async () => {
-    setIsPlaying(true);
-    setIsComplete(false);
-    
-    const currentArray = [...array];
-    const n = currentArray.length;
-    let totalComparisons = 0;
-    let totalShifts = 0;
+  // Cancellable delay function
+  const cancellableDelay = async (ms: number) => {
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        if (cancelRef.current) {
+          reject(new Error('Cancelled'));
+        } else {
+          resolve();
+        }
+      }, ms);
 
-    // Step 0: Show array length
-    setCurrentStep(0);
-    await delay(speed);
+      // Check for cancellation periodically
+      const checkCancellation = () => {
+        if (cancelRef.current) {
+          clearTimeout(timeout);
+          reject(new Error('Cancelled'));
+        }
+      };
+      
+      const interval = setInterval(checkCancellation, 50);
+      setTimeout(() => clearInterval(interval), ms);
+    });
+  };
+
+  const insertionSort = useCallback(async () => {
+    try {
+      cancelRef.current = false;
+      setIsPlaying(true);
+      setIsComplete(false);
+      
+      const currentArray = [...array];
+      const n = currentArray.length;
+      let totalComparisons = 0;
+      let totalShifts = 0;
+
+      // Step 0: Show array length
+      setCurrentStep(0);
+      await cancellableDelay(speed);
 
     // Mark first element as sorted
     setArray(prev => prev.map((item, idx) => ({
@@ -130,126 +158,135 @@ export default function InsertionSortVisualizer() {
     for (let i = 1; i < n; i++) {
       setCurrentI(i);
       
-      // Step 1: Start from second element
-      setCurrentStep(1);
-      await delay(speed);
-      
-      // Step 2: Store key and set position
-      const keyElement = currentArray[i];
-      const key = keyElement.value;
-      setKeyValue(key);
-      let j = i - 1;
-      setCurrentJ(j);
-      setCurrentStep(2);
-      
-      // Highlight key element
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isKey: idx === i,
-        isActive: idx === j && j >= 0,
-        isComparing: false,
-        isShifting: false
-      })));
-      
-      await delay(speed);
-
-      // Step 3: Shift elements
-      setCurrentStep(3);
-      
-      while (j >= 0 && currentArray[j].value > key) {
-        totalComparisons++;
-        setComparisons(totalComparisons);
+        // Step 1: Start from second element
+        setCurrentStep(1);
+        await cancellableDelay(speed);
         
-        // Highlight comparison
+        // Step 2: Store key and set position
+        const keyElement = currentArray[i];
+        const key = keyElement.value;
+        setKeyValue(key);
+        let j = i - 1;
+        setCurrentJ(j);
+        setCurrentStep(2);
+        
+        // Highlight key element
         setArray(prev => prev.map((item, idx) => ({
           ...item,
-          isComparing: idx === j,
           isKey: idx === i,
-          isShifting: false,
-          isActive: false
+          isActive: idx === j && j >= 0,
+          isComparing: false,
+          isShifting: false
         })));
         
-        await delay(speed);
+        await cancellableDelay(speed);
+
+        // Step 3: Shift elements
+        setCurrentStep(3);
         
-        // Shift element in working array
-        currentArray[j + 1] = currentArray[j];
-        totalShifts++;
-        setShifts(totalShifts);
+        while (j >= 0 && currentArray[j].value > key) {
+          totalComparisons++;
+          setComparisons(totalComparisons);
+          
+          // Highlight comparison
+          setArray(prev => prev.map((item, idx) => ({
+            ...item,
+            isComparing: idx === j,
+            isKey: idx === i,
+            isShifting: false,
+            isActive: false
+          })));
+          
+          await cancellableDelay(speed);
+          
+          // Shift element in working array
+          currentArray[j + 1] = currentArray[j];
+          totalShifts++;
+          setShifts(totalShifts);
+          
+          // Update visual array with the current state
+          setArray(currentArray.map((item, idx) => ({
+            ...item,
+            isShifting: idx === j || idx === j + 1,
+            isComparing: false,
+            isKey: false,
+            isActive: false
+          })));
+          
+          await cancellableDelay(speed);
+          
+          j--;
+          setCurrentJ(j);
+        }
+
+        // Final comparison if j >= 0
+        if (j >= 0) {
+          totalComparisons++;
+          setComparisons(totalComparisons);
+          
+          setArray(prev => prev.map((item, idx) => ({
+            ...item,
+            isComparing: idx === j,
+            isKey: false,
+            isShifting: false,
+            isActive: false
+          })));
+          
+          await cancellableDelay(speed);
+        }
+
+        // Step 4: Insert key at correct position
+        setCurrentStep(4);
         
-        // Update visual array with the current state
+        // Insert key in working array
+        currentArray[j + 1] = keyElement;
+        
+        // Update visual array with insertion
         setArray(currentArray.map((item, idx) => ({
           ...item,
-          isShifting: idx === j || idx === j + 1,
+          isKey: idx === j + 1,
+          isSorted: idx <= i,
           isComparing: false,
-          isKey: false,
-          isActive: false
-        })));
-        
-        await delay(speed);
-        
-        j--;
-        setCurrentJ(j);
-      }
-
-      // Final comparison if j >= 0
-      if (j >= 0) {
-        totalComparisons++;
-        setComparisons(totalComparisons);
-        
-        setArray(prev => prev.map((item, idx) => ({
-          ...item,
-          isComparing: idx === j,
-          isKey: false,
           isShifting: false,
           isActive: false
         })));
         
-        await delay(speed);
+        await cancellableDelay(speed);
+        
+        // Clear highlighting
+        setArray(currentArray.map((item, idx) => ({
+          ...item,
+          isKey: false,
+          isSorted: idx <= i,
+          isComparing: false,
+          isShifting: false,
+          isActive: false
+        })));
+        
+        await cancellableDelay(speed);
       }
 
-      // Step 4: Insert key at correct position
-      setCurrentStep(4);
-      
-      // Insert key in working array
-      currentArray[j + 1] = keyElement;
-      
-      // Update visual array with insertion
-      setArray(currentArray.map((item, idx) => ({
-        ...item,
-        isKey: idx === j + 1,
-        isSorted: idx <= i,
-        isComparing: false,
-        isShifting: false,
-        isActive: false
-      })));
-      
-      await delay(speed);
-      
-      // Clear highlighting
-      setArray(currentArray.map((item, idx) => ({
-        ...item,
+      // Mark all as sorted
+      setArray(currentArray.map(item => ({ 
+        ...item, 
+        isSorted: true,
         isKey: false,
-        isSorted: idx <= i,
         isComparing: false,
         isShifting: false,
         isActive: false
       })));
-      
-      await delay(speed);
+      setIsComplete(true);
+      setIsPlaying(false);
+      setCurrentStep(5);
+    } catch (error) {
+      // Handle cancellation gracefully
+      if (error instanceof Error && error.message === 'Cancelled') {
+        setIsPlaying(false);
+        setIsPaused(true);
+        return;
+      }
+      throw error;
     }
-
-    // Mark all as sorted
-    setArray(currentArray.map(item => ({ 
-      ...item, 
-      isSorted: true,
-      isKey: false,
-      isComparing: false,
-      isShifting: false,
-      isActive: false
-    })));
-    setIsComplete(true);
-    setIsPlaying(false);
-    setCurrentStep(5);
   }, [array, speed]);
 
   const handlePlayPause = () => {
@@ -259,6 +296,7 @@ export default function InsertionSortVisualizer() {
     }
     
     if (isPlaying) {
+      cancelRef.current = true;
       setIsPlaying(false);
       setIsPaused(true);
     } else {

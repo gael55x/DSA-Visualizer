@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
@@ -105,6 +105,9 @@ export default function MergeSortVisualizer() {
   const [recursionDepth, setRecursionDepth] = useState(0);
   const [currentOperation, setCurrentOperation] = useState('');
   const [mergeLevels, setMergeLevels] = useState<ArrayElement[][]>([]);
+
+  // Add cancellation ref for pause functionality
+  const cancelRef = useRef(false);
 
   const generateId = (index: number) => `element-${index}-${Date.now()}`;
 

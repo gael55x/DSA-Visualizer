@@ -390,7 +390,7 @@ export default function HeapSortVisualizer() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-8">
           {/* Visualization Panel */}
           <div className="space-y-6">
             {/* Array Visualization */}
