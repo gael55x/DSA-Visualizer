@@ -1,17 +1,10 @@
-import ComingSoon from '../../../components/ComingSoon';
+import HeapSortVisualizer from '../../../components/visualizers/HeapSortVisualizer';
 
 export default function HeapSortPage() {
-  return (
-    <ComingSoon
-      title="Heap Sort"
-      description="Explore heap data structure with interactive heap sort visualization."
-      backHref="/sorting/selection-sort"
-      backText="Try Selection Sort"
-    />
-  );
+  return <HeapSortVisualizer />;
 }
 
 export const metadata = {
-  title: 'Heap Sort - Coming Soon | DSA Visualizer',
-  description: 'Heap sort visualization is coming soon to DSA Visualizer.',
+  title: 'Heap Sort Visualizer | DSA Visualizer',
+  description: 'Interactive heap sort algorithm visualization with step-by-step code execution and heap tree structure visualization.',
 }; 

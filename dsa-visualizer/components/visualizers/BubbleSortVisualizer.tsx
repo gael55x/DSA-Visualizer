@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
@@ -74,6 +74,9 @@ export default function BubbleSortVisualizer() {
   const [comparisons, setComparisons] = useState(0);
   const [swaps, setSwaps] = useState(0);
 
+  // Add cancellation ref for pause functionality
+  const cancelRef = useRef(false);
+
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const generateRandomArray = useCallback(() => {
@@ -89,6 +92,7 @@ export default function BubbleSortVisualizer() {
   }, []);
 
   const resetSort = useCallback(() => {
+    cancelRef.current = true; // Cancel any ongoing animation
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentStep(0);
@@ -104,122 +108,158 @@ export default function BubbleSortVisualizer() {
       isSorted: false,
       isActive: false
     })));
+    setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
   }, []);
 
+  // Cancellable delay function
+  const cancellableDelay = async (ms: number) => {
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        if (cancelRef.current) {
+          reject(new Error('Cancelled'));
+        } else {
+          resolve();
+        }
+      }, ms);
+
+      // Check for cancellation periodically
+      const checkCancellation = () => {
+        if (cancelRef.current) {
+          clearTimeout(timeout);
+          reject(new Error('Cancelled'));
+        }
+      };
+      
+      const interval = setInterval(checkCancellation, 50);
+      setTimeout(() => clearInterval(interval), ms);
+    });
+  };
+
   const bubbleSort = useCallback(async () => {
-    setIsPlaying(true);
-    setIsComplete(false);
-    
-    const arr = [...array];
-    const n = arr.length;
-    let totalComparisons = 0;
-    let totalSwaps = 0;
-
-    // Step 0: Show array length
-    setCurrentStep(0);
-    await delay(speed);
-
-    for (let i = 0; i < n - 1; i++) {
-      setCurrentI(i);
+    try {
+      cancelRef.current = false;
+      setIsPlaying(true);
+      setIsComplete(false);
       
-      // Step 1: Start outer loop
-      setCurrentStep(1);
-      await delay(speed);
-      
-      let swapped = false;
-      
-      // Step 2: Initialize swapped flag
-      setCurrentStep(2);
-      await delay(speed);
+      const arr = [...array];
+      const n = arr.length;
+      let totalComparisons = 0;
+      let totalSwaps = 0;
 
-      for (let j = 0; j < n - i - 1; j++) {
-        setCurrentJ(j);
-        
-        // Step 3: Start inner loop
-        setCurrentStep(3);
-        await delay(speed);
+      // Step 0: Show array length
+      setCurrentStep(0);
+      await cancellableDelay(speed);
 
-        // Step 4: Compare adjacent elements
-        setCurrentStep(4);
+      for (let i = 0; i < n - 1; i++) {
+        setCurrentI(i);
         
-        // Highlight elements being compared
-        setArray(prev => prev.map((item, idx) => ({
-          ...item,
-          isComparing: idx === j || idx === j + 1,
-          isActive: idx === j || idx === j + 1,
-          isSwapping: false
-        })));
+        // Step 1: Start outer loop
+        setCurrentStep(1);
+        await cancellableDelay(speed);
         
-        totalComparisons++;
-        setComparisons(totalComparisons);
-        await delay(speed);
+        let swapped = false;
+        
+        // Step 2: Initialize swapped flag
+        setCurrentStep(2);
+        await cancellableDelay(speed);
 
-        if (arr[j].value > arr[j + 1].value) {
-          // Step 5: Swap elements
-          setCurrentStep(5);
+        for (let j = 0; j < n - i - 1; j++) {
+          setCurrentJ(j);
           
-          // Highlight swapping
+          // Step 3: Start inner loop
+          setCurrentStep(3);
+          await cancellableDelay(speed);
+
+          // Step 4: Compare adjacent elements
+          setCurrentStep(4);
+          
+          // Highlight elements being compared
           setArray(prev => prev.map((item, idx) => ({
             ...item,
-            isComparing: false,
-            isSwapping: idx === j || idx === j + 1,
-            isActive: idx === j || idx === j + 1
+            isComparing: idx === j || idx === j + 1,
+            isActive: idx === j || idx === j + 1,
+            isSwapping: false
           })));
           
-          await delay(speed);
-          
-          // Perform swap
-          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-          swapped = true;
-          totalSwaps++;
-          setSwaps(totalSwaps);
-          
-          // Update array with swapped values
-          setArray(prev => {
-            const newArr = [...prev];
-            [newArr[j], newArr[j + 1]] = [newArr[j + 1], newArr[j]];
-            return newArr.map((item, idx) => ({
+          totalComparisons++;
+          setComparisons(totalComparisons);
+          await cancellableDelay(speed);
+
+          if (arr[j].value > arr[j + 1].value) {
+            // Step 5: Swap elements
+            setCurrentStep(5);
+            
+            // Highlight swapping
+            setArray(prev => prev.map((item, idx) => ({
               ...item,
+              isComparing: false,
               isSwapping: idx === j || idx === j + 1,
               isActive: idx === j || idx === j + 1
-            }));
-          });
-          
-          await delay(speed);
+            })));
+            
+            await cancellableDelay(speed);
+            
+            // Perform swap
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            swapped = true;
+            totalSwaps++;
+            setSwaps(totalSwaps);
+            
+            // Update array with swapped values
+            setArray(prev => {
+              const newArr = [...prev];
+              [newArr[j], newArr[j + 1]] = [newArr[j + 1], newArr[j]];
+              return newArr.map((item, idx) => ({
+                ...item,
+                isSwapping: idx === j || idx === j + 1,
+                isActive: idx === j || idx === j + 1
+              }));
+            });
+            
+            await cancellableDelay(speed);
+          }
+
+          // Clear highlighting
+          setArray(prev => prev.map(item => ({
+            ...item,
+            isComparing: false,
+            isSwapping: false,
+            isActive: false
+          })));
         }
 
-        // Clear highlighting
-        setArray(prev => prev.map(item => ({
+        // Mark current position as sorted
+        setArray(prev => prev.map((item, idx) => ({
           ...item,
-          isComparing: false,
-          isSwapping: false,
-          isActive: false
+          isSorted: idx >= n - i - 1 ? true : item.isSorted
         })));
+
+        // Step 6: Check if swapped
+        setCurrentStep(6);
+        await cancellableDelay(speed);
+        
+        if (!swapped) {
+          // Step 7: No swaps, array is sorted
+          setCurrentStep(7);
+          setArray(prev => prev.map(item => ({ ...item, isSorted: true })));
+          break;
+        }
       }
 
-      // Mark current position as sorted
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isSorted: idx >= n - i - 1 ? true : item.isSorted
-      })));
-
-      // Step 6: Check if swapped
-      setCurrentStep(6);
-      await delay(speed);
-      
-      if (!swapped) {
-        // Step 7: No swaps, array is sorted
-        setCurrentStep(7);
-        setArray(prev => prev.map(item => ({ ...item, isSorted: true })));
-        break;
+      // Mark all as sorted
+      setArray(prev => prev.map(item => ({ ...item, isSorted: true })));
+      setIsComplete(true);
+      setIsPlaying(false);
+      setCurrentStep(7);
+    } catch (error) {
+      // Handle cancellation gracefully
+      if (error instanceof Error && error.message === 'Cancelled') {
+        setIsPlaying(false);
+        setIsPaused(true);
+        return;
       }
+      throw error;
     }
-
-    // Mark all as sorted
-    setArray(prev => prev.map(item => ({ ...item, isSorted: true })));
-    setIsComplete(true);
-    setIsPlaying(false);
-    setCurrentStep(7);
   }, [array, speed]);
 
   const handlePlayPause = () => {
@@ -229,6 +269,7 @@ export default function BubbleSortVisualizer() {
     }
     
     if (isPlaying) {
+      cancelRef.current = true;
       setIsPlaying(false);
       setIsPaused(true);
     } else {
@@ -247,7 +288,7 @@ export default function BubbleSortVisualizer() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-8">
           {/* Visualization Panel */}
           <div className="space-y-6">
             {/* Array Visualization */}
