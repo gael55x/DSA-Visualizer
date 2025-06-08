@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
@@ -94,6 +94,13 @@ export default function HeapSortVisualizer() {
   const [swaps, setSwaps] = useState(0);
   const [heapSize, setHeapSize] = useState(0);
   const [phase, setPhase] = useState<'building' | 'sorting'>('building');
+  
+  // Add cancellation ref for pause functionality
+  const cancelRef = useRef(false);
+  
+  // Pan state
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -110,6 +117,7 @@ export default function HeapSortVisualizer() {
   }, []);
 
   const resetSort = useCallback(() => {
+    cancelRef.current = true; // Cancel any ongoing animation
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentStep(0);
@@ -127,176 +135,220 @@ export default function HeapSortVisualizer() {
       isHeapified: false,
       isExtracted: false
     })));
+    setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
   }, []);
 
-  const heapify = async (arr: ArrayElement[], n: number, rootIndex: number) => {
+  // Cancellable delay function
+  const cancellableDelay = async (ms: number) => {
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        if (cancelRef.current) {
+          reject(new Error('Cancelled'));
+        } else {
+          resolve();
+        }
+      }, ms);
+
+      // Check for cancellation periodically
+      const checkCancellation = () => {
+        if (cancelRef.current) {
+          clearTimeout(timeout);
+          reject(new Error('Cancelled'));
+        }
+      };
+      
+      const interval = setInterval(checkCancellation, 50);
+      setTimeout(() => clearInterval(interval), ms);
+    });
+  };
+
+  const heapify = async (arr: ArrayElement[], n: number, rootIndex: number): Promise<void> => {
     let largest = rootIndex;
     let left = 2 * rootIndex + 1;
     let right = 2 * rootIndex + 2;
     let totalComparisons = comparisons;
 
-    // Step 6: Initialize heapify variables
-    setCurrentStep(6);
-    setArray(prev => prev.map((item, idx) => ({
-      ...item,
-      isActive: idx === rootIndex,
-      isComparing: false,
-      isSwapping: false
-    })));
-    await delay(speed);
-
-    // Step 7: Check left child
-    setCurrentStep(7);
-    if (left < n) {
+    try {
+      // Step 6: Initialize heapify variables
+      setCurrentStep(6);
       setArray(prev => prev.map((item, idx) => ({
         ...item,
-        isComparing: idx === left || idx === largest,
-        isActive: idx === rootIndex
-      })));
-      totalComparisons++;
-      setComparisons(totalComparisons);
-      await delay(speed);
-
-      if (arr[left].value > arr[largest].value) {
-        largest = left;
-      }
-    }
-
-    // Step 8: Check right child
-    setCurrentStep(8);
-    if (right < n) {
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isComparing: idx === right || idx === largest,
-        isActive: idx === rootIndex
-      })));
-      totalComparisons++;
-      setComparisons(totalComparisons);
-      await delay(speed);
-
-      if (arr[right].value > arr[largest].value) {
-        largest = right;
-      }
-    }
-
-    // Step 9: Swap if needed
-    setCurrentStep(9);
-    if (largest !== rootIndex) {
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isSwapping: idx === rootIndex || idx === largest,
+        isActive: idx === rootIndex,
         isComparing: false,
+        isSwapping: false
+      })));
+      await cancellableDelay(speed);
+
+      // Step 7: Check left child
+      setCurrentStep(7);
+      if (left < n) {
+        setArray(prev => prev.map((item, idx) => ({
+          ...item,
+          isComparing: idx === left || idx === largest,
+          isActive: idx === rootIndex
+        })));
+        totalComparisons++;
+        setComparisons(totalComparisons);
+        await cancellableDelay(speed);
+
+        if (arr[left].value > arr[largest].value) {
+          largest = left;
+        }
+      }
+
+      // Step 8: Check right child
+      setCurrentStep(8);
+      if (right < n) {
+        setArray(prev => prev.map((item, idx) => ({
+          ...item,
+          isComparing: idx === right || idx === largest,
+          isActive: idx === rootIndex
+        })));
+        totalComparisons++;
+        setComparisons(totalComparisons);
+        await cancellableDelay(speed);
+
+        if (arr[right].value > arr[largest].value) {
+          largest = right;
+        }
+      }
+
+      // Step 9: Swap if needed
+      setCurrentStep(9);
+      if (largest !== rootIndex) {
+        setArray(prev => prev.map((item, idx) => ({
+          ...item,
+          isSwapping: idx === rootIndex || idx === largest,
+          isComparing: false,
+          isActive: false
+        })));
+        await cancellableDelay(speed);
+
+        // Perform swap
+        [arr[rootIndex], arr[largest]] = [arr[largest], arr[rootIndex]];
+        setSwaps(prev => prev + 1);
+        
+        setArray(prev => {
+          const newArr = [...prev];
+          [newArr[rootIndex], newArr[largest]] = [newArr[largest], newArr[rootIndex]];
+          return newArr;
+        });
+        
+        await cancellableDelay(speed);
+        
+        // Recursively heapify affected subtree
+        await heapify(arr, n, largest);
+      }
+
+      // Clear highlighting
+      setArray(prev => prev.map(item => ({
+        ...item,
+        isComparing: false,
+        isSwapping: false,
         isActive: false
       })));
-      await delay(speed);
-
-      // Perform swap
-      [arr[rootIndex], arr[largest]] = [arr[largest], arr[rootIndex]];
-      setSwaps(prev => prev + 1);
-      
-      setArray(prev => {
-        const newArr = [...prev];
-        [newArr[rootIndex], newArr[largest]] = [newArr[largest], newArr[rootIndex]];
-        return newArr;
-      });
-      
-      await delay(speed);
-      
-      // Recursively heapify affected subtree
-      await heapify(arr, n, largest);
+    } catch (error) {
+      // Handle cancellation
+      if (error instanceof Error && error.message === 'Cancelled') {
+        return;
+      }
+      throw error;
     }
-
-    // Clear highlighting
-    setArray(prev => prev.map(item => ({
-      ...item,
-      isComparing: false,
-      isSwapping: false,
-      isActive: false
-    })));
   };
 
   const heapSort = useCallback(async () => {
-    setIsPlaying(true);
-    setIsComplete(false);
-    
-    const arr = [...array];
-    const n = arr.length;
-    setHeapSize(n);
-
-    // Step 0: Show array length
-    setCurrentStep(0);
-    await delay(speed);
-
-    // Build max heap (heapify phase)
-    setPhase('building');
-    
-    // Step 1: Build heap from bottom up
-    setCurrentStep(1);
-    await delay(speed);
-
-    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-      await heapify(arr, n, i);
+    try {
+      cancelRef.current = false;
+      setIsPlaying(true);
+      setIsComplete(false);
       
-      // Mark heapified region
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isHeapified: idx <= Math.floor(n / 2) - 1 - i + Math.floor(n / 2) - 1
-      })));
-    }
+      const arr = [...array];
+      const n = arr.length;
+      setHeapSize(n);
 
-    // Sorting phase
-    setPhase('sorting');
-    
-    // Step 2: Extract elements from heap
-    setCurrentStep(2);
-    await delay(speed);
+      // Step 0: Show array length
+      setCurrentStep(0);
+      await cancellableDelay(speed);
 
-    for (let i = n - 1; i > 0; i--) {
-      setHeapSize(i);
+      // Build max heap (heapify phase)
+      setPhase('building');
       
-      // Step 3: Move root to end
-      setCurrentStep(3);
-      setArray(prev => prev.map((item, idx) => ({
-        ...item,
-        isSwapping: idx === 0 || idx === i,
-        isHeapified: false
-      })));
-      await delay(speed);
+      // Step 1: Build heap from bottom up
+      setCurrentStep(1);
+      await cancellableDelay(speed);
 
-      // Perform swap
-      [arr[0], arr[i]] = [arr[i], arr[0]];
-      setSwaps(prev => prev + 1);
-      
-      setArray(prev => {
-        const newArr = [...prev];
-        [newArr[0], newArr[i]] = [newArr[i], newArr[0]];
-        return newArr.map((item, idx) => ({
+      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+        await heapify(arr, n, i);
+        
+        // Mark heapified region
+        setArray(prev => prev.map((item, idx) => ({
           ...item,
-          isSorted: idx >= i,
-          isExtracted: idx === i,
-          isSwapping: false
-        }));
-      });
-      
-      await delay(speed);
+          isHeapified: idx <= Math.floor(n / 2) - 1 - i + Math.floor(n / 2) - 1
+        })));
+      }
 
-      // Step 4: Heapify reduced heap
-      setCurrentStep(4);
-      await delay(speed);
+      // Sorting phase
+      setPhase('sorting');
       
-      await heapify(arr, i, 0);
+      // Step 2: Extract elements from heap
+      setCurrentStep(2);
+      await cancellableDelay(speed);
+
+      for (let i = n - 1; i > 0; i--) {
+        setHeapSize(i);
+        
+        // Step 3: Move root to end
+        setCurrentStep(3);
+        setArray(prev => prev.map((item, idx) => ({
+          ...item,
+          isSwapping: idx === 0 || idx === i,
+          isHeapified: false
+        })));
+        await cancellableDelay(speed);
+
+        // Perform swap
+        [arr[0], arr[i]] = [arr[i], arr[0]];
+        setSwaps(prev => prev + 1);
+        
+        setArray(prev => {
+          const newArr = [...prev];
+          [newArr[0], newArr[i]] = [newArr[i], newArr[0]];
+          return newArr.map((item, idx) => ({
+            ...item,
+            isSorted: idx >= i,
+            isExtracted: idx === i,
+            isSwapping: false
+          }));
+        });
+        
+        await cancellableDelay(speed);
+
+        // Step 4: Heapify reduced heap
+        setCurrentStep(4);
+        await cancellableDelay(speed);
+        
+        await heapify(arr, i, 0);
+      }
+
+      // Mark all as sorted
+      setArray(prev => prev.map(item => ({ 
+        ...item, 
+        isSorted: true,
+        isHeapified: false,
+        isExtracted: false
+      })));
+      setIsComplete(true);
+      setIsPlaying(false);
+      setCurrentStep(5);
+    } catch (error) {
+      // Handle cancellation gracefully
+      if (error instanceof Error && error.message === 'Cancelled') {
+        setIsPlaying(false);
+        setIsPaused(true);
+        return;
+      }
+      throw error;
     }
-
-    // Mark all as sorted
-    setArray(prev => prev.map(item => ({ 
-      ...item, 
-      isSorted: true,
-      isHeapified: false,
-      isExtracted: false
-    })));
-    setIsComplete(true);
-    setIsPlaying(false);
-    setCurrentStep(5);
   }, [array, speed, comparisons]);
 
   const handlePlayPause = () => {
@@ -306,6 +358,7 @@ export default function HeapSortVisualizer() {
     }
     
     if (isPlaying) {
+      cancelRef.current = true;
       setIsPlaying(false);
       setIsPaused(true);
     } else {
@@ -315,7 +368,6 @@ export default function HeapSortVisualizer() {
 
   // Helper function to get heap tree positions
   const getTreePosition = (index: number, totalNodes: number) => {
-    const maxLevel = Math.floor(Math.log2(totalNodes)) + 1;
     const level = Math.floor(Math.log2(index + 1));
     const positionInLevel = index - (Math.pow(2, level) - 1);
     const maxPositionsInLevel = Math.pow(2, level);
@@ -323,8 +375,7 @@ export default function HeapSortVisualizer() {
     return {
       level,
       position: positionInLevel,
-      maxPositions: maxPositionsInLevel,
-      maxLevel
+      maxPositions: maxPositionsInLevel
     };
   };
 
@@ -339,7 +390,7 @@ export default function HeapSortVisualizer() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-8">
           {/* Visualization Panel */}
           <div className="space-y-6">
             {/* Array Visualization */}
@@ -401,22 +452,72 @@ export default function HeapSortVisualizer() {
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Heap Tree Structure</h3>
               
-              <div className="relative overflow-x-auto">
-                <div className="flex justify-center items-center min-h-[200px] min-w-[600px]">
-                  <div className="relative w-full h-full">
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              <div className="relative overflow-hidden bg-slate-900 rounded-lg border border-slate-600 h-80">
+                <div 
+                  className={cn(
+                    "relative w-full h-full",
+                    isDragging ? "cursor-grabbing" : "cursor-grab"
+                  )}
+                  style={{
+                    backgroundImage: 'radial-gradient(circle, #334155 1px, transparent 1px)',
+                    backgroundSize: '20px 20px',
+                    backgroundPosition: `${panOffset.x}px ${panOffset.y}px`
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                    const startX = e.clientX;
+                    const startY = e.clientY;
+                    const startPanX = panOffset.x;
+                    const startPanY = panOffset.y;
+
+                    const handleMouseMove = (e: MouseEvent) => {
+                      const deltaX = e.clientX - startX;
+                      const deltaY = e.clientY - startY;
+                      setPanOffset({
+                        x: startPanX + deltaX,
+                        y: startPanY + deltaY
+                      });
+                    };
+
+                    const handleMouseUp = () => {
+                      setIsDragging(false);
+                      document.removeEventListener('mousemove', handleMouseMove);
+                      document.removeEventListener('mouseup', handleMouseUp);
+                    };
+
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                  }}
+                >
+                  <div 
+                    className="absolute w-full h-full"
+                    style={{
+                      transform: `translate(${panOffset.x}px, ${panOffset.y}px)`
+                    }}
+                  >
+                    {/* Tree connections */}
+                    <svg 
+                      className="absolute inset-0 pointer-events-none overflow-visible" 
+                      style={{ 
+                        zIndex: 1,
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    >
                       {array.slice(0, heapSize).map((_, index) => {
                         const leftChild = 2 * index + 1;
                         const rightChild = 2 * index + 2;
                         const connections = [];
                         
+                        const parentPos = getTreePosition(index, heapSize);
+                        const parentX = (parentPos.position - parentPos.maxPositions / 2) * 80 + 320;
+                        const parentY = parentPos.level * 70 + 160;
+                        
                         if (leftChild < heapSize) {
-                          const parentPos = getTreePosition(index, heapSize);
                           const childPos = getTreePosition(leftChild, heapSize);
-                          const parentX = (parentPos.position - parentPos.maxPositions / 2) * 60 + 300;
-                          const parentY = parentPos.level * 50 + 30;
-                          const childX = (childPos.position - childPos.maxPositions / 2) * 60 + 300;
-                          const childY = childPos.level * 50 + 30;
+                          const childX = (childPos.position - childPos.maxPositions / 2) * 80 + 320;
+                          const childY = childPos.level * 70 + 160;
                           
                           connections.push(
                             <line
@@ -424,7 +525,7 @@ export default function HeapSortVisualizer() {
                               x1={parentX}
                               y1={parentY + 20}
                               x2={childX}
-                              y2={childY}
+                              y2={childY - 20}
                               stroke="#64748b"
                               strokeWidth="2"
                             />
@@ -432,12 +533,9 @@ export default function HeapSortVisualizer() {
                         }
                         
                         if (rightChild < heapSize) {
-                          const parentPos = getTreePosition(index, heapSize);
                           const childPos = getTreePosition(rightChild, heapSize);
-                          const parentX = (parentPos.position - parentPos.maxPositions / 2) * 60 + 300;
-                          const parentY = parentPos.level * 50 + 30;
-                          const childX = (childPos.position - childPos.maxPositions / 2) * 60 + 300;
-                          const childY = childPos.level * 50 + 30;
+                          const childX = (childPos.position - childPos.maxPositions / 2) * 80 + 320;
+                          const childY = childPos.level * 70 + 160;
                           
                           connections.push(
                             <line
@@ -445,7 +543,7 @@ export default function HeapSortVisualizer() {
                               x1={parentX}
                               y1={parentY + 20}
                               x2={childX}
-                              y2={childY}
+                              y2={childY - 20}
                               stroke="#64748b"
                               strokeWidth="2"
                             />
@@ -456,16 +554,17 @@ export default function HeapSortVisualizer() {
                       })}
                     </svg>
                     
+                    {/* Tree nodes */}
                     {array.slice(0, heapSize).map((item, index) => {
                       const pos = getTreePosition(index, heapSize);
-                      const x = (pos.position - pos.maxPositions / 2) * 60 + 300;
-                      const y = pos.level * 50 + 30;
+                      const x = (pos.position - pos.maxPositions / 2) * 80 + 320;
+                      const y = pos.level * 70 + 160;
                       
                       return (
                         <motion.div
                           key={item.id}
                           className={cn(
-                            "absolute w-10 h-10 flex items-center justify-center text-white font-bold text-xs rounded-full border-2 transition-all duration-300",
+                            "absolute w-10 h-10 flex items-center justify-center text-white font-bold text-sm rounded-full border-2 transition-all duration-300 select-none pointer-events-none",
                             item.isSorted 
                               ? "bg-green-500 border-green-400" 
                               : item.isSwapping
@@ -480,7 +579,8 @@ export default function HeapSortVisualizer() {
                           )}
                           style={{
                             left: `${x - 20}px`,
-                            top: `${y}px`,
+                            top: `${y - 20}px`,
+                            zIndex: 2
                           }}
                           animate={{
                             scale: item.isComparing || item.isSwapping || item.isActive ? 1.2 : 1,
@@ -491,6 +591,19 @@ export default function HeapSortVisualizer() {
                       );
                     })}
                   </div>
+                  
+                  {/* Pan instructions */}
+                  <div className="absolute bottom-2 right-2 text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded pointer-events-none">
+                    Click & drag to pan
+                  </div>
+                  
+                  {/* Reset pan button */}
+                  <button
+                    onClick={() => setPanOffset({ x: 0, y: 0 })}
+                    className="absolute top-2 right-2 text-xs text-slate-300 bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-colors"
+                  >
+                    Reset View
+                  </button>
                 </div>
               </div>
             </div>
