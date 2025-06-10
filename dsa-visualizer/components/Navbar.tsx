@@ -12,6 +12,7 @@ const dataStructures = [
   { name: 'Stacks', href: '/stack' },
   { name: 'Queues', href: '/queue' },
   { name: 'Binary Trees', href: '/binary-tree' },
+  { name: 'Recursion', href: '/recursion' },
 ];
 
 const sortingAlgorithms = [
