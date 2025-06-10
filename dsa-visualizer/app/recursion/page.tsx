@@ -1,4 +1,4 @@
-import RecursionVisualizer from '../../components/visualizers/RecursionVisualizer';
+import RecursionVisualizer from "@/components/visualizers/RecursionVisualizer";
 
 export default function RecursionPage() {
   return <RecursionVisualizer />;
