@@ -594,10 +594,10 @@ export default function RecursionVisualizer() {
               <div className="relative min-h-96 overflow-auto">
                 <svg width="800" height={Math.max(400, maxDepth * 80 + 100)} className="w-full">
                   {/* Connections */}
-                  {recursionTree.map(node => 
-                    node.children.map(child => (
+                  {recursionTree.flatMap(node => 
+                    node.children.map((child, index) => (
                       <line
-                        key={`${node.id}-${child.id}`}
+                        key={`connection-${node.id}-${child.id}-${index}`}
                         x1={node.x}
                         y1={node.y + 15}
                         x2={child.x}
