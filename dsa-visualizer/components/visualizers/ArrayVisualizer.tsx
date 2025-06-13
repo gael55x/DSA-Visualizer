@@ -4,6 +4,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -102,26 +104,22 @@ export default function ArrayVisualizer() {
   const [inputValue, setInputValue] = useState('');
   const [inputIndex, setInputIndex] = useState('');
   const [searchValue, setSearchValue] = useState('');
-  const [message, setMessage] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = useCallback((text: string, _type?: string) => {
-    setMessage(text);
-    setTimeout(() => setMessage(''), 3000);
-  }, []);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const insertElement = useCallback(async () => {
     if (!inputValue.trim()) {
-      showMessage('Please enter a value', 'error');
+      showError('Please enter a value');
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -133,7 +131,7 @@ export default function ArrayVisualizer() {
     const index = inputIndex.trim() ? parseInt(inputIndex) : currentArray.length;
     
     if (isNaN(index) || index < 0 || index > currentArray.length) {
-      showMessage(`Index must be between 0 and ${currentArray.length}`, 'error');
+      showError(`Index must be between 0 and ${currentArray.length}`);
       setIsAnimating(false);
       return;
     }
@@ -189,19 +187,19 @@ export default function ArrayVisualizer() {
 
     setInputValue('');
     setInputIndex('');
-    showMessage(`Successfully inserted ${value} at index ${index}`, 'success');
+    showSuccess(`Successfully inserted ${value} at index ${index}`);
     setIsAnimating(false);
-  }, [inputValue, inputIndex, array, showMessage]);
+  }, [inputValue, inputIndex, array, showSuccess]);
 
   const searchElement = useCallback(async () => {
     if (!searchValue.trim()) {
-      showMessage('Please enter a value to search', 'error');
+      showError('Please enter a value to search');
       return;
     }
 
     const value = parseInt(searchValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -240,7 +238,7 @@ export default function ArrayVisualizer() {
         })));
         await delay(800);
         
-        showMessage(`Found ${value} at index ${i}!`, 'success');
+        showSuccess(`Found ${value} at index ${i}!`);
         setIsAnimating(false);
         setSearchValue('');
         return;
@@ -252,14 +250,14 @@ export default function ArrayVisualizer() {
     setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
     await delay(800);
     
-    showMessage(`Value ${value} not found in the array`, 'error');
+    showError(`Value ${value} not found in the array`);
     setSearchValue('');
     setIsAnimating(false);
-  }, [searchValue, array, showMessage]);
+  }, [searchValue, array, showSuccess, showError]);
     
   const deleteElement = useCallback(async (indexToDelete: number) => {
     if (indexToDelete < 0 || indexToDelete >= array.length) {
-      showMessage('Invalid index for deletion', 'error');
+      showError('Invalid index for deletion');
       return;
     }
 
@@ -290,13 +288,13 @@ export default function ArrayVisualizer() {
       }
     }
 
-    showMessage(`Successfully deleted ${valueToDelete} from the array`, 'success');
+    showSuccess(`Successfully deleted ${valueToDelete} from the array`);
     setIsAnimating(false);
-  }, [array, showMessage]);
+  }, [array, showSuccess]);
 
   const clearArray = () => {
     setArray([]);
-    setMessage('Array cleared');
+    showInfo('Array cleared');
   };
 
   const generateRandomArray = () => {
@@ -306,7 +304,7 @@ export default function ArrayVisualizer() {
       isHighlighted: false
     }));
     setArray(randomArray);
-    setMessage('Generated random array');
+    showInfo('Generated random array');
   };
 
   const currentCode = useMemo(() => {
@@ -477,12 +475,7 @@ export default function ArrayVisualizer() {
                   </button>
                 </div>
               </div>
-              
-              {message && (
-                <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-md text-sky-800 dark:text-sky-200">
-                  {message}
-                </div>
-              )}
+
             </div>
           </div>
 
