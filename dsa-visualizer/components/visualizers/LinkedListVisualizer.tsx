@@ -124,13 +124,13 @@ export default function LinkedListVisualizer() {
 
   const handleAddNode = useCallback(async () => {
     if (newValue.trim() === '') {
-      setMessage('Please enter a value');
+      showError('Please enter a value');
       return;
     }
 
     const value = parseInt(newValue);
     if (isNaN(value)) {
-      setMessage('Please enter a valid number');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -169,19 +169,19 @@ export default function LinkedListVisualizer() {
       
       if (step === 0) {
         // Create new node step
-        setMessage(`Creating new node with value ${value}`);
+        showInfo(`Creating new node with value ${value}`);
       } else if (step === 1) {
         // Check insertion position
         if (position === 'start') {
           // Insert at beginning
           newNodes = [newNode, ...nodes];
-          setMessage(`Added ${value} at the beginning of the list`);
+          showSuccess(`Added ${value} at the beginning of the list`);
           break;
         }
       } else if (step === 2) {
         // Start traversal for end/index insertion
         if (position === 'end' || position === 'index') {
-          setMessage('Starting traversal to find insertion point');
+          showInfo('Starting traversal to find insertion point');
           if (nodes.length > 0) {
             setTraversalIndex(0);
             setHighlightedId(nodes[0].id);
@@ -192,7 +192,7 @@ export default function LinkedListVisualizer() {
         if (position === 'index') {
           const idx = parseInt(index);
           if (isNaN(idx) || idx < 0 || idx > nodes.length) {
-            setMessage(`Index must be between 0 and ${nodes.length}`);
+            showError(`Index must be between 0 and ${nodes.length}`);
             setIsAnimating(false);
             return;
           }
@@ -216,11 +216,11 @@ export default function LinkedListVisualizer() {
         setHighlightedId(null);
         if (position === 'end') {
           newNodes = [...nodes, newNode];
-          setMessage(`Added ${value} at the end of the list`);
+          showSuccess(`Added ${value} at the end of the list`);
         } else if (position === 'index') {
           const idx = parseInt(index);
           newNodes = [...nodes.slice(0, idx), newNode, ...nodes.slice(idx)];
-          setMessage(`Added ${value} at index ${idx}`);
+          showSuccess(`Added ${value} at index ${idx}`);
         }
         break;
       }
@@ -236,11 +236,11 @@ export default function LinkedListVisualizer() {
       setHighlightedId(null);
       setIsAnimating(false);
     }, 1500);
-  }, [newValue, position, index, nodes, nextId]);
+  }, [newValue, position, index, nodes, nextId, showError, showInfo, showSuccess]);
 
   const handleRemoveNode = useCallback(async () => {
     if (nodes.length === 0) {
-      setMessage('List is already empty');
+      showError('List is already empty');
       return;
     }
 
@@ -260,13 +260,13 @@ export default function LinkedListVisualizer() {
         // Check if deleting from beginning
         if (position === 'start') {
           removedNode = newNodes.shift() || null;
-          setMessage(`Removed ${removedNode?.value} from the beginning of the list`);
+          showSuccess(`Removed ${removedNode?.value} from the beginning of the list`);
           break;
         }
       } else if (step === 1) {
         // Start traversal for end/index deletion
         if (position === 'end' || position === 'index') {
-          setMessage('Starting traversal to find deletion point');
+          showInfo('Starting traversal to find deletion point');
           if (nodes.length > 0) {
             setTraversalIndex(0);
             setHighlightedId(nodes[0].id);
@@ -277,7 +277,7 @@ export default function LinkedListVisualizer() {
         if (position === 'index') {
           const idx = parseInt(index);
           if (isNaN(idx) || idx < 0 || idx >= nodes.length) {
-            setMessage(`Index must be between 0 and ${nodes.length - 1}`);
+            showError(`Index must be between 0 and ${nodes.length - 1}`);
             setIsAnimating(false);
             return;
           }
@@ -300,18 +300,18 @@ export default function LinkedListVisualizer() {
         }
       } else if (step === 3) {
         // Highlight node to be deleted
-        setMessage(`Deleting node with value ${removedNode?.value}`);
+        showInfo(`Deleting node with value ${removedNode?.value}`);
         await delay(800);
       } else if (step === 4) {
         // Perform the actual deletion
         setHighlightedId(null);
         if (position === 'end') {
           newNodes.pop();
-          setMessage(`Removed ${removedNode?.value} from the end of the list`);
+          showSuccess(`Removed ${removedNode?.value} from the end of the list`);
         } else if (position === 'index') {
           const idx = parseInt(index);
           newNodes.splice(idx, 1);
-          setMessage(`Removed ${removedNode?.value} from index ${idx}`);
+          showSuccess(`Removed ${removedNode?.value} from index ${idx}`);
         }
         break;
       }
@@ -323,11 +323,11 @@ export default function LinkedListVisualizer() {
       setHighlightedId(null);
       setIsAnimating(false);
     }, 800);
-  }, [nodes, position, index]);
+  }, [nodes, position, index, showError, showInfo, showSuccess]);
 
   const handleTraverse = useCallback(async () => {
     if (nodes.length === 0) {
-      setMessage('List is empty - nothing to traverse');
+      showError('List is empty - nothing to traverse');
       return;
     }
 
@@ -374,22 +374,22 @@ export default function LinkedListVisualizer() {
       }
     }
 
-    setMessage(`Traversed ${nodes.length} nodes: [${nodes.map(n => n.value).join(', ')}]`);
+    showSuccess(`Traversed ${nodes.length} nodes: [${nodes.map(n => n.value).join(', ')}]`);
     setTraversalIndex(-1);
     setTimeout(() => {
       setHighlightedId(null);
       setIsAnimating(false);
     }, 1000);
-  }, [nodes]);
+  }, [nodes, showError, showSuccess]);
 
   const handleClear = () => {
     setNodes([]);
-    setMessage('Linked list cleared');
+    showInfo('Linked list cleared');
   };
 
   const resetView = () => {
     setCanvasOffset({ x: 0, y: 0 });
-    setMessage('View reset to center');
+    showInfo('View reset to center');
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -749,12 +749,6 @@ export default function LinkedListVisualizer() {
                   </button>
                 </div>
               </div>
-              
-              {message && (
-                <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-md text-sky-800 dark:text-sky-200">
-                  {message}
-                </div>
-              )}
             </div>
           </div>
 
@@ -987,6 +981,7 @@ export default function LinkedListVisualizer() {
           </div>
         </div>
       </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 
