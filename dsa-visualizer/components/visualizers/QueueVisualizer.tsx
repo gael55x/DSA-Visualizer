@@ -89,28 +89,23 @@ export default function QueueVisualizer() {
   ]);
   
   const [inputValue, setInputValue] = useState('');
-  const [message, setMessage] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('enqueue');
   const [currentStep, setCurrentStep] = useState(0);
   const [peekedValue, setPeekedValue] = useState<number | null>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
-
-  const showMessage = (text: string, _type?: 'success' | 'error' | 'info') => {
-    setMessage(text);
-    setTimeout(() => setMessage(''), 3000);
-  };
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const enqueueElement = useCallback(async () => {
     if (!inputValue.trim()) {
-      showMessage('Please enter a value', 'error');
+      showError('Please enter a value');
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -139,13 +134,13 @@ export default function QueueVisualizer() {
     }
 
     setInputValue('');
-    showMessage(`Successfully enqueued ${value} to the queue`, 'success');
+    showSuccess(`Successfully enqueued ${value} to the queue`);
     setIsAnimating(false);
-  }, [inputValue]);
+  }, [inputValue, showSuccess]);
 
   const dequeueElement = useCallback(async () => {
     if (queue.length === 0) {
-      showMessage('Queue is empty! Cannot dequeue from empty queue', 'error');
+      showError('Queue is empty! Cannot dequeue from empty queue');
       return;
     }
 
@@ -180,13 +175,13 @@ export default function QueueVisualizer() {
       }
     }
 
-    showMessage(`Successfully dequeued ${frontElement.value} from the queue`, 'success');
+    showSuccess(`Successfully dequeued ${frontElement.value} from the queue`);
     setIsAnimating(false);
-  }, [queue]);
+  }, [queue, showSuccess]);
 
   const peekElement = useCallback(async () => {
     if (queue.length === 0) {
-      showMessage('Queue is empty! Nothing to peek', 'error');
+      showError('Queue is empty! Nothing to peek');
       setPeekedValue(null);
       return;
     }
@@ -209,7 +204,7 @@ export default function QueueVisualizer() {
         })));
         
         setPeekedValue(frontElement.value);
-        showMessage(`Front element is ${frontElement.value}`, 'success');
+        showSuccess(`Front element is ${frontElement.value}`);
       }
     }
 
@@ -224,7 +219,7 @@ export default function QueueVisualizer() {
 
   const clearQueue = () => {
     setQueue([]);
-    setMessage('Queue cleared');
+    showInfo('Queue cleared');
     setPeekedValue(null);
   };
 
@@ -378,11 +373,7 @@ export default function QueueVisualizer() {
                 </div>
               </div>
               
-              {message && (
-                <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-md text-sky-800 dark:text-sky-200">
-                  {message}
-                </div>
-              )}
+
             </div>
           </div>
 
