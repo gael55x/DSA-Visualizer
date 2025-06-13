@@ -177,7 +177,7 @@ export default function QueueVisualizer() {
 
     showSuccess(`Successfully dequeued ${frontElement.value} from the queue`);
     setIsAnimating(false);
-  }, [queue, showSuccess]);
+  }, [queue, showSuccess, showError]);
 
   const peekElement = useCallback(async () => {
     if (queue.length === 0) {
@@ -215,7 +215,7 @@ export default function QueueVisualizer() {
     }, 2000);
 
     setIsAnimating(false);
-  }, [queue]);
+  }, [queue, showSuccess, showError]);
 
   const clearQueue = () => {
     setQueue([]);
@@ -613,6 +613,9 @@ export default function QueueVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 
