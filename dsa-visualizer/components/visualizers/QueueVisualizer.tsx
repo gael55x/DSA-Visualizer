@@ -62,7 +62,7 @@ const CODE_STEPS = {
     { lines: [2, 3], description: "Add the new element to the rear of the queue" },
     { lines: [5, 6], description: "Move the rear pointer to the next position" },
     { lines: [8, 9], description: "Increment the queue size counter" },
-    { line: 10, description: "Return the modified queue" }
+    { line: 11, description: "Return the modified queue" }
   ],
   
   dequeue: [
@@ -70,7 +70,7 @@ const CODE_STEPS = {
     { lines: [7, 8], description: "Get reference to the front element" },
     { lines: [10, 11], description: "Move the front pointer to the next position" },
     { lines: [13, 14], description: "Decrement the queue size counter" },
-    { line: 15, description: "Return the removed element" }
+    { line: 16, description: "Return the removed element" }
   ],
   
   peek: [

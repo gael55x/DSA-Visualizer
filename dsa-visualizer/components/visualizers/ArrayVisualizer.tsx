@@ -67,18 +67,18 @@ const ARRAY_OPERATIONS = {
 
 const CODE_STEPS = {
   insert: [
-    { lines: [2, 3, 4], description: "Validate that the index is within valid bounds" },
-    { lines: [7, 8, 9], description: "Start shifting elements from the end to make space" },
-    { line: 8, description: "Move each element one position to the right" },
-    { line: 11, description: "Insert the new value at the specified index" },
-    { line: 13, description: "Return the modified array" }
+    { lines: [2, 3, 4, 5], description: "Validate that the index is within valid bounds" },
+    { lines: [7, 8, 9, 10], description: "Start shifting elements from the end to make space" },
+    { line: 9, description: "Move each element one position to the right" },
+    { line: 13, description: "Insert the new value at the specified index" },
+    { line: 15, description: "Return the modified array" }
   ],
   
   search: [
-    { lines: [2, 3], description: "Start iterating through the array from index 0" },
-    { lines: [4, 5], description: "Compare current element with the target value" },
-    { line: 5, description: "Found a match! Return the current index" },
-    { line: 9, description: "Target not found in the array, return -1" }
+    { lines: [2, 3, 4, 5, 6, 7, 8], description: "Start iterating through the array from index 0" },
+    { lines: [4, 5, 6, 7], description: "Compare current element with the target value" },
+    { lines: [5, 6], description: "Found a match! Return the current index" },
+    { lines: [10], description: "Target not found in the array, return -1" }
   ],
   
   delete: [
@@ -211,14 +211,15 @@ export default function ArrayVisualizer() {
     // Clear previous highlights
     setArray(prev => prev.map(item => ({ ...item, isHighlighted: false, isSearching: false })));
 
-    // Step-by-step animation with code highlighting
-    for (let step = 0; step < CODE_STEPS.search.length; step++) {
-      setCurrentStep(step);
-      await delay(600);
+    // Step 0: Start iterating through the array from index 0
+    setCurrentStep(0);
+    await delay(800);
 
-      if (step === 0) {
-        // Start searching from index 0
-        for (let i = 0; i < array.length; i++) {
+    // Start searching from index 0
+    for (let i = 0; i < array.length; i++) {
+      // Step 1: Compare current element with the target value
+      setCurrentStep(1);
+      
       // Highlight current element being checked
       setArray(prev => prev.map((item, idx) => ({
         ...item,
@@ -226,29 +227,32 @@ export default function ArrayVisualizer() {
         isHighlighted: false
       })));
 
-          await delay(500);
+      await delay(800);
 
-          // Check if found
-          if (array[i].value === value) {
+      // Check if found
+      if (array[i].value === value) {
+        // Step 2: Found a match! Return the current index
+        setCurrentStep(2);
         setArray(prev => prev.map((item, idx) => ({
           ...item,
           isSearching: false,
           isHighlighted: idx === i
         })));
-            showMessage(`Found ${value} at index ${i}!`, 'success');
+        await delay(800);
+        
+        showMessage(`Found ${value} at index ${i}!`, 'success');
         setIsAnimating(false);
-            setSearchValue('');
+        setSearchValue('');
         return;
       }
     }
 
-        // Not found
+    // Step 3: Target not found in the array, return -1
+    setCurrentStep(3);
     setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
-        showMessage(`Value ${value} not found in the array`, 'error');
-        break;
-      }
-    }
-
+    await delay(800);
+    
+    showMessage(`Value ${value} not found in the array`, 'error');
     setSearchValue('');
     setIsAnimating(false);
   }, [searchValue, array, showMessage]);

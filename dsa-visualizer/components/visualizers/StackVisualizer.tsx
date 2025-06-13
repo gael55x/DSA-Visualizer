@@ -61,7 +61,7 @@ const CODE_STEPS = {
     { lines: [2, 3], description: "Add the new element to the top of the stack" },
     { lines: [5, 6], description: "Move the top pointer to the next position" },
     { lines: [8, 9], description: "Increment the stack size counter" },
-    { line: 10, description: "Return the modified stack" }
+    { line: 11, description: "Return the modified stack" }
   ],
   
   pop: [
@@ -69,7 +69,7 @@ const CODE_STEPS = {
     { lines: [7, 8], description: "Get reference to the top element" },
     { lines: [10, 11], description: "Move the top pointer to the previous position" },
     { lines: [13, 14], description: "Decrement the stack size counter" },
-    { line: 15, description: "Return the removed element" }
+    { line: 16, description: "Return the removed element" }
   ],
   
   peek: [

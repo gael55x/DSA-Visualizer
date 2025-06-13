@@ -71,34 +71,42 @@ export default function CodeHighlighter({
       <pre {...props} className="relative">
         {children}
         {/* Overlay for line highlighting */}
-        {currentStepLines.map((lineNumber, index) => (
-          <motion.div
-            key={`highlight-${lineNumber}-${index}`}
-            className="absolute pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              top: `${(lineNumber - 1) * 1.7 * 14 + 24}px`, // line height * font size + padding
-              left: '0',
-              right: '0',
-              height: `${1.7 * 14}px`, // line height * font size
-              backgroundColor: theme === 'dark' 
-                ? 'rgba(56, 189, 248, 0.25)' 
-                : 'rgba(56, 189, 248, 0.15)',
-              borderLeft: '4px solid rgb(56, 189, 248)',
-              borderRadius: '6px',
-              animation: theme === 'dark' 
-                ? 'pulse-highlight-dark 2.5s ease-in-out infinite' 
-                : 'pulse-highlight 2.5s ease-in-out infinite',
-              boxShadow: theme === 'dark'
-                ? '0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2)'
-                : '0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1)',
-              marginLeft: '3em', // Account for line numbers
-              zIndex: 1
-            }}
-          />
-        ))}
+        {currentStepLines.map((lineNumber, index) => {
+          // Calculate the actual line position accounting for line numbers and padding
+          const lineHeight = 1.7 * 14; // line height * font size
+          const lineNumberWidth = 3; // width of line numbers in em
+          const paddingTop = 24; // top padding in px
+          const lineNumberPadding = 16; // padding between line numbers and code in px
+          
+          return (
+            <motion.div
+              key={`highlight-${lineNumber}-${index}`}
+              className="absolute pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                top: `${(lineNumber - 1) * lineHeight + paddingTop}px`,
+                left: `${lineNumberWidth}em`,
+                right: '0',
+                height: `${lineHeight}px`,
+                backgroundColor: theme === 'dark' 
+                  ? 'rgba(56, 189, 248, 0.25)' 
+                  : 'rgba(56, 189, 248, 0.15)',
+                borderLeft: '4px solid rgb(56, 189, 248)',
+                borderRadius: '6px',
+                animation: theme === 'dark' 
+                  ? 'pulse-highlight-dark 2.5s ease-in-out infinite' 
+                  : 'pulse-highlight 2.5s ease-in-out infinite',
+                boxShadow: theme === 'dark'
+                  ? '0 0 0 1px rgba(56, 189, 248, 0.3), inset 0 0 0 1px rgba(56, 189, 248, 0.2)'
+                  : '0 0 0 1px rgba(56, 189, 248, 0.2), inset 0 0 0 1px rgba(56, 189, 248, 0.1)',
+                marginLeft: `${lineNumberPadding}px`,
+                zIndex: 1
+              }}
+            />
+          );
+        })}
       </pre>
     );
   };
