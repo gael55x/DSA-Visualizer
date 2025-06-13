@@ -5,6 +5,8 @@ import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Minus, Search, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn, delay } from '../../lib/utils';
 
 interface TreeNode {
@@ -134,7 +136,6 @@ export default function BinaryTreeVisualizer() {
   const [root, setRoot] = useState<TreeNode | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [searchValue, setSearchValue] = useState('');
-  const [message, setMessage] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
@@ -147,6 +148,7 @@ export default function BinaryTreeVisualizer() {
   const svgRef = useRef<SVGSVGElement>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   // Calculate node positions for visualization
   const calculatePositions = useCallback((node: TreeNode | null, x = 400, y = 80, level = 0): TreeNode | null => {
@@ -165,20 +167,15 @@ export default function BinaryTreeVisualizer() {
 
   const positionedRoot = useMemo(() => calculatePositions(root), [root, calculatePositions]);
 
-  const showMessage = (text: string, _type: 'success' | 'error' | 'info' = 'info') => {
-    setMessage(text);
-    setTimeout(() => setMessage(''), 3000);
-  };
-
   const insertNode = useCallback(async () => {
     if (!inputValue.trim()) {
-      showMessage('Please enter a value', 'error');
+      showError('Please enter a value');
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -235,7 +232,7 @@ export default function BinaryTreeVisualizer() {
         node.right = await insertRecursive(node.right, val, parentRoot || node);
       } else {
         // Value already exists
-        showMessage(`Value ${val} already exists in the tree`, 'error');
+        showError(`Value ${val} already exists in the tree`);
         return node;
       }
       
@@ -250,25 +247,25 @@ export default function BinaryTreeVisualizer() {
       const newRoot = await insertRecursive(root, value, root);
       setRoot(newRoot);
       setInputValue('');
-      showMessage(`Value ${value} inserted successfully!`, 'success');
+      showSuccess(`Value ${value} inserted successfully!`);
     } catch (_error) {
-      showMessage('Error inserting node', 'error');
+      showError('Error inserting node');
     } finally {
       setIsAnimating(false);
       setIsPlaying(false);
       setTimeout(() => setRoot(prev => clearHighlights(prev)), 500);
     }
-  }, [inputValue, root, animationSpeed]);
+  }, [inputValue, root, animationSpeed, showSuccess, showError]);
 
   const searchNode = useCallback(async () => {
     if (!searchValue.trim()) {
-      showMessage('Please enter a value to search', 'error');
+      showError('Please enter a value to search');
       return;
     }
 
     const value = parseInt(searchValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -284,7 +281,7 @@ export default function BinaryTreeVisualizer() {
       await delay(animationSpeed);
       
       if (node === null) {
-        showMessage(`Value ${val} not found`, 'error');
+        showError(`Value ${val} not found`);
         return null;
       }
       
@@ -293,7 +290,7 @@ export default function BinaryTreeVisualizer() {
         setCurrentStep(1);
         setRoot(prev => highlightNode(prev, node.id, 'isSearching'));
         await delay(animationSpeed);
-        showMessage(`Value ${val} found!`, 'success');
+        showSuccess(`Value ${val} found!`);
         return node;
       }
 
@@ -319,23 +316,23 @@ export default function BinaryTreeVisualizer() {
       const result = await searchRecursive(root, value);
       setSearchResult(result);
     } catch (_error) {
-      showMessage('Error searching node', 'error');
+      showError('Error searching node');
     } finally {
       setIsAnimating(false);
       setIsPlaying(false);
       setTimeout(() => setRoot(prev => clearHighlights(prev)), 2000);
     }
-  }, [searchValue, root, animationSpeed]);
+  }, [searchValue, root, animationSpeed, showError, showSuccess]);
 
   const deleteNode = useCallback(async () => {
     if (!inputValue.trim()) {
-      showMessage('Please enter a value to delete', 'error');
+      showError('Please enter a value to delete');
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -378,18 +375,17 @@ export default function BinaryTreeVisualizer() {
       const newRoot = deleteRecursive(root, value);
       setRoot(newRoot);
       setInputValue('');
-      showMessage(`Value ${value} deleted successfully!`, 'success');
+      showSuccess(`Value ${value} deleted successfully!`);
     } catch (_error) {
-      showMessage('Error deleting node', 'error');
+      showError('Error deleting node');
     } finally {
       setIsAnimating(false);
       setIsPlaying(false);
     }
-  }, [inputValue, root, animationSpeed]);
+  }, [inputValue, root, animationSpeed, showSuccess, showError]);
 
   const clearTree = () => {
     setRoot(null);
-    setMessage('');
     setCurrentStep(0);
     setSearchResult(null);
   };
@@ -403,7 +399,7 @@ export default function BinaryTreeVisualizer() {
     });
     
     setRoot(newRoot);
-    showMessage('Random tree generated!', 'success');
+    showSuccess('Random tree generated!');
   };
 
   const insertNodeSync = (node: TreeNode | null, value: number): TreeNode => {
@@ -738,19 +734,7 @@ export default function BinaryTreeVisualizer() {
               </div>
             </div>
 
-            {/* Status Message */}
-            {message && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-blue-800 dark:text-blue-200"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="font-medium">{message}</span>
-                </div>
-              </motion.div>
-            )}
+                
           </div>
 
           {/* Code Panel */}
@@ -989,6 +973,9 @@ export default function BinaryTreeVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

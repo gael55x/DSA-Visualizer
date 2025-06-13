@@ -4,6 +4,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -67,18 +69,18 @@ const ARRAY_OPERATIONS = {
 
 const CODE_STEPS = {
   insert: [
-    { lines: [2, 3, 4], description: "Validate that the index is within valid bounds" },
-    { lines: [7, 8, 9], description: "Start shifting elements from the end to make space" },
-    { line: 8, description: "Move each element one position to the right" },
-    { line: 11, description: "Insert the new value at the specified index" },
-    { line: 13, description: "Return the modified array" }
+    { lines: [2, 3, 4, 5], description: "Validate that the index is within valid bounds" },
+    { lines: [7, 8, 9, 10], description: "Start shifting elements from the end to make space" },
+    { line: 9, description: "Move each element one position to the right" },
+    { line: 13, description: "Insert the new value at the specified index" },
+    { line: 15, description: "Return the modified array" }
   ],
   
   search: [
-    { lines: [2, 3], description: "Start iterating through the array from index 0" },
-    { lines: [4, 5], description: "Compare current element with the target value" },
-    { line: 5, description: "Found a match! Return the current index" },
-    { line: 9, description: "Target not found in the array, return -1" }
+    { lines: [2, 3, 4, 5, 6, 7, 8], description: "Start iterating through the array from index 0" },
+    { lines: [4, 5, 6, 7], description: "Compare current element with the target value" },
+    { lines: [5, 6], description: "Found a match! Return the current index" },
+    { lines: [10], description: "Target not found in the array, return -1" }
   ],
   
   delete: [
@@ -102,26 +104,22 @@ export default function ArrayVisualizer() {
   const [inputValue, setInputValue] = useState('');
   const [inputIndex, setInputIndex] = useState('');
   const [searchValue, setSearchValue] = useState('');
-  const [message, setMessage] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
-  const showMessage = useCallback((text: string, _type?: string) => {
-    setMessage(text);
-    setTimeout(() => setMessage(''), 3000);
-  }, []);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const insertElement = useCallback(async () => {
     if (!inputValue.trim()) {
-      showMessage('Please enter a value', 'error');
+      showError('Please enter a value');
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -133,7 +131,7 @@ export default function ArrayVisualizer() {
     const index = inputIndex.trim() ? parseInt(inputIndex) : currentArray.length;
     
     if (isNaN(index) || index < 0 || index > currentArray.length) {
-      showMessage(`Index must be between 0 and ${currentArray.length}`, 'error');
+      showError(`Index must be between 0 and ${currentArray.length}`);
       setIsAnimating(false);
       return;
     }
@@ -189,19 +187,19 @@ export default function ArrayVisualizer() {
 
     setInputValue('');
     setInputIndex('');
-    showMessage(`Successfully inserted ${value} at index ${index}`, 'success');
+    showSuccess(`Successfully inserted ${value} at index ${index}`);
     setIsAnimating(false);
-  }, [inputValue, inputIndex, array, showMessage]);
+  }, [inputValue, inputIndex, array, showSuccess]);
 
   const searchElement = useCallback(async () => {
     if (!searchValue.trim()) {
-      showMessage('Please enter a value to search', 'error');
+      showError('Please enter a value to search');
       return;
     }
 
     const value = parseInt(searchValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -211,14 +209,15 @@ export default function ArrayVisualizer() {
     // Clear previous highlights
     setArray(prev => prev.map(item => ({ ...item, isHighlighted: false, isSearching: false })));
 
-    // Step-by-step animation with code highlighting
-    for (let step = 0; step < CODE_STEPS.search.length; step++) {
-      setCurrentStep(step);
-      await delay(600);
+    // Step 0: Start iterating through the array from index 0
+    setCurrentStep(0);
+    await delay(800);
 
-      if (step === 0) {
-        // Start searching from index 0
-        for (let i = 0; i < array.length; i++) {
+    // Start searching from index 0
+    for (let i = 0; i < array.length; i++) {
+      // Step 1: Compare current element with the target value
+      setCurrentStep(1);
+      
       // Highlight current element being checked
       setArray(prev => prev.map((item, idx) => ({
         ...item,
@@ -226,36 +225,39 @@ export default function ArrayVisualizer() {
         isHighlighted: false
       })));
 
-          await delay(500);
+      await delay(800);
 
-          // Check if found
-          if (array[i].value === value) {
+      // Check if found
+      if (array[i].value === value) {
+        // Step 2: Found a match! Return the current index
+        setCurrentStep(2);
         setArray(prev => prev.map((item, idx) => ({
           ...item,
           isSearching: false,
           isHighlighted: idx === i
         })));
-            showMessage(`Found ${value} at index ${i}!`, 'success');
+        await delay(800);
+        
+        showSuccess(`Found ${value} at index ${i}!`);
         setIsAnimating(false);
-            setSearchValue('');
+        setSearchValue('');
         return;
       }
     }
 
-        // Not found
+    // Step 3: Target not found in the array, return -1
+    setCurrentStep(3);
     setArray(prev => prev.map(item => ({ ...item, isSearching: false })));
-        showMessage(`Value ${value} not found in the array`, 'error');
-        break;
-      }
-    }
-
+    await delay(800);
+    
+    showError(`Value ${value} not found in the array`);
     setSearchValue('');
     setIsAnimating(false);
-  }, [searchValue, array, showMessage]);
+  }, [searchValue, array, showSuccess, showError]);
     
   const deleteElement = useCallback(async (indexToDelete: number) => {
     if (indexToDelete < 0 || indexToDelete >= array.length) {
-      showMessage('Invalid index for deletion', 'error');
+      showError('Invalid index for deletion');
       return;
     }
 
@@ -286,13 +288,13 @@ export default function ArrayVisualizer() {
       }
     }
 
-    showMessage(`Successfully deleted ${valueToDelete} from the array`, 'success');
+    showSuccess(`Successfully deleted ${valueToDelete} from the array`);
     setIsAnimating(false);
-  }, [array, showMessage]);
+  }, [array, showSuccess]);
 
   const clearArray = () => {
     setArray([]);
-    setMessage('Array cleared');
+    showInfo('Array cleared');
   };
 
   const generateRandomArray = () => {
@@ -302,7 +304,7 @@ export default function ArrayVisualizer() {
       isHighlighted: false
     }));
     setArray(randomArray);
-    setMessage('Generated random array');
+    showInfo('Generated random array');
   };
 
   const currentCode = useMemo(() => {
@@ -473,12 +475,7 @@ export default function ArrayVisualizer() {
                   </button>
                 </div>
               </div>
-              
-              {message && (
-                <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-md text-sky-800 dark:text-sky-200">
-                  {message}
-                </div>
-              )}
+
             </div>
           </div>
 
@@ -709,6 +706,9 @@ export default function ArrayVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 

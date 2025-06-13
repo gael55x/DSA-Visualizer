@@ -3,6 +3,8 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { delay } from '../../lib/utils';
 
 interface StackElement {
@@ -61,7 +63,7 @@ const CODE_STEPS = {
     { lines: [2, 3], description: "Add the new element to the top of the stack" },
     { lines: [5, 6], description: "Move the top pointer to the next position" },
     { lines: [8, 9], description: "Increment the stack size counter" },
-    { line: 10, description: "Return the modified stack" }
+    { line: 11, description: "Return the modified stack" }
   ],
   
   pop: [
@@ -69,7 +71,7 @@ const CODE_STEPS = {
     { lines: [7, 8], description: "Get reference to the top element" },
     { lines: [10, 11], description: "Move the top pointer to the previous position" },
     { lines: [13, 14], description: "Decrement the stack size counter" },
-    { line: 15, description: "Return the removed element" }
+    { line: 16, description: "Return the removed element" }
   ],
   
   peek: [
@@ -86,28 +88,23 @@ export default function StackVisualizer() {
   ]);
   
   const [inputValue, setInputValue] = useState('');
-  const [message, setMessage] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('push');
   const [currentStep, setCurrentStep] = useState(0);
   const [peekedValue, setPeekedValue] = useState<number | null>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
-
-  const showMessage = (text: string, _type?: 'success' | 'error' | 'info') => {
-    setMessage(text);
-    setTimeout(() => setMessage(''), 3000);
-  };
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const pushElement = useCallback(async () => {
     if (!inputValue.trim()) {
-      showMessage('Please enter a value', 'error');
+      showError('Please enter a value');
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) {
-      showMessage('Please enter a valid number', 'error');
+      showError('Please enter a valid number');
       return;
     }
 
@@ -137,13 +134,13 @@ export default function StackVisualizer() {
     }
 
     setInputValue('');
-    showMessage(`Successfully pushed ${value} to the stack`, 'success');
+    showSuccess(`Successfully pushed ${value} to the stack`);
     setIsAnimating(false);
-  }, [inputValue]);
+  }, [inputValue, showSuccess]);
 
   const popElement = useCallback(async () => {
     if (stack.length === 0) {
-      showMessage('Stack is empty! Cannot pop from empty stack', 'error');
+      showError('Stack is empty! Cannot pop from empty stack');
       return;
     }
 
@@ -177,13 +174,13 @@ export default function StackVisualizer() {
       }
     }
 
-    showMessage(`Successfully popped ${topElement.value} from the stack`, 'success');
+    showSuccess(`Successfully popped ${topElement.value} from the stack`);
     setIsAnimating(false);
-  }, [stack]);
+  }, [stack, showSuccess, showError]);
 
   const peekElement = useCallback(async () => {
     if (stack.length === 0) {
-      showMessage('Stack is empty! Nothing to peek', 'error');
+      showError('Stack is empty! Nothing to peek');
       setPeekedValue(null);
       return;
     }
@@ -205,7 +202,7 @@ export default function StackVisualizer() {
         })));
         
         setPeekedValue(topElement.value);
-        showMessage(`Top element is ${topElement.value}`, 'success');
+        showSuccess(`Top element is ${topElement.value}`);
       }
     }
 
@@ -220,7 +217,7 @@ export default function StackVisualizer() {
 
   const clearStack = () => {
     setStack([]);
-    setMessage('Stack cleared');
+    showInfo('Stack cleared');
     setPeekedValue(null);
   };
 
@@ -359,11 +356,7 @@ export default function StackVisualizer() {
                 </div>
               </div>
               
-              {message && (
-                <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-md text-sky-800 dark:text-sky-200">
-                  {message}
-                </div>
-              )}
+
             </div>
           </div>
 
@@ -603,6 +596,9 @@ export default function StackVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
