@@ -55,9 +55,9 @@ const Toast = ({ toast, onRemove }: ToastProps) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -50, scale: 0.95 }}
+      initial={{ opacity: 0, y: 50, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -50, scale: 0.95 }}
+      exit={{ opacity: 0, y: 50, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={`
         flex items-center gap-3 p-4 rounded-lg border backdrop-blur-sm
@@ -84,7 +84,7 @@ interface ToastContainerProps {
 
 export const ToastContainer = ({ toasts, onRemove }: ToastContainerProps) => {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed bottom-4 right-4 z-50 space-y-2">
       <AnimatePresence>
         {toasts.map((toast) => (
           <Toast key={toast.id} toast={toast} onRemove={onRemove} />
