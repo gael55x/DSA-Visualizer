@@ -2,6 +2,8 @@
 
 import React, { useState, useCallback } from 'react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 
 interface Node {
   value: number;
@@ -107,9 +109,9 @@ export default function LinkedListVisualizer() {
   const [newValue, setNewValue] = useState<string>('');
   const [position, setPosition] = useState<string>('end');
   const [index, setIndex] = useState<string>('0');
-  const [message, setMessage] = useState<string>('');
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [nextId, setNextId] = useState<number>(4);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<string>('insert');
   const [currentStep, setCurrentStep] = useState(0);
