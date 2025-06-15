@@ -148,7 +148,8 @@ export default function MergeSortVisualizer() {
       leftChild: false,
       rightChild: false
     })));
-  }, []);
+    showInfo('Visualization reset');
+  }, [showInfo]);
 
   const merge = async (leftStart: number, leftEnd: number, rightStart: number, rightEnd: number) => {
     // Step 4: Initialize merge process with pointers and result array
@@ -343,6 +344,7 @@ export default function MergeSortVisualizer() {
       setIsComplete(true);
       setCurrentOperation('Merge sort completed! All elements are now sorted.');
       setCurrentStep(8); // Final step - return result
+      showSuccess(`Merge sort completed! ${comparisons} comparisons, ${merges} merges`);
     } catch (error) {
       console.error('Error during merge sort:', error);
     }
@@ -671,6 +673,9 @@ export default function MergeSortVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 
