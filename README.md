@@ -1,6 +1,8 @@
-# DSA Visualizer
+# DSA Visualizer **[Work In Progress]**
 
 > Interactive web-based platform for learning data structures and algorithms through real-time visualizations and step-by-step code execution.
+
+**This project is currently under active development. Features and documentation are subject to change.**
 
 [![Built with Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
