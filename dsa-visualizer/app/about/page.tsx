@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Code, Heart, Users, Target, Zap, GitBranch, Coffee } from 'lucide-react';
+import { SiNextdotjs, SiTypescript, SiTailwindcss, SiFramer } from 'react-icons/si';
 
 export default function AboutPage() {
   const features = [
@@ -200,10 +201,26 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { name: "Next.js 14", description: "React Framework", color: "from-slate-600 to-slate-700" },
-              { name: "TypeScript", description: "Type Safety", color: "from-blue-600 to-blue-700" },
-              { name: "Tailwind CSS", description: "Modern Styling", color: "from-cyan-600 to-cyan-700" },
-              { name: "Framer Motion", description: "Smooth Animations", color: "from-purple-600 to-purple-700" }
+              { 
+                name: "Next.js 14", 
+                description: "React Framework", 
+                logo: <SiNextdotjs className="w-8 h-8 text-white" />
+              },
+              { 
+                name: "TypeScript", 
+                description: "Type Safety", 
+                logo: <SiTypescript className="w-8 h-8 text-[#3178C6]" />
+              },
+              { 
+                name: "Tailwind CSS", 
+                description: "Modern Styling", 
+                logo: <SiTailwindcss className="w-8 h-8 text-[#06B6D4]" />
+              },
+              { 
+                name: "Framer Motion", 
+                description: "Smooth Animations", 
+                logo: <SiFramer className="w-8 h-8 text-[#BB4B96]" />
+              }
             ].map((tech, index) => (
               <motion.div
                 key={tech.name}
@@ -212,7 +229,9 @@ export default function AboutPage() {
                 transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
                 className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-center hover:bg-slate-800/50 transition-all duration-300 group"
               >
-                <div className={`w-12 h-12 bg-gradient-to-br ${tech.color} rounded-xl mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}></div>
+                <div className="w-12 h-12 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-all duration-300">
+                  {tech.logo}
+                </div>
                 <h3 className="text-lg font-bold text-slate-100 mb-2">{tech.name}</h3>
                 <p className="text-slate-400 text-sm">{tech.description}</p>
               </motion.div>
@@ -236,10 +255,13 @@ export default function AboutPage() {
               &quot;There has to be a better way to learn this stuff!&quot; So I built this tool for myself, 
               and now I&apos;m sharing it with anyone who wants to make DSA less painful and more visual.
             </p>
-            <p className="text-base text-slate-400 leading-relaxed mb-8 max-w-xl mx-auto">
+            <p className="text-base text-slate-400 leading-relaxed mb-6 max-w-xl mx-auto">
               Whether you&apos;re cramming for an exam, prepping for interviews, or just curious about 
               how these algorithms actually work - I hope this helps make it click! ✨
             </p>
+            <div className="text-sm text-slate-500 bg-slate-800/50 rounded-lg p-4 mb-8 max-w-md mx-auto">
+              <span className="text-yellow-400">⚠️ Still WIP:</span> More algorithms coming when I get bored again! 😄
+            </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="https://github.com/gael55x"
