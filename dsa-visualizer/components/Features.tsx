@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Database, GitBranch, Layers, RotateCcw, ArrowUpDown, Binary } from 'lucide-react';
+import { ArrowRight, Database, GitBranch, Layers, RotateCcw, ArrowUpDown, Binary, Coffee, Heart } from 'lucide-react';
 
 export default function Features() {
   const dataStructures = [
@@ -187,7 +187,7 @@ export default function Features() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.8 }}
-          className="text-center"
+          className="text-center mb-16"
         >
           <div className="bg-gradient-to-r from-sky-500/10 to-yellow-500/10 border border-sky-500/20 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-slate-100 mb-4">
@@ -200,19 +200,84 @@ export default function Features() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/array"
-                className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105"
+                className="group inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105"
               >
-                <Database size={18} />
                 Start with Arrays
-                <ArrowRight size={16} />
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
+              
               <Link
-                href="/sorting/bubble-sort"
-                className="inline-flex items-center gap-3 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 border border-slate-600 hover:border-slate-500 rounded-xl font-semibold transition-all duration-300"
+                href="/about"
+                className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 hover:border-slate-500 rounded-xl font-semibold transition-all duration-300"
               >
-                <ArrowUpDown size={18} />
-                Try Sorting
+                Learn More
               </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Support Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm">
+            <h3 className="text-2xl font-bold text-slate-100 mb-6 text-center">Support This Project</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Contribute Section */}
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                    <GitBranch size={20} className="text-green-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-100">Contribute</h4>
+                </div>
+                <p className="text-slate-400 mb-4 text-sm leading-relaxed">
+                  Help improve DSA Visualizer by contributing new algorithms, fixing bugs, or enhancing the UI.
+                </p>
+                <Link
+                  href="https://github.com/gael55x/DSA-Visualizer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 hover:text-green-300 rounded-lg text-sm font-medium transition-all duration-300"
+                >
+                  <GitBranch size={16} />
+                  View on GitHub
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+
+              {/* Coffee Section */}
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+                    <Coffee size={20} className="text-yellow-400" />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-100">Buy Me a Coffee</h4>
+                </div>
+                <p className="text-slate-400 mb-4 text-sm leading-relaxed">
+                  Enjoyed learning with DSA Visualizer? Support development with a coffee!
+                </p>
+                <Link
+                  href="https://coff.ee/gailleamolg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 hover:text-yellow-300 rounded-lg text-sm font-medium transition-all duration-300"
+                >
+                  <Coffee size={16} />
+                  Buy Coffee
+                  <Heart size={14} className="text-red-400" />
+                </Link>
+              </div>
+            </div>
+
+            <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
+              <p className="text-slate-500 text-sm">
+                Built with 🔥 for learners by learners
+              </p>
             </div>
           </div>
         </motion.div>

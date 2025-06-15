@@ -8,31 +8,31 @@ export default function AboutPage() {
   const features = [
     {
       icon: Zap,
-      title: "Interactive Visualizations",
-      description: "Watch algorithms come to life with real-time animations and step-by-step execution."
+      title: "Real-time Visualizations",
+      description: "Watch algorithms come to life with smooth animations and step-by-step execution that makes complex concepts intuitive."
     },
     {
       icon: Code,
-      title: "Code Analysis",
-      description: "Comprehensive code highlighting and detailed complexity analysis for every algorithm."
+      title: "In-depth Code Analysis",
+      description: "Comprehensive code highlighting, complexity analysis, and educational explanations for every algorithm and data structure."
     },
     {
       icon: Users,
-      title: "Educational Focus",
-      description: "Designed with learners in mind, from beginners to advanced computer science students."
+      title: "Student-Focused Design",
+      description: "Built specifically for learners, from CS beginners to advanced students preparing for technical interviews."
     },
     {
       icon: Target,
-      title: "Practical Learning",
-      description: "Hands-on approach to understanding data structures and algorithms through interaction."
+      title: "Hands-on Learning",
+      description: "Interactive approach to understanding algorithms through direct manipulation and real-time feedback."
     }
   ];
 
   const stats = [
-    { number: "5", label: "Data Structures (more are coming)" },
-    { number: "10+", label: "Algorithms (more are coming)" },
-    { number: "100%", label: "Interactive" },
-    { number: "0$", label: "Cost" }
+    { number: "5+", label: "Data Structures" },
+    { number: "10+", label: "Sorting Algorithms" },
+    { number: "100%", label: "Interactive & Free" },
+    { number: "∞", label: "Learning Opportunities" }
   ];
 
   return (
@@ -57,8 +57,7 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto leading-relaxed">
-              Empowering learners to understand and master data structures and algorithms through 
-              interactive visualizations and comprehensive educational content.
+              Making data structures and algorithms accessible through interactive visualizations and comprehensive educational content.
             </p>
           </motion.div>
         </div>
@@ -75,17 +74,34 @@ export default function AboutPage() {
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-4xl font-bold text-slate-100 mb-6">Our Mission</h2>
+                <h2 className="text-4xl font-bold text-slate-100 mb-6">The Real Story</h2>
                 <p className="text-lg text-slate-300 leading-relaxed mb-6">
-                  I believe that understanding data structures and algorithms shouldn&apos;t be 
-                  intimidating or abstract. My mission for this summer is to make these fundamental 
-                  computer science concepts accessible, engaging, and intuitive through 
-                  interactive visualizations.
+                  Honestly? I got bored this summer 2025, and wanted to review my data structures and algorithms. 
+                  Instead of just grinding through textbooks and dry exercises, I thought - why not make this 
+                  actually interesting and visual?
                 </p>
+                <p className="text-lg text-slate-300 leading-relaxed mb-6">
+                  So I built DSA Visualizer! What started as my personal learning tool turned into something 
+                  I hope can help anyone who needs to:
+                </p>
+                <ul className="text-lg text-slate-300 leading-relaxed mb-6 space-y-2">
+                  <li className="flex items-start gap-3">
+                    <span className="text-sky-400 mt-1">•</span>
+                    <span>Review for their DSA class</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-sky-400 mt-1">•</span>
+                    <span>Prep for technical interviews</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-sky-400 mt-1">•</span>
+                    <span>Just learn algorithms in a fun, visual way</span>
+                  </li>
+                </ul>
                 <p className="text-lg text-slate-300 leading-relaxed">
-                  Whether you&apos;re a student preparing for technical interviews, a developer 
-                  brushing up on fundamentals, or simply curious about how algorithms work, 
-                  DSA Visualizer provides the tools you need to learn effectively.
+                  Built during summer 2025, this project represents a passion for making computer science education 
+                  more accessible and engaging for everyone. If it helps even one person understand how algorithms 
+                  work, then it was worth every line of code!
                 </p>
               </div>
               <div className="flex justify-center">
@@ -110,9 +126,9 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-slate-100 mb-4">Why Choose DSA Visualizer?</h2>
+            <h2 className="text-4xl font-bold text-slate-100 mb-4">What Makes Us Different?</h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Built with modern web technologies and educational best practices
+              Combining modern web technology with proven educational principles
             </p>
           </motion.div>
 
@@ -148,7 +164,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
             className="bg-gradient-to-r from-sky-500/10 to-yellow-500/10 border border-sky-500/20 rounded-3xl p-12"
           >
-            <h2 className="text-3xl font-bold text-slate-100 text-center mb-12">By the Numbers (Mostly WIP)</h2>
+            <h2 className="text-3xl font-bold text-slate-100 text-center mb-12">Project Highlights</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                 <motion.div
@@ -176,31 +192,67 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold text-slate-100 mb-4">Built with Modern Technology</h2>
+            <h2 className="text-4xl font-bold text-slate-100 mb-4">Built with Modern Tech Stack</h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Leveraging cutting-edge web technologies to deliver smooth, responsive, and accessible visualizations
+              Leveraging cutting-edge web technologies for smooth, responsive, and accessible learning experiences
             </p>
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { name: "Next.js", description: "React Framework" },
-              { name: "TypeScript", description: "Type Safety" },
-              { name: "Tailwind CSS", description: "Styling" },
-              { name: "Framer Motion", description: "Animations" }
+              { name: "Next.js 14", description: "React Framework", color: "from-slate-600 to-slate-700" },
+              { name: "TypeScript", description: "Type Safety", color: "from-blue-600 to-blue-700" },
+              { name: "Tailwind CSS", description: "Modern Styling", color: "from-cyan-600 to-cyan-700" },
+              { name: "Framer Motion", description: "Smooth Animations", color: "from-purple-600 to-purple-700" }
             ].map((tech, index) => (
               <motion.div
                 key={tech.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-                className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-center hover:bg-slate-800/50 transition-all duration-300"
+                className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 text-center hover:bg-slate-800/50 transition-all duration-300 group"
               >
+                <div className={`w-12 h-12 bg-gradient-to-br ${tech.color} rounded-xl mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}></div>
                 <h3 className="text-lg font-bold text-slate-100 mb-2">{tech.name}</h3>
                 <p className="text-slate-400 text-sm">{tech.description}</p>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Developer Section */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-12 text-center"
+          >
+            <h2 className="text-3xl font-bold text-slate-100 mb-6">Hey, I&apos;m Gaille! 👋</h2>
+            <p className="text-lg text-slate-300 leading-relaxed mb-8 max-w-2xl mx-auto">
+              I&apos;m just a developer who got tired of boring algorithm explanations and thought, 
+              &quot;There has to be a better way to learn this stuff!&quot; So I built this tool for myself, 
+              and now I&apos;m sharing it with anyone who wants to make DSA less painful and more visual.
+            </p>
+            <p className="text-base text-slate-400 leading-relaxed mb-8 max-w-xl mx-auto">
+              Whether you&apos;re cramming for an exam, prepping for interviews, or just curious about 
+              how these algorithms actually work - I hope this helps make it click! ✨
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="https://github.com/gael55x"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500 text-slate-100 rounded-xl font-semibold transition-all duration-300"
+              >
+                <GitBranch size={20} />
+                Check out my GitHub
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -223,7 +275,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-slate-100 mb-4">Contribute</h3>
                 <p className="text-slate-400 mb-6">
-                  Help us improve DSA Visualizer by contributing new features, fixing bugs, or enhancing documentation.
+                  Help make DSA Visualizer even better! Contribute new algorithms, fix bugs, improve UI/UX, or enhance documentation.
                 </p>
                 <Link
                   href="https://github.com/gael55x/DSA-Visualizer"
@@ -244,10 +296,10 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-slate-100 mb-4">Buy Me a Coffee</h3>
                 <p className="text-slate-400 mb-6">
-                  Support the development of DSA Visualizer and help us create more amazing educational content.
+                  Enjoyed learning with DSA Visualizer? Support continued development and help create more educational content!
                 </p>
                 <Link
-                  href="https://buymeacoffee.com/gael55x"
+                  href="https://coff.ee/gailleamolg"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 hover:text-yellow-300 rounded-xl font-semibold transition-all duration-300"
@@ -257,6 +309,12 @@ export default function AboutPage() {
                   <Heart size={16} className="text-red-400" />
                 </Link>
               </div>
+            </div>
+
+            <div className="text-center mt-8 pt-8 border-t border-slate-700/50">
+              <p className="text-slate-500 text-sm">
+                Built with 🔥 for the programming community • Open source and free forever
+              </p>
             </div>
           </motion.div>
         </div>
@@ -271,11 +329,11 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-slate-100 mb-6">
-              Ready to Start Learning?
+              Ready to Start Your Journey?
             </h2>
             <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
-              Join thousands of learners who are mastering data structures and algorithms 
-              through interactive visualizations.
+              Join the growing community of learners mastering data structures and algorithms 
+              through interactive, visual experiences.
             </p>
             <Link
               href="/array"

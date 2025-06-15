@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, GitBranch, Coffee, Heart, Code, Zap } from 'lucide-react';
+import { ArrowRight, Code, Zap, GitBranch } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -53,8 +53,8 @@ export default function Hero() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-lg md:text-xl text-slate-400 mb-12 max-w-4xl mx-auto leading-relaxed"
           >
-            Understand computer science concepts through interactive visualizations. 
-            Watch algorithms come to life with step-by-step animations and comprehensive code analysis.
+            Master computer science fundamentals through interactive visualizations. 
+            Watch algorithms execute step-by-step with comprehensive code analysis and real-time animations.
           </motion.p>
 
           {/* Feature Highlights */}
@@ -88,7 +88,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
           >
             <Link
               href="/array"
@@ -106,69 +106,24 @@ export default function Hero() {
             </Link>
           </motion.div>
 
-          {/* Support Section */}
+          {/* Quick Stats */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="max-w-4xl mx-auto"
+            transition={{ delay: 0.8, duration: 0.8 }}
+            className="flex flex-wrap justify-center gap-8 text-center"
           >
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm">
-              <h3 className="text-2xl font-bold text-slate-100 mb-6">Support This Project</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Contribute Section */}
-                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                      <GitBranch size={20} className="text-green-400" />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-100">Contribute</h4>
-                  </div>
-                  <p className="text-slate-400 mb-4 text-sm leading-relaxed">
-                    Help improve DSA Visualizer by contributing new algorithms, fixing bugs, or enhancing the UI.
-                  </p>
-                  <Link
-                    href="https://github.com/gael55x/DSA-Visualizer"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 hover:text-green-300 rounded-lg text-sm font-medium transition-all duration-300"
-                  >
-                    <GitBranch size={16} />
-                    View on GitHub
-                    <ArrowRight size={14} />
-                  </Link>
-                </div>
-
-                {/* Coffee Section */}
-                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
-                      <Coffee size={20} className="text-yellow-400" />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-100">Buy Me a Coffee</h4>
-                  </div>
-                  <p className="text-slate-400 mb-4 text-sm leading-relaxed">
-                    Enjoyed learning with DSA Visualizer? Support development with a coffee!
-                  </p>
-                  <Link
-                    href="https://coff.ee/gailleamolg"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 hover:text-yellow-300 rounded-lg text-sm font-medium transition-all duration-300"
-                  >
-                    <Coffee size={16} />
-                    Buy Coffee
-                    <Heart size={14} className="text-red-400" />
-                  </Link>
-                </div>
-              </div>
-
-              <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
-                <p className="text-slate-500 text-sm">
-                  For the community
-                </p>
-              </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-sky-400">5+</span>
+              <span className="text-slate-400 text-sm">Data Structures</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-yellow-400">10+</span>
+              <span className="text-slate-400 text-sm">Algorithms</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-green-400">100%</span>
+              <span className="text-slate-400 text-sm">Interactive</span>
             </div>
           </motion.div>
         </motion.div>
