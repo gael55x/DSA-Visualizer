@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn, delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -110,6 +112,7 @@ export default function MergeSortVisualizer() {
   const cancelRef = useRef(false);
 
   const generateId = (index: number) => `element-${index}-${Date.now()}`;
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const generateRandomArray = useCallback(() => {
     const newArray = [];
@@ -121,7 +124,8 @@ export default function MergeSortVisualizer() {
     }
     setArray(newArray);
     resetSort();
-  }, []);
+    showInfo('Generated new random array');
+  }, [showInfo]);
 
   const resetSort = useCallback(() => {
     setIsPlaying(false);

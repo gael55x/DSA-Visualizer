@@ -45,13 +45,13 @@ const BUBBLE_SORT_CODE = `function bubbleSort(array) {
 const CODE_STEPS = {
   bubbleSort: [
     { lines: [2], description: "Get the length of the array" },
-    { lines: [4, 5], description: "Start outer loop for number of passes" },
-    { lines: [5], description: "Initialize swapped flag for this pass" },
-    { lines: [7, 8], description: "Start inner loop for comparisons in current pass" },
-    { lines: [10, 11], description: "Compare adjacent elements" },
+    { lines: [5, 6], description: "Start outer loop for number of passes" },
+    { lines: [6], description: "Initialize swapped flag for this pass" },
+    { lines: [8, 9], description: "Start inner loop for comparisons in current pass" },
+    { lines: [11, 12], description: "Compare adjacent elements" },
     { lines: [12, 13, 14], description: "Swap elements if they are in wrong order" },
-    { lines: [17, 18], description: "Check if any swaps occurred in this pass" },
-    { lines: [21], description: "Return the sorted array" }
+    { lines: [17, 18, 19, 20], description: "Check if any swaps occurred in this pass" },
+    { lines: [23], description: "Return the sorted array" }
   ]
 };
 
