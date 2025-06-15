@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn, delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -75,6 +77,7 @@ export default function InsertionSortVisualizer() {
   const cancelRef = useRef(false);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const generateRandomArray = useCallback(() => {
     const newArray = [];
@@ -86,7 +89,8 @@ export default function InsertionSortVisualizer() {
     }
     setArray(newArray);
     resetSort();
-  }, []);
+    showInfo('Generated new random array');
+  }, [showInfo]);
 
   const resetSort = useCallback(() => {
     cancelRef.current = true; // Cancel any ongoing animation
@@ -108,7 +112,8 @@ export default function InsertionSortVisualizer() {
       isKey: false
     })));
     setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
-  }, []);
+    showInfo('Visualization reset');
+  }, [showInfo]);
 
   // Cancellable delay function
   const cancellableDelay = async (ms: number) => {
@@ -278,6 +283,7 @@ export default function InsertionSortVisualizer() {
       setIsComplete(true);
       setIsPlaying(false);
       setCurrentStep(5);
+      showSuccess(`Insertion sort completed! ${totalComparisons} comparisons, ${totalShifts} shifts`);
     } catch (error) {
       // Handle cancellation gracefully
       if (error instanceof Error && error.message === 'Cancelled') {
@@ -327,7 +333,7 @@ export default function InsertionSortVisualizer() {
                   <AnimatePresence mode="wait">
                     {array.map((item, index) => (
                       <motion.div
-                        key={index}
+                        key={item.id}
                         layout
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -678,6 +684,9 @@ export default function InsertionSortVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 

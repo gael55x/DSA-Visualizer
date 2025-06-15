@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn, delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -110,6 +112,7 @@ export default function MergeSortVisualizer() {
   const cancelRef = useRef(false);
 
   const generateId = (index: number) => `element-${index}-${Date.now()}`;
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const generateRandomArray = useCallback(() => {
     const newArray = [];
@@ -121,9 +124,11 @@ export default function MergeSortVisualizer() {
     }
     setArray(newArray);
     resetSort();
-  }, []);
+    showInfo('Generated new random array');
+  }, [showInfo]);
 
   const resetSort = useCallback(() => {
+    cancelRef.current = true; // Cancel any ongoing animation
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentStep(0);
@@ -144,7 +149,33 @@ export default function MergeSortVisualizer() {
       leftChild: false,
       rightChild: false
     })));
-  }, []);
+    setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
+    showInfo('Visualization reset');
+  }, [showInfo]);
+
+  // Cancellable delay function
+  const cancellableDelay = async (ms: number) => {
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        if (cancelRef.current) {
+          reject(new Error('Cancelled'));
+        } else {
+          resolve();
+        }
+      }, ms);
+
+      // Check for cancellation periodically
+      const checkCancellation = () => {
+        if (cancelRef.current) {
+          clearTimeout(timeout);
+          reject(new Error('Cancelled'));
+        }
+      };
+      
+      const interval = setInterval(checkCancellation, 50);
+      setTimeout(() => clearInterval(interval), ms);
+    });
+  };
 
   const merge = async (leftStart: number, leftEnd: number, rightStart: number, rightEnd: number) => {
     // Step 4: Initialize merge process with pointers and result array
@@ -158,12 +189,12 @@ export default function MergeSortVisualizer() {
       isActive: idx >= leftStart && idx <= rightEnd
     })));
 
-    await delay(speed);
+    await cancellableDelay(speed);
 
     // Step 5: Compare elements and merge in sorted order
     setCurrentStep(5);
     setCurrentOperation('Comparing and merging elements in sorted order');
-    await delay(speed);
+    await cancellableDelay(speed);
 
     // Create temporary arrays for merging using current array state
     setArray(prev => {
@@ -221,12 +252,12 @@ export default function MergeSortVisualizer() {
     // Show step 6: Add remaining elements from left array
     setCurrentStep(6);
     setCurrentOperation('Adding remaining elements from left array');
-    await delay(speed);
+    await cancellableDelay(speed);
     
     // Show step 7: Add remaining elements from right array  
     setCurrentStep(7);
     setCurrentOperation('Adding remaining elements from right array');
-    await delay(speed);
+    await cancellableDelay(speed);
 
     // Mark merged section as sorted
     setArray(prev => prev.map((item, idx) => ({
@@ -242,7 +273,7 @@ export default function MergeSortVisualizer() {
     // Step 8: Return merged result
     setCurrentStep(8);
     setCurrentOperation('Merge completed - returning result');
-    await delay(speed);
+    await cancellableDelay(speed);
   };
 
   const mergeSortRecursive = async (left: number, right: number, level: number = 0): Promise<void> => {
@@ -260,7 +291,7 @@ export default function MergeSortVisualizer() {
         level: idx === left ? level : item.level
       })));
       
-      await delay(speed * 0.5);
+      await cancellableDelay(speed * 0.5);
       return;
     }
 
@@ -275,7 +306,7 @@ export default function MergeSortVisualizer() {
       level: idx >= left && idx <= right ? level : item.level
     })));
     
-    await delay(speed);
+    await cancellableDelay(speed);
 
     // Divide
     const middle = Math.floor((left + right) / 2);
@@ -288,7 +319,7 @@ export default function MergeSortVisualizer() {
       isDividing: false
     })));
 
-    await delay(speed);
+    await cancellableDelay(speed);
 
     // Step 2: Conquer: recursively sort both halves
     setCurrentStep(2);
@@ -301,7 +332,7 @@ export default function MergeSortVisualizer() {
     // Step 3: Combine: merge the sorted halves together
     setCurrentStep(3);
     setCurrentOperation('Combining: merging sorted halves');
-    await delay(speed * 0.5);
+    await cancellableDelay(speed * 0.5);
     
     // Combine - merge the sorted halves
     await merge(left, middle, middle + 1, right);
@@ -316,12 +347,13 @@ export default function MergeSortVisualizer() {
   };
 
   const mergeSort = useCallback(async () => {
-    setIsPlaying(true);
-    setIsComplete(false);
-    setCurrentOperation('Starting merge sort...');
-    setCurrentStep(0);
-    
     try {
+      cancelRef.current = false;
+      setIsPlaying(true);
+      setIsComplete(false);
+      setCurrentOperation('Starting merge sort...');
+      setCurrentStep(0);
+      
       await mergeSortRecursive(0, array.length - 1, 0);
       
       // Mark all elements as sorted
@@ -339,11 +371,18 @@ export default function MergeSortVisualizer() {
       setIsComplete(true);
       setCurrentOperation('Merge sort completed! All elements are now sorted.');
       setCurrentStep(8); // Final step - return result
+      showSuccess(`Merge sort completed! ${comparisons} comparisons, ${merges} merges`);
+      setIsPlaying(false);
     } catch (error) {
+      // Handle cancellation gracefully
+      if (error instanceof Error && error.message === 'Cancelled') {
+        setIsPlaying(false);
+        setIsPaused(true);
+        return;
+      }
       console.error('Error during merge sort:', error);
+      setIsPlaying(false);
     }
-    
-    setIsPlaying(false);
   }, [array, speed, comparisons, recursionDepth]);
 
   const handlePlayPause = () => {
@@ -353,6 +392,7 @@ export default function MergeSortVisualizer() {
     }
     
     if (isPlaying) {
+      cancelRef.current = true;
       setIsPlaying(false);
       setIsPaused(true);
     } else {
@@ -667,6 +707,9 @@ export default function MergeSortVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 

@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, ChevronDown, GitBranch, ArrowRight, ArrowDown, Repeat, TreePine } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn } from '../../lib/utils';
 
 interface RecursionNode {
@@ -283,6 +285,7 @@ export default function RecursionVisualizer() {
   const nodeCounter = useRef(0);
 
   const generateId = () => `node_${nodeCounter.current++}`;
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const resetVisualization = useCallback(() => {
     cancelRef.current = true;
@@ -296,7 +299,8 @@ export default function RecursionVisualizer() {
     setTotalNodes(0);
     nodeCounter.current = 0;
     setTimeout(() => { cancelRef.current = false; }, 100);
-  }, []);
+    showInfo('Visualization reset');
+  }, [showInfo]);
 
   const cancellableDelay = async (ms: number) => {
     return new Promise<void>((resolve, reject) => {
@@ -540,6 +544,7 @@ export default function RecursionVisualizer() {
 
       setIsComplete(true);
       setIsPlaying(false);
+      showSuccess(`Recursion completed! Max depth: ${maxDepth}, Total nodes: ${totalNodes}`);
     } catch (error) {
       if (error instanceof Error && error.message === 'Cancelled') {
         setIsPlaying(false);
@@ -900,6 +905,9 @@ export default function RecursionVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 

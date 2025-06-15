@@ -42,25 +42,32 @@ export default function Navbar() {
             className="flex items-center gap-3 text-slate-100 hover:text-sky-400 transition-colors"
           >
             {/* DSA Tree Logo */}
-            <div className="relative">
-              <svg width="32" height="32" viewBox="0 0 32 32" className="transition-transform hover:scale-110">
-                {/* Root node */}
-                <circle cx="16" cy="6" r="3" fill="#38bdf8" className="drop-shadow-lg"/>
-                
+            <div className="relative w-8 h-8">
+              <svg 
+                width="32" 
+                height="32" 
+                viewBox="0 0 32 32" 
+                className="transition-transform hover:scale-110"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 {/* Connections */}
-                <line x1="16" y1="9" x2="10" y2="18" stroke="#64748b" strokeWidth="2"/>
-                <line x1="16" y1="9" x2="22" y2="18" stroke="#64748b" strokeWidth="2"/>
-                <line x1="10" y1="21" x2="6" y2="26" stroke="#64748b" strokeWidth="1.5"/>
-                <line x1="10" y1="21" x2="14" y2="26" stroke="#64748b" strokeWidth="1.5"/>
+                <path d="M16 9L10 18M16 9L22 18M10 21L6 26M10 21L14 26" 
+                      stroke="#64748b" 
+                      strokeWidth="2" 
+                      strokeLinecap="round"/>
+                
+                {/* Root node */}
+                <circle cx="16" cy="6" r="3" fill="#38bdf8" stroke="#1e293b" strokeWidth="1"/>
                 
                 {/* Child nodes */}
-                <circle cx="10" cy="18" r="2.5" fill="#22d3ee" className="drop-shadow-md"/>
-                <circle cx="22" cy="18" r="2.5" fill="#22d3ee" className="drop-shadow-md"/>
+                <circle cx="10" cy="18" r="2.5" fill="#22d3ee" stroke="#1e293b" strokeWidth="1"/>
+                <circle cx="22" cy="18" r="2.5" fill="#22d3ee" stroke="#1e293b" strokeWidth="1"/>
                 
                 {/* Leaf nodes */}
-                <circle cx="6" cy="26" r="2" fill="#fbbf24" className="drop-shadow-sm"/>
-                <circle cx="14" cy="26" r="2" fill="#fbbf24" className="drop-shadow-sm"/>
-                <circle cx="22" cy="26" r="2" fill="#fbbf24" className="drop-shadow-sm"/>
+                <circle cx="6" cy="26" r="2" fill="#fbbf24" stroke="#1e293b" strokeWidth="1"/>
+                <circle cx="14" cy="26" r="2" fill="#fbbf24" stroke="#1e293b" strokeWidth="1"/>
+                <circle cx="22" cy="26" r="2" fill="#fbbf24" stroke="#1e293b" strokeWidth="1"/>
               </svg>
             </div>
             <div>

@@ -92,8 +92,8 @@ const CODE_STEPS = {
   
   traverse: [
     { lines: [2, 3], description: "Start traversal from head and initialize array" },
-    { lines: [6, 7, 8], description: "Loop: check node exists, add value, move to next" },
-    { line: 11, description: "Return the collected values" }
+    { lines: [7, 8, 9], description: "Loop: check node exists, add value, move to next" }, 
+    { lines: [7,8,9], description: "Return the collected values" }
   ]
 };
 
@@ -334,45 +334,38 @@ export default function LinkedListVisualizer() {
     setIsAnimating(true);
     setCurrentOperation('traverse');
     setTraversalIndex(-1);
+    setHighlightedId(null);
 
-    // Step-by-step traversal animation
-    for (let step = 0; step < CODE_STEPS.traverse.length; step++) {
-      setCurrentStep(step);
-      await delay(800);
+    // Step 1: Start from head
+    setCurrentStep(0);
+    await delay(800);
+    showInfo('Starting traversal from head node');
+
+    // Step 2: Initialize array
+    setCurrentStep(1);
+    await delay(600);
+
+    // Step 3: Begin traversal loop
+    setCurrentStep(2);
+    await delay(600);
+    
+    // Traverse each node
+    for (let i = 0; i < nodes.length; i++) {
+      setTraversalIndex(i);
+      setHighlightedId(nodes[i].id);
+      showInfo(`Visiting node at position ${i} with value ${nodes[i].value}`);
+      await delay(1000);
       
-      if (step === 0) {
-        // Start from head
-        setTraversalIndex(0);
-        setHighlightedId(nodes[0].id);
-      } else if (step === 1) {
-        // Initialize values array
-        continue;
-      } else if (step === 2) {
-        // Start the traversal loop
-        for (let i = 0; i < nodes.length; i++) {
-          setTraversalIndex(i);
-          setHighlightedId(nodes[i].id);
-          
-          // Show "add value to array" step
-          if (i < nodes.length) {
-            setCurrentStep(3); // Add current node's value
-            await delay(600);
-            
-            if (i < nodes.length - 1) {
-              setCurrentStep(4); // Move to next node
-              await delay(600);
-              setCurrentStep(5); // Check next node
-              await delay(600);
-            }
-          }
-        }
-        
-        // Final step - return values
-        setCurrentStep(6);
-        await delay(800);
-        break;
+      // Show current.next operation if not the last node
+      if (i < nodes.length - 1) {
+        showInfo(`Moving to next node...`);
+        await delay(600);
       }
     }
+    
+    // Final step - return values
+    setCurrentStep(3);
+    await delay(800);
 
     showSuccess(`Traversed ${nodes.length} nodes: [${nodes.map(n => n.value).join(', ')}]`);
     setTraversalIndex(-1);
@@ -380,7 +373,7 @@ export default function LinkedListVisualizer() {
       setHighlightedId(null);
       setIsAnimating(false);
     }, 1000);
-  }, [nodes, showError, showSuccess]);
+  }, [nodes, showError, showSuccess, showInfo]);
 
   const handleClear = () => {
     setNodes([]);
@@ -519,19 +512,46 @@ export default function LinkedListVisualizer() {
                         transition: isPanningCanvas ? 'none' : 'transform 0.2s ease'
                       }}
                     >
-                    <svg 
-                      className="absolute inset-0 w-full h-full pointer-events-none"
-                      style={{ zIndex: 1 }}
-                    >
-                      {/* Draw arrows between connected nodes */}
-                                              {nodes.map((node, idx) => {
-                          const nextNode = nodes[idx + 1];
-                          if (idx < nodes.length - 1 && node.x && node.y && nextNode?.x && nextNode?.y) {
-                            const startX = node.x + 40; // center of current node
-                            const startY = node.y + 32;
-                            const endX = nextNode.x + 40; // center of next node
-                            const endY = nextNode.y + 32;
+                    {(() => {
+                      // Calculate SVG bounds based on node positions
+                      const nodePositions = nodes.map(node => ({ x: node.x || 0, y: node.y || 0 }));
+                      if (nodePositions.length === 0) return null;
+                      
+                      const minX = Math.min(...nodePositions.map(p => p.x)) - 50;
+                      const maxX = Math.max(...nodePositions.map(p => p.x)) + 200; // Extra space for NULL pointer
+                      const minY = Math.min(...nodePositions.map(p => p.y)) - 50;
+                      const maxY = Math.max(...nodePositions.map(p => p.y)) + 100;
+                      
+                      const svgWidth = Math.max(800, maxX - minX);
+                      const svgHeight = Math.max(400, maxY - minY);
+                      
+                      return (
+                        <svg 
+                          className="absolute pointer-events-none"
+                          style={{ 
+                            zIndex: 1,
+                            left: Math.min(0, minX),
+                            top: Math.min(0, minY),
+                            width: svgWidth,
+                            height: svgHeight
+                          }}
+                          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                        >
+                    
+                                            {/* Draw arrows between connected nodes */}
+                      {nodes.map((node, idx) => {
+                        const nextNode = nodes[idx + 1];
+                        if (idx < nodes.length - 1 && node.x && node.y && nextNode?.x && nextNode?.y) {
+                          // Adjust coordinates relative to SVG positioning
+                          const svgOffsetX = Math.min(0, minX);
+                          const svgOffsetY = Math.min(0, minY);
                           
+                          const startX = node.x + 80 - svgOffsetX; // right edge of current node (w-20 = 80px)
+                          const startY = node.y + 32 - svgOffsetY; // center vertically (h-16 = 64px, so 32px is center)
+                          const endX = nextNode.x - 5 - svgOffsetX; // slight gap before next node
+                          const endY = nextNode.y + 32 - svgOffsetY; // center vertically
+                          const isHighlighted = traversalIndex === idx;
+                        
                           return (
                             <line
                               key={`arrow-${node.id}`}
@@ -539,32 +559,61 @@ export default function LinkedListVisualizer() {
                               y1={startY}
                               x2={endX}
                               y2={endY}
-                              stroke={traversalIndex === idx ? '#fbbf24' : '#64748b'}
+                              stroke={isHighlighted ? '#fbbf24' : '#64748b'}
                               strokeWidth="2"
-                              markerEnd="url(#arrowhead)"
+                              markerEnd={`url(#arrowhead-${isHighlighted ? 'highlighted' : 'normal'})`}
                             />
                           );
                         }
                         return null;
                       })}
                       
-                      {/* Arrow marker definition */}
-                      <defs>
-                        <marker
-                          id="arrowhead"
-                          markerWidth="10"
-                          markerHeight="7"
-                          refX="9"
-                          refY="3.5"
-                          orient="auto"
-                        >
-                          <polygon
-                            points="0 0, 10 3.5, 0 7"
-                            fill="#64748b"
-                          />
-                        </marker>
-                      </defs>
-                    </svg>
+                      {/* Arrow from tail node to NULL */}
+                      {nodes.length > 0 && (
+                        <line
+                          key="tail-to-null"
+                          x1={(nodes[nodes.length - 1]?.x || 0) + 80 - Math.min(0, minX)} // right edge of tail node
+                          y1={(nodes[nodes.length - 1]?.y || 0) + 32 - Math.min(0, minY)} // center vertically
+                          x2={(nodes[nodes.length - 1]?.x || 0) + 115 - Math.min(0, minX)} // slight gap before NULL box
+                          y2={(nodes[nodes.length - 1]?.y || 0) + 32 - Math.min(0, minY)} // center vertically (NULL is at y + 20, so 32-20+20 = 32)
+                          stroke={traversalIndex === nodes.length - 1 ? '#fbbf24' : '#64748b'}
+                          strokeWidth="2"
+                          markerEnd={`url(#arrowhead-${traversalIndex === nodes.length - 1 ? 'highlighted' : 'normal'})`}
+                        />
+                      )}
+                      
+                     {/* Arrow marker definitions */}
+                     <defs>
+                       <marker
+                         id="arrowhead-normal"
+                         markerWidth="10"
+                         markerHeight="7"
+                         refX="9"
+                         refY="3.5"
+                         orient="auto"
+                       >
+                         <polygon
+                           points="0 0, 10 3.5, 0 7"
+                           fill="#64748b"
+                         />
+                       </marker>
+                       <marker
+                         id="arrowhead-highlighted"
+                         markerWidth="10"
+                         markerHeight="7"
+                         refX="9"
+                         refY="3.5"
+                         orient="auto"
+                       >
+                         <polygon
+                           points="0 0, 10 3.5, 0 7"
+                           fill="#fbbf24"
+                         />
+                       </marker>
+                     </defs>
+                   </svg>
+                   );
+                 })()}
 
                     {/* Render draggable nodes */}
                     {nodes.map((node, idx) => (
@@ -629,7 +678,7 @@ export default function LinkedListVisualizer() {
                         className="absolute z-10"
                         style={{
                           left: (nodes[nodes.length - 1]?.x || 0) + 120,
-                          top: (nodes[nodes.length - 1]?.y || 0) + 20,
+                          top: (nodes[nodes.length - 1]?.y || 0) + 16, // Align with node center (node.y + 32 - 16 for NULL center)
                         }}
                       >
                         <div className="px-3 py-2 bg-slate-600 text-slate-300 rounded-lg text-sm font-medium border-2 border-slate-500 shadow-lg">

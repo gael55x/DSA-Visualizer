@@ -22,7 +22,7 @@ const QUEUE_OPERATIONS = {
   queue[queue.rear] = value;
   
   // Move rear pointer forward
-  queue.rear = (queue.rear + 1) % queue.capacity;
+  queue.rear = queue.rear + 1;
   
   // Increment queue size
   queue.size++;
@@ -40,7 +40,7 @@ const QUEUE_OPERATIONS = {
   const frontElement = queue[queue.front];
   
   // Move front pointer forward
-  queue.front = (queue.front + 1) % queue.capacity;
+  queue.front = queue.front + 1;
   
   // Decrement queue size
   queue.size--;
@@ -68,7 +68,7 @@ const CODE_STEPS = {
   ],
   
   dequeue: [
-    { lines: [2, 3, 4], description: "Check if the queue is empty (underflow condition)" },
+    { lines: [3, 4, 5], description: "Check if the queue is empty (underflow condition)" },
     { lines: [7, 8], description: "Get reference to the front element" },
     { lines: [10, 11], description: "Move the front pointer to the next position" },
     { lines: [13, 14], description: "Decrement the queue size counter" },
@@ -83,9 +83,9 @@ const CODE_STEPS = {
 
 export default function QueueVisualizer() {
   const [queue, setQueue] = useState<QueueElement[]>([
-    { value: 10, id: '1' },
-    { value: 20, id: '2' },
-    { value: 30, id: '3' }
+    { value: 5, id: '1' },
+    { value: 10, id: '2' },
+    { value: 15, id: '3' }
   ]);
   
   const [inputValue, setInputValue] = useState('');
@@ -94,7 +94,7 @@ export default function QueueVisualizer() {
   const [currentStep, setCurrentStep] = useState(0);
   const [peekedValue, setPeekedValue] = useState<number | null>(null);
 
-  const generateId = () => Math.random().toString(36).substr(2, 9);
+  const generateId = () => Math.random().toString(36).substring(2, 11);
   const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const enqueueElement = useCallback(async () => {
@@ -118,7 +118,7 @@ export default function QueueVisualizer() {
       await delay(800);
 
       if (step === 0) {
-        // Create new element and add to queue
+        // Create new element and add to rear (end) of queue
         const newElement: QueueElement = {
           value,
           id: generateId(),
@@ -136,7 +136,7 @@ export default function QueueVisualizer() {
     setInputValue('');
     showSuccess(`Successfully enqueued ${value} to the queue`);
     setIsAnimating(false);
-  }, [inputValue, showSuccess]);
+  }, [inputValue, showSuccess, showError]);
 
   const dequeueElement = useCallback(async () => {
     if (queue.length === 0) {
@@ -170,7 +170,7 @@ export default function QueueVisualizer() {
         
         await delay(600);
         
-        // Remove the element
+        // Remove the front element
         setQueue(prev => prev.slice(1));
       }
     }
@@ -217,11 +217,12 @@ export default function QueueVisualizer() {
     setIsAnimating(false);
   }, [queue, showSuccess, showError]);
 
-  const clearQueue = () => {
+  const clearQueue = useCallback(() => {
+    if (isAnimating) return;
     setQueue([]);
-    showInfo('Queue cleared');
     setPeekedValue(null);
-  };
+    showInfo('Queue cleared');
+  }, [isAnimating, showInfo]);
 
   return (
     <div className="min-h-screen bg-slate-900 p-6">
@@ -239,80 +240,133 @@ export default function QueueVisualizer() {
           <div className="space-y-6">
             {/* Queue Visualization */}
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Queue Structure</h3>
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Queue Structure (FIFO - First In, First Out)</h3>
               
               <div className="mb-8 mt-5 overflow-x-auto">
                 {queue.length === 0 ? (
-                  <div className="flex justify-center p-4">
-                    <div className="p-4 border border-dashed border-slate-600 rounded-md text-slate-400">
-                      Empty Queue
+                  <div className="flex justify-center p-8">
+                    <div className="p-6 border-2 border-dashed border-slate-600 rounded-xl text-slate-400 text-center">
+                      <div className="text-lg font-medium mb-2">Empty Queue</div>
+                      <div className="text-sm">Add elements using Enqueue</div>
                     </div>
-              </div>
+                  </div>
                 ) : (
-                  <div className="min-w-max mx-auto">
-                    <div className="flex items-center gap-4 justify-center">
-                      {/* Rear indicator */}
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-red-400 font-medium text-sm">REAR</span>
-                        <span className="text-red-300 text-xs">(enqueue)</span>
-                        <ArrowRight className="text-red-400" size={20} />
-                </div>
-                
-                      <div className="flex gap-2 items-center">
-                  <AnimatePresence mode="popLayout">
+                  <div className="space-y-6">
+                    {/* Labels */}
+                    <div className="flex justify-between items-center max-w-4xl mx-auto px-4">
+                      <div className="text-center">
+                        <div className="text-green-400 font-bold text-lg">HEAD</div>
+                        <div className="text-green-300 text-sm">← Dequeue (Remove)</div>
+                        <div className="text-xs text-slate-400 mt-1">First In, First Out</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-blue-400 font-bold text-lg">TAIL</div>
+                        <div className="text-blue-300 text-sm">Enqueue (Add) →</div>
+                        <div className="text-xs text-slate-400 mt-1">New elements enter here</div>
+                      </div>
+                    </div>
+
+                    {/* Queue Elements */}
+                    <div className="flex justify-center">
+                      <div className="flex items-center gap-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+                        <AnimatePresence mode="popLayout">
                           {queue.map((item, index) => (
-                        <motion.div
-                          key={item.id}
-                          layout
-                              initial={{ opacity: 0, scale: 0.8, x: -20 }}
-                              animate={{ opacity: 1, scale: 1, x: 0 }}
-                              exit={{ opacity: 0, scale: 0.8, x: 20 }}
-                              transition={{ duration: 0.3 }}
-                          className="relative"
-                        >
+                            <motion.div
+                              key={item.id}
+                              layout
+                              initial={{ 
+                                opacity: 0, 
+                                scale: 0.8, 
+                                x: item.isEnqueuing ? 50 : -50 
+                              }}
+                              animate={{ 
+                                opacity: 1, 
+                                scale: 1, 
+                                x: 0 
+                              }}
+                              exit={{ 
+                                opacity: 0, 
+                                scale: 0.8, 
+                                x: item.isDequeuing ? -50 : 50 
+                              }}
+                              transition={{ 
+                                duration: 0.5,
+                                type: "spring",
+                                stiffness: 100,
+                                damping: 15
+                              }}
+                              className="relative"
+                            >
                               <div 
-                                className={`w-20 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-sm transition-all duration-300 ${
+                                className={`w-16 h-16 flex flex-col items-center justify-center border-2 rounded-lg shadow-lg transition-all duration-300 ${
                                   item.isHighlighted 
-                                    ? 'border-sky-400 bg-sky-900/50 text-sky-100 shadow-sky-400/25' 
+                                    ? 'border-sky-400 bg-sky-900/60 text-sky-100 shadow-sky-400/30 scale-110' 
                                     : item.isEnqueuing
-                                    ? 'border-green-400 bg-green-900/50 text-green-100 shadow-green-400/25'
+                                    ? 'border-blue-400 bg-blue-900/60 text-blue-100 shadow-blue-400/30 scale-110'
                                     : item.isDequeuing
-                                    ? 'border-red-400 bg-red-900/50 text-red-100 shadow-red-400/25'
-                                    : 'border-slate-600 bg-slate-700 text-slate-200'
+                                    ? 'border-red-400 bg-red-900/60 text-red-100 shadow-red-400/30 scale-110'
+                                    : 'border-slate-500 bg-slate-600 text-slate-100 hover:border-slate-400'
                                 }`}
                               >
-                                <span className="text-lg font-semibold">{item.value}</span>
-                                <span className="text-xs text-slate-400">[{index}]</span>
-                          </div>
-                          
-                          {/* Arrow between elements */}
-                          {index < queue.length - 1 && (
-                                <div className="absolute -right-3 top-1/2 transform -translate-y-1/2">
-                                  <ArrowRight className="text-slate-400" size={16} />
-                            </div>
-                          )}
-                        </motion.div>
+                                <span className="text-lg font-bold">{item.value}</span>
+                                <span className="text-xs text-slate-400">{index}</span>
+                              </div>
+                              
+                              {/* Arrow between elements */}
+                              {index < queue.length - 1 && (
+                                <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 z-10">
+                                  <ArrowRight className="text-slate-400" size={12} />
+                                </div>
+                              )}
+
+                              {/* Special indicators */}
+                              {index === 0 && (
+                                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+                                  <div className="text-xs text-green-400 font-medium bg-green-900/30 px-2 py-1 rounded border border-green-500/30">
+                                    HEAD
+                                  </div>
+                                </div>
+                              )}
+                              {index === queue.length - 1 && (
+                                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+                                  <div className="text-xs text-blue-400 font-medium bg-blue-900/30 px-2 py-1 rounded border border-blue-500/30">
+                                    TAIL
+                                  </div>
+                                </div>
+                              )}
+                            </motion.div>
                           ))}
-                  </AnimatePresence>
-                </div>
-
-                      {/* Front indicator */}
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-green-400 font-medium text-sm">FRONT</span>
-                        <span className="text-green-300 text-xs">(dequeue)</span>
-                        <ArrowLeft className="text-green-400" size={20} />
+                        </AnimatePresence>
                       </div>
-                </div>
-              </div>
+                    </div>
+
+                    {/* Operation Flow Indicators */}
+                    <div className="flex justify-between items-center max-w-4xl mx-auto px-4">
+                      <div className="flex items-center gap-2 text-green-400">
+                        <ArrowLeft size={20} />
+                        <span className="text-sm font-medium">Dequeue removes from HEAD</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-blue-400">
+                        <span className="text-sm font-medium">Enqueue adds to TAIL</span>
+                        <ArrowRight size={20} />
+                      </div>
+                    </div>
+                  </div>
                 )}
 
-                <div className="text-sm text-slate-400 text-center mt-6">
-                Queue Size: {queue.length}
-                {peekedValue !== null && (
-                    <span className="ml-4 text-sky-400">
-                      Peeked Value: {peekedValue}
-                  </span>
-                )}
+                <div className="text-sm text-slate-400 text-center mt-6 space-x-4">
+                  <span>Queue Size: <span className="text-slate-200 font-semibold">{queue.length}</span></span>
+                  {peekedValue !== null && (
+                    <span className="text-sky-400">
+                      Peeked Value: <span className="font-semibold">{peekedValue}</span>
+                    </span>
+                  )}
+                  {queue.length > 0 && (
+                    <>
+                      <span>Head: <span className="text-green-400 font-semibold">{queue[0]?.value}</span></span>
+                      <span>Tail: <span className="text-blue-400 font-semibold">{queue[queue.length - 1]?.value}</span></span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -324,13 +378,17 @@ export default function QueueVisualizer() {
               <div className="space-y-4">
                 {/* Enqueue Element */}
                 <div className="p-4 bg-slate-700 rounded-xl">
-                  <h4 className="font-medium text-slate-200 mb-3">Enqueue Element</h4>
+                  <h4 className="font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    Add Element to Queue
+                  </h4>
                   <div className="space-y-3">
                     <input
                       type="number"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+                      onKeyDown={(e) => e.key === 'Enter' && !isAnimating && inputValue.trim() && enqueueElement()}
+                      className="w-full px-3 py-3 bg-slate-600 border border-slate-500 rounded-lg text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200"
                       placeholder="Enter a number"
                       disabled={isAnimating}
                     />
@@ -338,42 +396,67 @@ export default function QueueVisualizer() {
                     <button
                       onClick={enqueueElement}
                       disabled={isAnimating || !inputValue.trim()}
-                      className="w-full px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-md font-medium transition-colors"
+                      className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 disabled:hover:scale-100"
                     >
-                      {isAnimating && currentOperation === 'enqueue' ? 'Enqueuing...' : 'Enqueue Element'}
+                      {isAnimating && currentOperation === 'enqueue' ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Adding...
+                        </span>
+                      ) : (
+                        <>
+                          Enqueue
+                          <ArrowRight size={16} />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
 
                 {/* Other Operations */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <button
                     onClick={dequeueElement}
                     disabled={isAnimating || queue.length === 0}
-                    className="px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-md font-medium transition-colors"
+                    className="px-4 py-3 bg-green-500 hover:bg-green-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 disabled:hover:scale-100"
                   >
-                    {isAnimating && currentOperation === 'dequeue' ? 'Dequeuing...' : 'Dequeue Element'}
+                    {isAnimating && currentOperation === 'dequeue' ? (
+                      <span className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Removing...
+                      </span>
+                    ) : (
+                      <>
+                        <ArrowLeft size={16} />
+                        Dequeue
+                      </>
+                    )}
                   </button>
                   
                   <button
                     onClick={peekElement}
                     disabled={isAnimating || queue.length === 0}
-                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-md font-medium transition-colors"
+                    className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-600 text-slate-900 disabled:text-slate-400 rounded-lg font-medium transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
                   >
-                    {isAnimating && currentOperation === 'peek' ? 'Peeking...' : 'Peek Front'}
+                    {isAnimating && currentOperation === 'peek' ? (
+                      <span className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                        Peeking...
+                      </span>
+                    ) : (
+                      'Peek Head'
+                    )}
                   </button>
                   
                   <button
                     onClick={clearQueue}
                     disabled={isAnimating}
-                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-md font-medium transition-colors"
+                    className="sm:col-span-2 lg:col-span-1 px-4 py-3 bg-slate-500 hover:bg-slate-600 disabled:bg-slate-600 text-white disabled:text-slate-400 rounded-lg font-medium transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
                   >
                     Clear Queue
                   </button>
                 </div>
               </div>
-              
-
             </div>
           </div>
 
@@ -385,7 +468,6 @@ export default function QueueVisualizer() {
               title={`Queue ${currentOperation.charAt(0).toUpperCase() + currentOperation.slice(1)} Operation`}
               steps={CODE_STEPS[currentOperation as keyof typeof CODE_STEPS]}
               currentStep={currentStep}
-
             />
           </div>
         </div>

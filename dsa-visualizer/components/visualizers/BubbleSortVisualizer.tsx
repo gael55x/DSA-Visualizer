@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn, delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -43,13 +45,13 @@ const BUBBLE_SORT_CODE = `function bubbleSort(array) {
 const CODE_STEPS = {
   bubbleSort: [
     { lines: [2], description: "Get the length of the array" },
-    { lines: [4, 5], description: "Start outer loop for number of passes" },
-    { lines: [5], description: "Initialize swapped flag for this pass" },
-    { lines: [7, 8], description: "Start inner loop for comparisons in current pass" },
-    { lines: [10, 11], description: "Compare adjacent elements" },
+    { lines: [5, 6], description: "Start outer loop for number of passes" },
+    { lines: [6], description: "Initialize swapped flag for this pass" },
+    { lines: [8, 9], description: "Start inner loop for comparisons in current pass" },
+    { lines: [11, 12], description: "Compare adjacent elements" },
     { lines: [12, 13, 14], description: "Swap elements if they are in wrong order" },
-    { lines: [17, 18], description: "Check if any swaps occurred in this pass" },
-    { lines: [21], description: "Return the sorted array" }
+    { lines: [17, 18, 19, 20], description: "Check if any swaps occurred in this pass" },
+    { lines: [23], description: "Return the sorted array" }
   ]
 };
 
@@ -78,6 +80,7 @@ export default function BubbleSortVisualizer() {
   const cancelRef = useRef(false);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const generateRandomArray = useCallback(() => {
     const newArray = [];
@@ -89,7 +92,8 @@ export default function BubbleSortVisualizer() {
     }
     setArray(newArray);
     resetSort();
-  }, []);
+    showInfo('Generated new random array');
+  }, [showInfo]);
 
   const resetSort = useCallback(() => {
     cancelRef.current = true; // Cancel any ongoing animation
@@ -109,7 +113,8 @@ export default function BubbleSortVisualizer() {
       isActive: false
     })));
     setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
-  }, []);
+    showInfo('Visualization reset');
+  }, [showInfo]);
 
   // Cancellable delay function
   const cancellableDelay = async (ms: number) => {
@@ -251,6 +256,7 @@ export default function BubbleSortVisualizer() {
       setIsComplete(true);
       setIsPlaying(false);
       setCurrentStep(7);
+      showSuccess(`Bubble sort completed! ${totalComparisons} comparisons, ${totalSwaps} swaps`);
     } catch (error) {
       // Handle cancellation gracefully
       if (error instanceof Error && error.message === 'Cancelled') {
@@ -620,6 +626,9 @@ export default function BubbleSortVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 

@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
 import CodeHighlighter from '../ui/CodeHighlighter';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 import { cn, delay } from '../../lib/utils';
 
 interface ArrayElement {
@@ -79,6 +81,7 @@ export default function SelectionSortVisualizer() {
   const cancelRef = useRef(false);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
 
   const generateRandomArray = useCallback(() => {
     const newArray = [];
@@ -90,7 +93,8 @@ export default function SelectionSortVisualizer() {
     }
     setArray(newArray);
     resetSort();
-  }, []);
+    showInfo('Generated new random array');
+  }, [showInfo]);
 
   const resetSort = useCallback(() => {
     cancelRef.current = true; // Cancel any ongoing animation
@@ -112,7 +116,8 @@ export default function SelectionSortVisualizer() {
       isMinimum: false
     })));
     setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
-  }, []);
+    showInfo('Visualization reset');
+  }, [showInfo]);
 
   // Cancellable delay function
   const cancellableDelay = async (ms: number) => {
@@ -283,6 +288,7 @@ export default function SelectionSortVisualizer() {
       setIsComplete(true);
       setIsPlaying(false);
       setCurrentStep(6);
+      showSuccess(`Selection sort completed! ${totalComparisons} comparisons, ${totalSwaps} swaps`);
     } catch (error) {
       // Handle cancellation gracefully
       if (error instanceof Error && error.message === 'Cancelled') {
@@ -686,6 +692,9 @@ export default function SelectionSortVisualizer() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 } 
