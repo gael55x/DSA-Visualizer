@@ -16,6 +16,11 @@ interface ArrayElement {
   isSorted?: boolean;
   isActive?: boolean;
   isKey?: boolean;
+  isLifted?: boolean;
+  originalIndex?: number;
+  targetIndex?: number;
+  isMoving?: boolean;
+  isInserting?: boolean;
 }
 
 const INSERTION_SORT_CODE = `function insertionSort(array) {
@@ -52,14 +57,14 @@ const CODE_STEPS = {
 };
 
 export default function InsertionSortVisualizer() {
-  const [array, setArray] = useState<ArrayElement[]>([
-    { value: 64, id: '1' },
-    { value: 34, id: '2' },
-    { value: 25, id: '3' },
-    { value: 12, id: '4' },
-    { value: 22, id: '5' },
-    { value: 11, id: '6' },
-    { value: 90, id: '7' }
+  const [array, setArray] = useState<ArrayElement[]>(() => [
+    { value: 64, id: 'initial-1' },
+    { value: 34, id: 'initial-2' },
+    { value: 25, id: 'initial-3' },
+    { value: 12, id: 'initial-4' },
+    { value: 22, id: 'initial-5' },
+    { value: 11, id: 'initial-6' },
+    { value: 90, id: 'initial-7' }
   ]);
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -109,7 +114,12 @@ export default function InsertionSortVisualizer() {
       isShifting: false,
       isSorted: false,
       isActive: false,
-      isKey: false
+      isKey: false,
+      isLifted: false,
+      originalIndex: undefined,
+      targetIndex: undefined,
+      isMoving: false,
+      isInserting: false
     })));
     setTimeout(() => { cancelRef.current = false; }, 100); // Reset cancellation flag
     showInfo('Visualization reset');
@@ -176,13 +186,20 @@ export default function InsertionSortVisualizer() {
         setCurrentStep(2);
         
         // Highlight key element
-        setArray(prev => prev.map((item, idx) => ({
-          ...item,
-          isKey: idx === i,
-          isActive: idx === j && j >= 0,
-          isComparing: false,
-          isShifting: false
-        })));
+        setArray(prev => {
+          const newArray = [...prev];
+          const keyEl = newArray[i];
+          if (keyEl) {
+            newArray[i] = { ...keyEl, isKey: true, isLifted: true, originalIndex: i };
+          }
+          // Mark elements before j as active
+          for (let k = 0; k <= j; k++) {
+            if (newArray[k]) {
+              newArray[k] = { ...newArray[k], isActive: true };
+            }
+          }
+          return newArray;
+        });
         
         await cancellableDelay(speed);
 
@@ -197,25 +214,43 @@ export default function InsertionSortVisualizer() {
           setArray(prev => prev.map((item, idx) => ({
             ...item,
             isComparing: idx === j,
-            isKey: idx === i,
+            isKey: false, // Keep key visually distinct
+            isLifted: idx === i,
             isShifting: false,
-            isActive: false
+            isActive: idx < j,
+            isInserting: false
           })));
           
           await cancellableDelay(speed);
           
-          // Shift element in working array
-          currentArray[j + 1] = currentArray[j];
+          // Shift element in working array - preserve unique IDs
+          const shiftedElement = { ...currentArray[j], id: generateId() };
+          currentArray[j + 1] = shiftedElement;
           totalShifts++;
           setShifts(totalShifts);
           
-          // Update visual array with the current state
-          setArray(currentArray.map((item, idx) => ({
+          // Show shifting animation
+          setArray(prev => prev.map((item, idx) => ({
             ...item,
-            isShifting: idx === j || idx === j + 1,
+            isShifting: idx === j,
             isComparing: false,
             isKey: false,
-            isActive: false
+            isLifted: idx === i,
+            isActive: idx < j,
+            isInserting: false
+          })));
+          
+          await cancellableDelay(speed / 2);
+          
+          // Update visual array with the shifted state
+          setArray(currentArray.map((item, idx) => ({
+            ...item,
+            isShifting: false,
+            isComparing: false,
+            isKey: false,
+            isLifted: idx === i,
+            isActive: idx < j,
+            isInserting: false
           })));
           
           await cancellableDelay(speed);
@@ -233,8 +268,10 @@ export default function InsertionSortVisualizer() {
             ...item,
             isComparing: idx === j,
             isKey: false,
+            isLifted: idx === i,
             isShifting: false,
-            isActive: false
+            isActive: idx < j,
+            isInserting: false
           })));
           
           await cancellableDelay(speed);
@@ -243,29 +280,62 @@ export default function InsertionSortVisualizer() {
         // Step 4: Insert key at correct position
         setCurrentStep(4);
         
-        // Insert key in working array
-        currentArray[j + 1] = keyElement;
+        // Insert key in working array with preserved ID
+        currentArray[j + 1] = { ...keyElement, id: keyElement.id };
         
-        // Update visual array with insertion
-        setArray(currentArray.map((item, idx) => ({
-          ...item,
-          isKey: idx === j + 1,
-          isSorted: idx <= i,
-          isComparing: false,
-          isShifting: false,
-          isActive: false
-        })));
+        // Show key moving horizontally to insertion position
+        setArray(prev => {
+          const newArray = [...prev];
+          const keyEl = newArray.find(item => item.id === keyElement.id);
+          if (keyEl) {
+            const keyIndex = newArray.indexOf(keyEl);
+            newArray[keyIndex] = { 
+              ...keyEl, 
+              isMoving: true, 
+              isLifted: true,
+              targetIndex: j + 1 
+            };
+          }
+          return newArray.map((item, idx) => ({
+            ...item,
+            isSorted: idx <= i && item.id !== keyElement.id
+          }));
+        });
         
         await cancellableDelay(speed);
         
-        // Clear highlighting
+        // Show key dropping into insertion position
+        setArray(prev => {
+          const newArray = [...prev];
+          const keyEl = newArray.find(item => item.id === keyElement.id);
+          if (keyEl) {
+            const keyIndex = newArray.indexOf(keyEl);
+            newArray[keyIndex] = {
+              ...keyEl,
+              isInserting: true,
+              isMoving: false,
+              isLifted: false
+            };
+          }
+          return newArray.map((item, idx) => ({
+            ...item,
+            isSorted: idx <= i && item.id !== keyElement.id
+          }));
+        });
+        
+        // Update visual array with insertion complete
         setArray(currentArray.map((item, idx) => ({
           ...item,
-          isKey: false,
+          isKey: idx === j + 1,
+          isInserting: false,
           isSorted: idx <= i,
           isComparing: false,
           isShifting: false,
-          isActive: false
+          isActive: false,
+          isLifted: false,
+          isMoving: false,
+          originalIndex: undefined,
+          targetIndex: undefined
         })));
         
         await cancellableDelay(speed);
@@ -278,7 +348,9 @@ export default function InsertionSortVisualizer() {
         isKey: false,
         isComparing: false,
         isShifting: false,
-        isActive: false
+        isActive: false,
+        isLifted: false,
+        isInserting: false
       })));
       setIsComplete(true);
       setIsPlaying(false);
@@ -341,9 +413,15 @@ export default function InsertionSortVisualizer() {
                       >
                         <motion.div
                           className={cn(
-                            "w-12 flex items-center justify-center text-white font-bold text-sm rounded-lg border-2 transition-all duration-300",
+                            "w-12 flex items-center justify-center text-white font-bold text-sm rounded-lg border-2 transition-all duration-300 relative",
                             item.isSorted 
                               ? "bg-green-500 border-green-400 shadow-green-400/25" 
+                              : item.isMoving
+                              ? "bg-pink-500 border-pink-400 shadow-pink-400/50 shadow-lg"
+                              : item.isLifted
+                              ? "bg-purple-500 border-purple-400 shadow-purple-400/50 shadow-lg"
+                              : item.isInserting
+                              ? "bg-cyan-500 border-cyan-400 shadow-cyan-400/50 shadow-lg"
                               : item.isKey
                               ? "bg-orange-500 border-orange-400 shadow-orange-400/25"
                               : item.isShifting
@@ -356,13 +434,24 @@ export default function InsertionSortVisualizer() {
                           )}
                           style={{ height: `${item.value * 3 + 20}px` }}
                           animate={{
-                            scale: item.isKey || item.isComparing || item.isShifting || item.isActive ? 1.1 : 1,
+                            scale: item.isLifted || item.isInserting ? 1.15 : item.isComparing || item.isShifting ? 1.1 : 1,
+                            y: item.isLifted ? -60 : item.isMoving ? -60 : item.isInserting ? -20 : 0,
+                            x: item.isMoving && item.originalIndex !== undefined && item.targetIndex !== undefined 
+                              ? (item.targetIndex - item.originalIndex) * 52 : 0, // 52 = 48 (width) + 4 (gap)
+                            rotate: item.isLifted ? -8 : item.isInserting ? 4 : 0,
+                            zIndex: item.isLifted || item.isMoving || item.isInserting ? 50 : item.isKey ? 40 : 1,
+                            boxShadow: item.isLifted || item.isMoving || item.isInserting ? '0 10px 20px rgba(0,0,0,0.2)' : 'none'
                           }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ 
+                            duration: 0.4,
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 20
+                          }}
                         >
                           {item.value}
                         </motion.div>
-                        <span className="text-xs text-slate-400">[{index}]</span>
+                        <span className="text-xs text-slate-400 mt-1">[{index}]</span>
                       </motion.div>
                     ))}
                   </AnimatePresence>
@@ -389,12 +478,16 @@ export default function InsertionSortVisualizer() {
                   <span className="text-slate-300">Shifting</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded border"></div>
-                  <span className="text-slate-300">Current Position</span>
+                  <div className="w-4 h-4 bg-blue-500 rounded border shadow-blue-400/50"></div>
+                  <span className="text-slate-300">Sorted Part</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-green-500 rounded border"></div>
                   <span className="text-slate-300">Sorted</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-cyan-500 rounded border shadow-cyan-400/50"></div>
+                  <span className="text-slate-300">Inserting</span>
                 </div>
               </div>
             </div>
