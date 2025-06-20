@@ -232,6 +232,38 @@ export default function Navbar() {
                   </Link>
                 ))}
                 
+                {/* Mobile Trees Section */}
+                <div className="border-t border-slate-700 pt-4">
+                  <div className="flex items-center gap-3 text-slate-300 p-2 mb-2">
+                    <TreePine size={16} />
+                    <span className="font-medium">Tree Structures</span>
+                  </div>
+                  <div className="pl-6 space-y-2">
+                    {treeStructures.map((tree) => (
+                      <Link
+                        key={tree.name}
+                        href={tree.href}
+                        onClick={() => setIsOpen(false)}
+                        className={cn(
+                          "block p-2 transition-colors",
+                          tree.comingSoon 
+                            ? "text-slate-500 cursor-not-allowed" 
+                            : "text-slate-400 hover:text-sky-400"
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          {tree.name}
+                          {tree.comingSoon && (
+                            <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">
+                              Soon
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                
                 {/* Mobile Sorting Section */}
                 <div className="border-t border-slate-700 pt-4">
                   <div className="flex items-center gap-3 text-slate-300 p-2 mb-2">
