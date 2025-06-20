@@ -22,22 +22,7 @@ export default function TreeComingSoon({
 }: TreeComingSoonProps) {
   return (
     <div className="min-h-screen bg-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header with Tree Type Selector */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-100 mb-2">Tree Visualizers</h1>
-          <p className="text-slate-400 text-lg mb-6">
-            Interactive visualization of different tree data structures and their operations
-          </p>
-          
-          {/* Tree Type Selector */}
-          <div className="flex justify-center mb-8">
-            <TreeTypeSelector />
-          </div>
-        </div>
-
-        {/* Coming Soon Content */}
-        <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
             {/* Icon and Title */}
             <div className="text-center mb-8">
@@ -124,19 +109,19 @@ export default function TreeComingSoon({
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/binary-tree"
+                  href="/trees"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Try Binary Search Tree
+                  Back to Tree Overview
                 </Link>
                 
                 <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-medium transition-colors"
+                  href="/binary-tree"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors"
                 >
                   <TreePine className="w-4 h-4" />
-                  Explore All Visualizers
+                  Try Binary Search Tree
                 </Link>
               </div>
             </div>
@@ -150,6 +135,5 @@ export default function TreeComingSoon({
           </div>
         </div>
       </div>
-    </div>
   );
 } 
