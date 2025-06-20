@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Menu, X, ChevronDown, ArrowUpDown, TreePine } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const dataStructures = [
@@ -11,7 +11,6 @@ const dataStructures = [
   { name: 'Linked Lists', href: '/linked-list' },
   { name: 'Stacks', href: '/stack' },
   { name: 'Queues', href: '/queue' },
-  { name: 'Binary Trees', href: '/binary-tree' },
   { name: 'Recursion', href: '/recursion' },
 ];
 
@@ -24,9 +23,19 @@ const sortingAlgorithms = [
   { name: 'Heap Sort', href: '/sorting/heap-sort' },
 ];
 
+const treeStructures = [
+  { name: 'Tree Overview', href: '/trees' },
+  { name: 'Binary Search Tree', href: '/binary-tree' },
+  { name: 'AVL Tree', href: '/trees/avl-tree', comingSoon: true },
+  { name: 'Red-Black Tree', href: '/trees/red-black-tree', comingSoon: true },
+  { name: 'B-Tree', href: '/trees/b-tree', comingSoon: true },
+  { name: 'Trie', href: '/trees/trie', comingSoon: true },
+];
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSortingOpen, setIsSortingOpen] = useState(false);
+  const [isTreesOpen, setIsTreesOpen] = useState(false);
 
   return (
     <motion.nav
