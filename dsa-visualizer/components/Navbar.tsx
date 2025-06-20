@@ -98,6 +98,58 @@ export default function Navbar() {
                 </Link>
               ))}
               
+              {/* Trees Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsTreesOpen(!isTreesOpen)}
+                  className="group flex items-center gap-2 text-slate-300 hover:text-sky-400 transition-colors"
+                >
+                  <span className="font-medium">Trees</span>
+                  <ChevronDown 
+                    size={16} 
+                    className={cn(
+                      "transition-transform duration-200",
+                      isTreesOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+                
+                <AnimatePresence>
+                  {isTreesOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden"
+                    >
+                      <div className="py-2">
+                        {treeStructures.map((tree) => (
+                          <Link
+                            key={tree.name}
+                            href={tree.href}
+                            onClick={() => setIsTreesOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-2 transition-colors",
+                              tree.comingSoon 
+                                ? "text-slate-500 cursor-not-allowed" 
+                                : "text-slate-300 hover:text-sky-400 hover:bg-slate-700/50"
+                            )}
+                          >
+                            <span className="font-medium">{tree.name}</span>
+                            {tree.comingSoon && (
+                              <span className="text-xs bg-slate-700 px-2 py-1 rounded-full ml-auto">
+                                Soon
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
               {/* Sorting Dropdown */}
               <div className="relative">
                 <button
