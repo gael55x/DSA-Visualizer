@@ -1,17 +1,10 @@
-import ComingSoon from '../../../components/ComingSoon';
+import QuickSortVisualizer from '../../../components/visualizers/QuickSortVisualizer';
 
 export default function QuickSortPage() {
-  return (
-    <ComingSoon
-      title="Quick Sort"
-      description="Witness the power of partitioning with interactive quick sort visualization."
-      backHref="/sorting/insertion-sort"
-      backText="Try Insertion Sort"
-    />
-  );
+  return <QuickSortVisualizer />;
 }
 
 export const metadata = {
-  title: 'Quick Sort - Coming Soon | DSA Visualizer',
-  description: 'Quick sort visualization is coming soon to DSA Visualizer.',
+  title: 'Quick Sort Visualizer | DSA Visualizer',
+  description: 'Interactive visualization of quick sort algorithm with smooth animations and step-by-step execution.',
 }; 
