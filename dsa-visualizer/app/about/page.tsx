@@ -31,9 +31,9 @@ export default function AboutPage() {
 
   const stats = [
     { number: "5+", label: "Data Structures" },
-    { number: "10+", label: "Sorting Algorithms" },
-    { number: "100%", label: "Interactive & Free" },
-    { number: "∞", label: "Learning Opportunities" }
+    { number: "8+", label: "Tree Types" },
+    { number: "6+", label: "Sorting Algorithms" },
+    { number: "100%", label: "Interactive & Free" }
   ];
 
   return (
@@ -58,7 +58,7 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto leading-relaxed">
-              Making data structures and algorithms accessible through interactive visualizations and comprehensive educational content.
+              Making data structures and algorithms accessible through interactive visualizations. From basic arrays to complex tree structures, learn through hands-on exploration.
             </p>
           </motion.div>
         </div>

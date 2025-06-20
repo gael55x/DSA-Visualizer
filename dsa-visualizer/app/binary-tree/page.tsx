@@ -9,3 +9,8 @@ export default function BinaryTreePage() {
     </div>
   );
 }
+
+export const metadata = {
+  title: 'Binary Search Tree | DSA Visualizer',
+  description: 'Interactive Binary Search Tree visualization with insert, search, and delete operations.',
+};

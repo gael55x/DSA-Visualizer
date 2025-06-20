@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Database, GitBranch, Layers, RotateCcw, ArrowUpDown, Binary, Coffee, Heart } from 'lucide-react';
+import { ArrowRight, Database, GitBranch, Layers, RotateCcw, ArrowUpDown, Binary, Coffee, Heart, TreePine } from 'lucide-react';
 
 export default function Features() {
   const dataStructures = [
@@ -34,13 +34,7 @@ export default function Features() {
       href: "/queue",
       color: "from-orange-500 to-red-500"
     },
-    {
-      title: "Binary Trees",
-      description: "Understand tree structures with interactive node insertion and traversal.",
-      icon: Binary,
-      href: "/binary-tree",
-      color: "from-indigo-500 to-purple-500"
-    },
+
   ];
 
   const sortingAlgorithms = [
@@ -61,6 +55,35 @@ export default function Features() {
       description: "Observe elements being inserted into their sorted positions.",
       href: "/sorting/insertion-sort",
       complexity: "O(n²)"
+    },
+    {
+      title: "Quick Sort",
+      description: "Experience the power of divide-and-conquer with partitioning.",
+      href: "/sorting/quick-sort",
+      complexity: "O(n log n)"
+    }
+  ];
+
+  const treeStructures = [
+    {
+      title: "Binary Search Tree",
+      description: "Interactive tree operations with insert, search, and delete.",
+      href: "/binary-tree",
+      complexity: "O(log n)"
+    },
+    {
+      title: "AVL Tree",
+      description: "Self-balancing tree with automatic rotation operations.",
+      href: "/trees/avl-tree",
+      complexity: "O(log n)",
+      comingSoon: true
+    },
+    {
+      title: "Red-Black Tree",
+      description: "Balanced tree with color-based balancing properties.",
+      href: "/trees/red-black-tree",
+      complexity: "O(log n)",
+      comingSoon: true
     }
   ];
 
@@ -148,7 +171,7 @@ export default function Features() {
         </motion.div>
 
         {/* Sorting Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-20">
           {sortingAlgorithms.map((algorithm, index) => (
             <motion.div
               key={algorithm.title}
@@ -182,11 +205,104 @@ export default function Features() {
           ))}
         </div>
 
+        {/* Tree Structures Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <TreePine className="text-green-400" size={32} />
+            <h3 className="text-3xl md:text-4xl font-bold text-slate-100">
+              Tree Structures
+            </h3>
+          </div>
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            Explore hierarchical data structures from basic binary trees to advanced balanced trees.
+          </p>
+        </motion.div>
+
+        {/* Trees Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          {treeStructures.map((tree, index) => (
+            <motion.div
+              key={tree.title}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 + index * 0.1, duration: 0.6 }}
+            >
+              <Link
+                href={tree.href}
+                className={`group block p-6 bg-gradient-to-br from-slate-800/50 to-slate-800/30 border border-slate-700 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+                  tree.comingSoon 
+                    ? 'opacity-60 cursor-not-allowed' 
+                    : 'hover:from-slate-800/70 hover:to-slate-800/50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className={`text-lg font-bold transition-colors ${
+                    tree.comingSoon 
+                      ? 'text-slate-400' 
+                      : 'text-slate-100 group-hover:text-green-400'
+                  }`}>
+                    {tree.title}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono bg-slate-700/50 text-slate-300 px-2 py-1 rounded">
+                      {tree.complexity}
+                    </span>
+                    {tree.comingSoon && (
+                      <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
+                        Soon
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p className={`text-sm leading-relaxed transition-colors ${
+                  tree.comingSoon 
+                    ? 'text-slate-500' 
+                    : 'text-slate-400 group-hover:text-slate-300'
+                }`}>
+                  {tree.description}
+                </p>
+                <div className="flex items-center justify-end mt-4">
+                  <ArrowRight 
+                    size={14} 
+                    className={`transition-all ${
+                      tree.comingSoon 
+                        ? 'text-slate-500' 
+                        : 'text-slate-400 group-hover:text-green-400 group-hover:translate-x-1'
+                    }`}
+                  />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Trees Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <Link
+            href="/trees"
+            className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105"
+          >
+            <TreePine size={18} />
+            Explore All Trees
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
+
         {/* Call to Action */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.8 }}
+          transition={{ delay: 1.8, duration: 0.8 }}
           className="text-center mb-16"
         >
           <div className="bg-gradient-to-r from-sky-500/10 to-yellow-500/10 border border-sky-500/20 rounded-2xl p-8">
@@ -220,7 +336,7 @@ export default function Features() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
+          transition={{ delay: 2.1, duration: 0.8 }}
           className="max-w-4xl mx-auto"
         >
           <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm">
